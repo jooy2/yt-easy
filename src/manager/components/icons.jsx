@@ -77,12 +77,6 @@ export const ArrowDownIcon = () => (
   </Svg>
 );
 
-export const ChevronIcon = () => (
-  <Svg>
-    <path d="M9 6l6 6-6 6" />
-  </Svg>
-);
-
 export const FilterIcon = () => (
   <Svg>
     <path d="M4 6h16M7 12h10M10 18h4" />
