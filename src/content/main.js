@@ -10,12 +10,17 @@
   const MAX_TITLE_LENGTH = 300;
   const MAX_LABELS = 5;
   const MAX_LABEL_LENGTH = 100;
+  const LIST_ID_PATTERN = /^[\w-]{2,64}$/;
   const DELAY_MIN_LIMIT = 1000;
   const DELAY_MAX_LIMIT = 30000;
 
   let activeJob = null;
 
   const isFromThisExtension = (sender) => sender?.id === chrome.runtime.id;
+
+  const readListId = (value) => (typeof value === 'string' && LIST_ID_PATTERN.test(value) ? value : null);
+
+  const readCurrentListId = () => (location.pathname === '/playlist' ? readListId(new URLSearchParams(location.search).get('list')) : null);
 
   const clampDelay = (value, fallback) => {
     const number = Number.isFinite(value) ? value : fallback;
@@ -37,7 +42,17 @@
       .filter((label) => typeof label === 'string' && label.length <= MAX_LABEL_LENGTH)
       .slice(0, MAX_LABELS);
 
-    return { targets, options: { delayMin, delayMax, removeLabels, dryRun: options.dryRun === true } };
+    return {
+      targets,
+      options: {
+        listId: readListId(options.listId),
+        listTitle: String(options.listTitle ?? '').slice(0, MAX_LABEL_LENGTH),
+        delayMin,
+        delayMax,
+        removeLabels,
+        dryRun: options.dryRun === true,
+      },
+    };
   };
 
   const describeOutcome = ({ results, cancelled, stopReason, dryRun }) => {
@@ -58,8 +73,16 @@
   };
 
   const runCollect = async ({ message, post, signal }) => {
+    const listId = readListId(message.listId);
+
+    if (!listId) {
+      post({ type: 'error', message: '재생목록 ID가 올바르지 않습니다.' });
+      return;
+    }
+
     try {
       const result = await collector.collect({
+        listId,
         mode: message.mode === 'dom' ? 'dom' : 'auto',
         signal,
         onProgress: (progress) => post({ type: 'progress', ...progress }),
@@ -87,8 +110,8 @@
   const runRemove = async ({ message, post, controller }) => {
     const { targets, options } = readRemoveCommand(message);
 
-    if (!page.isWatchLaterPage()) {
-      post({ type: 'error', message: '이 탭이 나중에 볼 동영상 페이지가 아닙니다.' });
+    if (!options.listId || !page.isListPage(options.listId)) {
+      post({ type: 'error', message: '이 탭이 선택한 재생목록의 페이지가 아닙니다.' });
       return;
     }
 
@@ -101,7 +124,7 @@
     let failed = 0;
 
     overlay.show({
-      title: options.dryRun ? 'yt-easy · 삭제 메뉴 확인 (드라이런)' : 'yt-easy · 나중에 볼 동영상에서 삭제 중',
+      title: options.dryRun ? 'yt-easy · 삭제 메뉴 확인 (드라이런)' : `yt-easy · ${options.listTitle || '재생목록'}에서 삭제 중`,
       onCancel: () => controller.abort(),
     });
 
@@ -147,7 +170,7 @@
 
     sendResponse({
       ready: true,
-      isWatchLater: page.isWatchLaterPage(),
+      listId: readCurrentListId(),
       visible: page.isVisible(),
       busy: activeJob !== null,
     });

@@ -12,7 +12,6 @@ const ITEM = {
   channelId: 'UCchannel',
   durationSeconds: 245,
   durationText: '4:05',
-  thumbnail: 'https://i.ytimg.com/vi/abcdefghijk/hqdefault.jpg',
   watchedPercent: 45,
 };
 
@@ -37,22 +36,31 @@ describe('CSV', () => {
 
     assert.ok(csv.startsWith('﻿'));
     assert.equal(lines[0], '﻿position,video_id,title,channel_name,channel_id,duration_seconds,duration,category_id,watched_percent,url,thumbnail');
-    assert.equal(lines[1], `1,abcdefghijk,"Title, with ""quotes""",채널,UCchannel,245,4:05,10,45,https://www.youtube.com/watch?v=abcdefghijk,${ITEM.thumbnail}`);
+    assert.equal(lines[1], `1,abcdefghijk,"Title, with ""quotes""",채널,UCchannel,245,4:05,10,45,https://www.youtube.com/watch?v=abcdefghijk,https://i.ytimg.com/vi/abcdefghijk/mqdefault.jpg`);
     assert.equal(lines[2], '');
   });
 });
 
 describe('JSON', () => {
-  it('records the source, the time, and each video', () => {
+  it('records Watch later as the source when no list is given', () => {
     const json = JSON.parse(buildJson({ items: [ITEM], kind: 'export', exportedAt: Date.UTC(2026, 8, 30, 5, 0, 0) }));
 
     assert.equal(json.source, 'https://www.youtube.com/playlist?list=WL');
+    assert.equal(json.listId, 'WL');
     assert.equal(json.kind, 'export');
     assert.equal(json.exportedAt, '2026-09-30T05:00:00.000Z');
     assert.equal(json.count, 1);
     assert.equal(json.items[0].url, 'https://www.youtube.com/watch?v=abcdefghijk');
     assert.equal(json.items[0].categoryId, null);
     assert.equal(json.items[0].watchedPercent, 45);
+    assert.equal(json.items[0].thumbnail, 'https://i.ytimg.com/vi/abcdefghijk/mqdefault.jpg');
+  });
+
+  it('records the playlist a file came from', () => {
+    const json = JSON.parse(buildJson({ items: [ITEM], kind: 'export', exportedAt: 0, listId: 'PLabc123', listTitle: '여행' }));
+
+    assert.equal(json.source, 'https://www.youtube.com/playlist?list=PLabc123');
+    assert.deepEqual([json.listId, json.listTitle], ['PLabc123', '여행']);
   });
 });
 

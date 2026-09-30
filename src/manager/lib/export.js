@@ -1,4 +1,5 @@
-export const WATCH_LATER_URL = 'https://www.youtube.com/playlist?list=WL';
+import { toThumbnailUrl } from './snapshot.js';
+import { WATCH_LATER_ID, toPlaylistUrl } from './sources.js';
 
 const DOWNLOAD_FOLDER = 'yt-easy';
 const DOWNLOAD_TIMEOUT = 120000;
@@ -17,7 +18,7 @@ const CSV_COLUMNS = [
   ['category_id', (item, categories) => categories.get(item.videoId)],
   ['watched_percent', (item) => item.watchedPercent],
   ['url', (item) => toVideoUrl(item.videoId)],
-  ['thumbnail', (item) => item.thumbnail],
+  ['thumbnail', (item) => toThumbnailUrl(item.videoId)],
 ];
 
 export const toVideoUrl = (videoId) => `https://www.youtube.com/watch?v=${videoId}`;
@@ -41,8 +42,10 @@ export const buildCsv = (items, categories = new Map()) => {
   return `﻿${[header, ...rows].map((row) => row.map(escapeCsvCell).join(',')).join('\r\n')}\r\n`;
 };
 
-export const buildJson = ({ items, categories = new Map(), kind, exportedAt }) => JSON.stringify({
-  source: WATCH_LATER_URL,
+export const buildJson = ({ items, categories = new Map(), kind, exportedAt, listId = WATCH_LATER_ID, listTitle = '' }) => JSON.stringify({
+  source: toPlaylistUrl(listId),
+  listId,
+  listTitle,
   kind,
   exportedAt: new Date(exportedAt).toISOString(),
   count: items.length,
@@ -57,11 +60,12 @@ export const buildJson = ({ items, categories = new Map(), kind, exportedAt }) =
     categoryId: categories.get(item.videoId) ?? null,
     watchedPercent: item.watchedPercent ?? null,
     url: toVideoUrl(item.videoId),
-    thumbnail: item.thumbnail,
+    thumbnail: toThumbnailUrl(item.videoId),
   })),
 }, null, 2);
 
 // A path inside the Downloads folder, such as "yt-easy/wl-export-20260930-141502.csv".
+// `prefix` starts with the list's file name part from `toFileSlug`.
 export const buildFileName = ({ prefix, stamp, extension }) => `${DOWNLOAD_FOLDER}/${prefix}-${stamp}.${extension}`;
 
 // Saves text through the downloads API and resolves once the file is

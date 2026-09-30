@@ -1,15 +1,16 @@
-// DOM helpers for the Watch later page, shared by the collector's fallback
-// path and the remover.
+// DOM helpers for a playlist page, shared by the collector's fallback path
+// and the remover. `listId` is the playlist being worked on; Watch later is
+// the playlist `WL`.
 (() => {
   const ns = (globalThis.ytEasy ??= {});
-  const { SELECTORS, WATCH_LATER_LIST_ID, util } = ns;
+  const { SELECTORS, util } = ns;
 
   const LOAD_MORE_TIMEOUT = 15000;
 
-  const isWatchLaterPage = () => {
+  const isListPage = (listId) => {
     const params = new URLSearchParams(location.search);
 
-    return location.pathname === '/playlist' && params.get('list') === WATCH_LATER_LIST_ID;
+    return location.pathname === '/playlist' && params.get('list') === listId;
   };
 
   const isVisible = () => document.visibilityState === 'visible';
@@ -22,12 +23,12 @@
     return root ? [...root.querySelectorAll(SELECTORS.item)] : [];
   };
 
-  // Reads the video ID from a link, but only for links into Watch later.
+  // Reads the video ID from a link, but only for links into the playlist.
   // Other lists on the page, such as a recommendation shelf, are ignored.
-  const readVideoIdFromLink = (link) => {
+  const readVideoIdFromLink = (link, listId) => {
     const url = new URL(link.getAttribute('href') ?? '', location.origin);
 
-    if (url.searchParams.get('list') !== WATCH_LATER_LIST_ID) {
+    if (url.searchParams.get('list') !== listId) {
       return null;
     }
 
@@ -36,9 +37,9 @@
     return util.isVideoId(videoId) ? videoId : null;
   };
 
-  const readItemVideoId = (item) => {
+  const readItemVideoId = (item, listId) => {
     for (const link of item.querySelectorAll(SELECTORS.itemLink)) {
-      const videoId = readVideoIdFromLink(link);
+      const videoId = readVideoIdFromLink(link, listId);
 
       if (videoId) {
         return videoId;
@@ -51,7 +52,7 @@
   // Finds the row of one video among the rows loaded so far. Elements are
   // reused as rows are removed, so this always searches the current DOM
   // instead of trusting an earlier lookup.
-  const findItemElement = (videoId) => {
+  const findItemElement = (videoId, listId) => {
     const root = getPlaylistRoot();
 
     if (!root || !util.isVideoId(videoId)) {
@@ -59,7 +60,7 @@
     }
 
     for (const link of root.querySelectorAll(`a[href*="v=${videoId}"]`)) {
-      if (readVideoIdFromLink(link) !== videoId) {
+      if (readVideoIdFromLink(link, listId) !== videoId) {
         continue;
       }
 
@@ -133,7 +134,7 @@
   };
 
   ns.page = {
-    isWatchLaterPage,
+    isListPage,
     isVisible,
     getPlaylistRoot,
     getItemElements,

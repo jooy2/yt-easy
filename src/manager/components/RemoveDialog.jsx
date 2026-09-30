@@ -7,7 +7,7 @@ import { SETTINGS_LIMITS } from '../lib/settings.js';
 const PREVIEW_LIMIT = 50;
 
 // Confirms a removal. Focus starts on Cancel, the safe choice.
-export function RemoveDialog({ open, items, defaultTestCount, onClose, onConfirm }) {
+export function RemoveDialog({ open, items, listTitle, defaultTestCount, onClose, onConfirm }) {
   const [testMode, setTestMode] = useState(false);
   const [testCount, setTestCount] = useState(defaultTestCount);
   const [dryRun, setDryRun] = useState(false);
@@ -52,7 +52,7 @@ export function RemoveDialog({ open, items, defaultTestCount, onClose, onConfirm
       )}
     >
       <div className="dialog-form">
-        <p>선택한 {formatCount(items.length)}개를 나중에 볼 동영상에서 삭제합니다. 목록 순서대로 한 건씩 처리합니다.</p>
+        <p>선택한 {formatCount(items.length)}개를 {listTitle}에서 삭제합니다. 목록 순서대로 한 건씩 처리합니다.</p>
         <ScrollArea maxHeight={180} className="preview-box" label="삭제할 영상">
           <ul className="preview-list">
             {items.slice(0, PREVIEW_LIMIT).map((item) => (
@@ -94,7 +94,7 @@ export function RemoveDialog({ open, items, defaultTestCount, onClose, onConfirm
           onCheckedChange={setBackup}
           disabled={dryRun}
         />
-        <p className="hint">진행하는 동안 나중에 볼 동영상 탭이 앞으로 나옵니다. 끝날 때까지 그 탭을 화면에 띄워 두세요.</p>
+        <p className="hint">진행하는 동안 재생목록 탭이 앞으로 나옵니다. 끝날 때까지 그 탭을 화면에 띄워 두세요.</p>
       </div>
     </Dialog>
   );

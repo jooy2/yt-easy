@@ -271,4 +271,36 @@ describe('collector.collect through page data', () => {
 
     await assert.rejects(collector.collect(), (error) => error.code === 'signed-out');
   });
+
+  it('scans another playlist by its ID and reads its title', async () => {
+    const requests = [];
+    const site = {
+      fetch: async (input) => {
+        const url = new URL(input, 'https://www.youtube.com');
+
+        requests.push(url.pathname + url.search);
+
+        return new Response(pageHtml({
+          data: initialData([lockup({ videoId: videoId(1), listId: 'PLsample1' }), lockup({ videoId: videoId(2), listId: 'WL' })], [], { title: '여행 영상' }),
+          config: CONFIG,
+        }));
+      },
+    };
+    const { collector } = loadWith(site);
+    const result = plain(await collector.collect({ listId: 'PLsample1' }));
+
+    assert.deepEqual(requests, ['/playlist?list=PLsample1']);
+    assert.equal(result.title, '여행 영상');
+    assert.equal(result.listId, 'PLsample1');
+    assert.deepEqual(result.items.map((item) => item.videoId), [videoId(1)]);
+  });
+
+  it("passes on YouTube's message for a playlist it cannot show", async () => {
+    const site = {
+      fetch: async () => new Response(pageHtml({ data: initialData([], [], { alert: '존재하지 않는 재생목록입니다.' }), config: CONFIG })),
+    };
+    const { collector } = loadWith(site);
+
+    await assert.rejects(collector.collect({ listId: 'PLmissing1' }), (error) => error.code === 'empty' && error.message === '존재하지 않는 재생목록입니다.');
+  });
 });

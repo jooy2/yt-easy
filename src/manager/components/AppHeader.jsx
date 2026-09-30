@@ -1,17 +1,61 @@
-import { Badge, Button, IconButton, Menu, MenuItem, Tooltip } from 'neba';
+import { Badge, Button, IconButton, Menu, MenuItem, MenuRadioGroup, MenuRadioItem, MenuSeparator, Tooltip } from 'neba';
 
-import { DownloadIcon, FilterIcon, ScanIcon, SettingsIcon, WindowIcon } from './icons.jsx';
+import { ChevronDownIcon, DownloadIcon, FilterIcon, ScanIcon, SettingsIcon, WindowIcon } from './icons.jsx';
 
-// One row: the title, then every action. The filter toggle carries a dot
-// while filters are folded away but still narrowing the list.
-export function AppHeader({ isTabView, busy, hasItems, filtersOpen, filtersActive, onToggleFilters, onScan, onExport, onOpenSettings, onOpenInTab }) {
+// The list being managed, which opens a menu of the scanned lists, then
+// every action. The filter toggle carries a dot while filters are folded
+// away but still narrowing the list.
+export function AppHeader({
+  isTabView,
+  busy,
+  hasItems,
+  sources,
+  activeListId,
+  sourceTitle,
+  canForget,
+  onSelectSource,
+  onAddPlaylist,
+  onForgetSource,
+  filtersOpen,
+  filtersActive,
+  onToggleFilters,
+  onScan,
+  onExport,
+  onOpenSettings,
+  onOpenInTab,
+}) {
   const filterLabel = filtersOpen ? '검색과 필터 접기' : '검색과 필터 펼치기';
 
   return (
     <header className="app-header">
       <div className="app-brand">
         <img className="app-logo" src="../../icons/icon-48.png" alt="" width="20" height="20" />
-        <h1 className="app-title">나중에 볼 동영상</h1>
+        <Menu
+          disabled={busy}
+          align="start"
+          trigger={(
+            <Button
+              variant="text"
+              className="source-button"
+              endIcon={<ChevronDownIcon />}
+              disabled={busy}
+              aria-label={`목록 바꾸기. 지금 목록: ${sourceTitle}`}
+            >
+              <span className="source-title">{sourceTitle}</span>
+            </Button>
+          )}
+        >
+          <MenuRadioGroup value={activeListId} onValueChange={(value) => onSelectSource(String(value))}>
+            {sources.map((source) => (
+              <MenuRadioItem key={source.listId} value={source.listId} description={source.description} closeOnClick>
+                {source.title}
+              </MenuRadioItem>
+            ))}
+          </MenuRadioGroup>
+          <MenuSeparator />
+          <MenuItem onClick={onAddPlaylist}>재생목록 추가…</MenuItem>
+          {canForget && <MenuItem color="danger" onClick={onForgetSource}>이 목록을 기록에서 지우기</MenuItem>}
+        </Menu>
       </div>
       <div className="app-header-actions">
         <Button variant="solid" color="primary" startIcon={<ScanIcon />} onClick={onScan} disabled={busy}>

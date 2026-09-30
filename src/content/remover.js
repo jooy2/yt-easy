@@ -1,8 +1,9 @@
-// Removes videos from Watch later by doing what a person would do on the
-// page: open the row's menu, then choose "Remove from Watch later".
+// Removes videos from a playlist by doing what a person would do on the
+// page: open the row's menu, then choose its remove entry, such as "Remove
+// from Watch later".
 (() => {
   const ns = (globalThis.ytEasy ??= {});
-  const { SELECTORS, REMOVE_MENU_LABELS, util, page } = ns;
+  const { SELECTORS, REMOVE_MENU_LABELS, WATCH_LATER_LIST_ID, util, page } = ns;
 
   const MENU_OPEN_TIMEOUT = 4000;
   const MENU_CLOSE_TIMEOUT = 1500;
@@ -69,8 +70,8 @@
   };
 
   // Finds the row, scrolling further down the list when it is not loaded yet.
-  const locate = async ({ videoId, signal, onPause }) => {
-    let item = page.findItemElement(videoId);
+  const locate = async ({ videoId, listId, signal, onPause }) => {
+    let item = page.findItemElement(videoId, listId);
 
     while (!item) {
       const state = await page.loadMore({ signal, onPause });
@@ -79,16 +80,16 @@
         return { item: null, code: state === 'stalled' ? 'list-stalled' : 'not-found' };
       }
 
-      item = page.findItemElement(videoId);
+      item = page.findItemElement(videoId, listId);
     }
 
     return { item };
   };
 
-  const removeOne = async ({ videoId, labels, dryRun, signal, onPause }) => {
+  const removeOne = async ({ videoId, listId, labels, dryRun, signal, onPause }) => {
     await page.waitUntilVisible({ signal, onPause });
 
-    const { item, code } = await locate({ videoId, signal, onPause });
+    const { item, code } = await locate({ videoId, listId, signal, onPause });
 
     if (!item) {
       return fail(code);
@@ -128,7 +129,7 @@
 
     (entry.querySelector(SELECTORS.menuEntryTarget) ?? entry).click();
 
-    const removed = await util.waitFor(() => !page.findItemElement(videoId), {
+    const removed = await util.waitFor(() => !page.findItemElement(videoId, listId), {
       timeout: REMOVAL_TIMEOUT,
       interval: 200,
       signal,
@@ -148,10 +149,12 @@
   };
 
   // Removes `targets` one by one, in the given order, with a random pause
-  // between them. Stops on cancel, when the tab leaves Watch later, and after
+  // between them. Stops on cancel, when the tab leaves the playlist, and after
   // several failures in a row, since that usually means the page changed.
   const removeAll = async ({ targets, options, signal, onProgress }) => {
-    const labels = [...options.removeLabels, ...REMOVE_MENU_LABELS].map(normalizeLabel).filter(Boolean);
+    const { listId } = options;
+    const fallbackLabels = listId === WATCH_LATER_LIST_ID ? REMOVE_MENU_LABELS : [];
+    const labels = [...options.removeLabels, ...fallbackLabels].map(normalizeLabel).filter(Boolean);
     const results = [];
     const total = targets.length;
     let consecutiveFailures = 0;
@@ -162,8 +165,8 @@
 
     try {
       for (const [index, target] of targets.entries()) {
-        if (!page.isWatchLaterPage()) {
-          stopReason = '나중에 볼 동영상 페이지를 벗어나 중단했습니다.';
+        if (!page.isListPage(listId)) {
+          stopReason = '재생목록 페이지를 벗어나 중단했습니다.';
           break;
         }
 
@@ -172,7 +175,7 @@
         let result = null;
 
         try {
-          result = await removeOne({ videoId: target.videoId, labels, dryRun: options.dryRun, signal, onPause });
+          result = await removeOne({ videoId: target.videoId, listId, labels, dryRun: options.dryRun, signal, onPause });
         } catch (error) {
           if (!(error instanceof WrongRowError)) {
             throw error;

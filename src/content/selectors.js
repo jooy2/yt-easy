@@ -8,8 +8,9 @@
 (() => {
   const ns = (globalThis.ytEasy ??= {});
 
+  // Watch later is the playlist `WL`; any other playlist has its own ID.
   ns.WATCH_LATER_LIST_ID = 'WL';
-  ns.WATCH_LATER_PATH = '/playlist?list=WL';
+  ns.toPlaylistPath = (listId) => `/playlist?list=${encodeURIComponent(listId)}`;
 
   ns.SELECTORS = {
     // The page element that holds the playlist on screen. YouTube keeps
@@ -57,7 +58,9 @@
 
   // Labels of the "Remove from Watch later" menu entry. The collector reads
   // the exact label from the page data, in the account's own UI language, and
-  // passes it to the remover first; this list is the fallback.
+  // passes it to the remover first; this list is the fallback. In another
+  // playlist the entry names that playlist, so only the label from the page
+  // data is used there.
   ns.REMOVE_MENU_LABELS = [
     '나중에 볼 동영상에서 삭제',
     'Remove from Watch later',
@@ -78,6 +81,10 @@
     // How far a video was watched, in percent, for the account.
     watchedBarKey: 'thumbnailOverlayProgressBarViewModel',
     legacyWatchedKey: 'thumbnailOverlayResumePlaybackRenderer',
+    // Where the page data keeps the playlist title, and the message YouTube
+    // shows in place of a list, such as for a playlist that does not exist.
+    playlistMetadataKey: 'playlistMetadataRenderer',
+    alertKeys: ['alertWithButtonRenderer', 'alertRenderer'],
     videoContentType: 'LOCKUP_CONTENT_TYPE_VIDEO',
     removeActionPrefix: 'ACTION_REMOVE_VIDEO',
 

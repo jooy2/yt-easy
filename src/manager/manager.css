@@ -56,11 +56,19 @@ body {
   flex: none;
 }
 
-.app-title {
-  margin: 0;
-  overflow: hidden;
+/* The list picker reads as the page title, and shortens a long playlist
+   title rather than pushing the actions away. */
+.source-button {
+  min-width: 0;
+  max-width: 100%;
+  padding-inline: 4px;
   font-size: 15px;
   font-weight: 700;
+}
+
+.source-title {
+  min-width: 0;
+  overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }

@@ -1,16 +1,16 @@
-// Reads the whole Watch later list.
+// Reads a whole playlist: Watch later, or any other playlist.
 //
-// The primary path fetches the Watch later page, reads the first part of the
+// The primary path fetches the playlist page, reads the first part of the
 // list from its embedded `ytInitialData`, and then requests the rest with the
 // same continuation request the page sends while you scroll. It does not need
 // thousands of rows rendered, works while the tab is in the background, and
 // returns channel IDs and exact durations.
 //
-// If that path fails, the fallback scrolls the open Watch later tab to the end
+// If that path fails, the fallback scrolls the open playlist tab to the end
 // and reads the rows from the DOM.
 (() => {
   const ns = (globalThis.ytEasy ??= {});
-  const { PAGE_DATA, SELECTORS, WATCH_LATER_LIST_ID, WATCH_LATER_PATH, util } = ns;
+  const { PAGE_DATA, SELECTORS, WATCH_LATER_LIST_ID, toPlaylistPath, util } = ns;
 
   const MAX_PAGES = 200;
   const PAGE_DELAY_MIN = 800;
@@ -375,6 +375,21 @@
     return result;
   };
 
+  const readPlaylistInfo = (data) => ({
+    title: readText(data?.metadata?.[PAGE_DATA.playlistMetadataKey]?.title).trim(),
+    alert: findDeep(data?.alerts, (value) => {
+      for (const key of PAGE_DATA.alertKeys) {
+        const text = readText(value[key]?.text).trim();
+
+        if (text) {
+          return text;
+        }
+      }
+
+      return null;
+    }) ?? '',
+  });
+
   // ---------------------------------------------------------------------------
   // Signed requests
 
@@ -499,17 +514,19 @@
     return { add, values: () => [...items.values()], get size() { return items.size; } };
   };
 
-  const collectFromData = async ({ signal, onProgress }) => {
-    const response = await fetch(new URL(WATCH_LATER_PATH, location.origin), { credentials: 'same-origin', signal });
+  const collectFromData = async ({ listId, signal, onProgress }) => {
+    const response = await fetch(new URL(toPlaylistPath(listId), location.origin), { credentials: 'same-origin', signal });
 
     if (!response.ok) {
-      throw new CollectError(`나중에 볼 동영상 페이지를 불러오지 못했습니다 (HTTP ${response.status}).`);
+      throw new CollectError(`재생목록 페이지를 불러오지 못했습니다 (HTTP ${response.status}).`);
     }
 
     const html = await response.text();
     const config = readConfig(html);
 
-    if (config.LOGGED_IN === false) {
+    // Watch later belongs to an account. A public playlist can be read
+    // signed out, and a private one answers with YouTube's own message below.
+    if (config.LOGGED_IN === false && listId === WATCH_LATER_LIST_ID) {
       throw new CollectError('YouTube에 로그인되어 있지 않습니다. 로그인한 뒤 다시 시도해 주세요.', { code: 'signed-out' });
     }
 
@@ -520,7 +537,8 @@
     }
 
     const store = createItemStore();
-    let page = readBrowseData(data);
+    const info = readPlaylistInfo(data);
+    let page = readBrowseData(data, listId);
     let removeLabel = page.removeLabel;
     let pages = 1;
 
@@ -536,7 +554,7 @@
 
       const token = page.token;
 
-      page = readBrowseData(await requestContinuation({ config, token, signal }));
+      page = readBrowseData(await requestContinuation({ config, token, signal }), listId);
 
       // A token means more entries exist, so a page without new entries is a
       // failed request (for example, one YouTube answered as signed out), not
@@ -551,10 +569,12 @@
     }
 
     if (store.size === 0) {
-      throw new CollectError('목록에서 영상을 찾지 못했습니다.', { code: 'empty' });
+      // YouTube's own words, such as "this playlist does not exist", say
+      // more than a guess would.
+      throw new CollectError(info.alert || '목록에서 영상을 찾지 못했습니다. 재생목록이 비어 있거나, 비공개이거나, 주소가 잘못됐을 수 있습니다.', { code: 'empty' });
     }
 
-    return { items: store.values(), removeLabel, method: 'data' };
+    return { items: store.values(), removeLabel, method: 'data', listId, title: info.title };
   };
 
   const decodeHandle = (handle) => {
@@ -577,8 +597,8 @@
     };
   };
 
-  const readItemElement = (element) => {
-    const videoId = ns.page.readItemVideoId(element);
+  const readItemElement = (element, listId) => {
+    const videoId = ns.page.readItemVideoId(element, listId);
 
     if (!videoId) {
       return null;
@@ -599,11 +619,11 @@
     };
   };
 
-  const collectFromDom = async ({ signal, onProgress }) => {
+  const collectFromDom = async ({ listId, signal, onProgress }) => {
     const { page } = ns;
 
-    if (!page.isWatchLaterPage() || !page.getPlaylistRoot()) {
-      throw new CollectError('나중에 볼 동영상 페이지에서만 스크롤 방식으로 스캔할 수 있습니다.', { code: 'needs-page' });
+    if (!page.isListPage(listId) || !page.getPlaylistRoot()) {
+      throw new CollectError('재생목록 페이지에서만 스크롤 방식으로 스캔할 수 있습니다.', { code: 'needs-page' });
     }
 
     const onPause = () => onProgress?.({ count: page.getItemElements().length, paused: true });
@@ -626,27 +646,27 @@
 
     const store = createItemStore();
 
-    store.add(page.getItemElements().map(readItemElement).filter(Boolean));
+    store.add(page.getItemElements().map((element) => readItemElement(element, listId)).filter(Boolean));
 
-    return { items: store.values(), removeLabel: null, method: 'dom' };
+    return { items: store.values(), removeLabel: null, method: 'dom', listId, title: document.title.replace(/\s*-\s*YouTube$/, '') };
   };
 
   // mode 'auto' tries the page data first and falls back to scrolling when
-  // this tab is the visible Watch later page. mode 'dom' only scrolls.
-  const collect = async ({ mode = 'auto', signal, onProgress } = {}) => {
+  // this tab is the visible page of the playlist. mode 'dom' only scrolls.
+  const collect = async ({ listId = WATCH_LATER_LIST_ID, mode = 'auto', signal, onProgress } = {}) => {
     if (mode === 'dom') {
-      return collectFromDom({ signal, onProgress });
+      return collectFromDom({ listId, signal, onProgress });
     }
 
     try {
-      return await collectFromData({ signal, onProgress });
+      return await collectFromData({ listId, signal, onProgress });
     } catch (error) {
-      if (util.isAbortError(error) || error.code === 'signed-out') {
+      if (util.isAbortError(error) || error.code === 'signed-out' || error.code === 'empty') {
         throw error;
       }
 
-      if (ns.page.isWatchLaterPage() && ns.page.isVisible()) {
-        return collectFromDom({ signal, onProgress });
+      if (ns.page.isListPage(listId) && ns.page.isVisible()) {
+        return collectFromDom({ listId, signal, onProgress });
       }
 
       // Network and parse errors arrive with English browser messages.

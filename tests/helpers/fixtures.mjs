@@ -123,7 +123,9 @@ export const continuationEntry = (token) => ({
   },
 });
 
-export const initialData = (entries, extraSections = []) => ({
+export const initialData = (entries, extraSections = [], { title, alert } = {}) => ({
+  ...(title ? { metadata: { playlistMetadataRenderer: { title } } } : {}),
+  ...(alert ? { alerts: [{ alertWithButtonRenderer: { type: 'ERROR', text: { simpleText: alert } } }] } : {}),
   contents: {
     twoColumnBrowseResultsRenderer: {
       tabs: [{

@@ -1,5 +1,6 @@
-// Finds or opens the Watch later tab and runs jobs in its content script.
-import { WATCH_LATER_URL } from './export.js';
+// Finds or opens the tab of a playlist (Watch later is the playlist `WL`)
+// and runs jobs in its content script.
+import { toPlaylistUrl } from './sources.js';
 
 const JOB_PORT_NAME = 'yt-easy-job';
 const TAB_LOAD_TIMEOUT = 30000;
@@ -9,25 +10,25 @@ const sleep = (ms) => new Promise((resolve) => {
   setTimeout(resolve, ms);
 });
 
-export const isWatchLaterUrl = (value) => {
+export const isListUrl = (value, listId) => {
   try {
     const url = new URL(value);
 
-    return url.origin === 'https://www.youtube.com' && url.pathname === '/playlist' && url.searchParams.get('list') === 'WL';
+    return url.origin === 'https://www.youtube.com' && url.pathname === '/playlist' && url.searchParams.get('list') === listId;
   } catch {
     return false;
   }
 };
 
-// Prefers a Watch later tab in this window, and the active one among those.
-const findWatchLaterTab = async () => {
+// Prefers a tab of the list in this window, and the active one among those.
+const findListTab = async (listId) => {
   const [current, tabs] = await Promise.all([
     chrome.windows.getCurrent(),
     chrome.tabs.query({ url: 'https://www.youtube.com/playlist*' }),
   ]);
   const score = (tab) => (tab.windowId === current.id ? 2 : 0) + (tab.active ? 1 : 0);
 
-  return tabs.filter((tab) => isWatchLaterUrl(tab.url)).sort((a, b) => score(b) - score(a))[0] ?? null;
+  return tabs.filter((tab) => isListUrl(tab.url, listId)).sort((a, b) => score(b) - score(a))[0] ?? null;
 };
 
 const waitForTabComplete = (tabId) => new Promise((resolve, reject) => {
@@ -80,16 +81,16 @@ const waitForContentScript = async (tabId, attempts) => {
   return null;
 };
 
-// Returns a Watch later tab whose content script answers. With `activate`,
+// Returns a tab of the list whose content script answers. With `activate`,
 // the tab is brought to the front, which removal and the scrolling fallback
 // need: Chrome pauses rendering in background tabs.
-export const prepareWatchLaterTab = async ({ activate }) => {
-  let tab = await findWatchLaterTab();
+export const prepareListTab = async ({ listId, activate }) => {
+  let tab = await findListTab(listId);
 
   if (!tab) {
     const current = await chrome.windows.getCurrent();
 
-    tab = await chrome.tabs.create({ url: WATCH_LATER_URL, active: activate, windowId: current.id });
+    tab = await chrome.tabs.create({ url: toPlaylistUrl(listId), active: activate, windowId: current.id });
   }
 
   if (activate) {
@@ -110,7 +111,7 @@ export const prepareWatchLaterTab = async ({ activate }) => {
   }
 
   if (!status) {
-    throw new Error('YouTube 탭에 연결하지 못했습니다. 나중에 볼 동영상 탭을 새로고침한 뒤 다시 시도해 주세요.');
+    throw new Error('YouTube 탭에 연결하지 못했습니다. 재생목록 탭을 새로고침한 뒤 다시 시도해 주세요.');
   }
 
   if (status.busy) {

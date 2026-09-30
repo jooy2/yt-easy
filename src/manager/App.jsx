@@ -1,6 +1,7 @@
 import { Pane, Panes, useToast } from 'neba';
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 
+import { AddPlaylistDialog } from './components/AddPlaylistDialog.jsx';
 import { AppHeader } from './components/AppHeader.jsx';
 import { EmptyState } from './components/EmptyState.jsx';
 import { FilterBar } from './components/FilterBar.jsx';
@@ -21,8 +22,9 @@ import { formatCount, formatDateTime, formatFileStamp } from './lib/format.js';
 import { openInCurrentTab, openInNewTab } from './lib/open-video.js';
 import { addAll, readCoverage, removeAll, selectRange, toggleOne } from './lib/selection.js';
 import { createSnapshot, removeFromSnapshot } from './lib/snapshot.js';
+import { WATCH_LATER_ID, WATCH_LATER_TITLE, isWatchLater, toFileSlug } from './lib/sources.js';
 import * as store from './lib/store.js';
-import { prepareWatchLaterTab, runJob } from './lib/tab-bridge.js';
+import { prepareListTab, runJob } from './lib/tab-bridge.js';
 import { buildSearchText, buildView, createBuckets, isMusicVideo, readGrouping } from './lib/view-model.js';
 
 const IS_TAB_VIEW = new URLSearchParams(location.search).get('view') === 'tab';
@@ -45,7 +47,7 @@ const describeScanProgress = ({ count, paused }) => (paused
 
 export function App() {
   const data = useManagerData();
-  const { snapshot, settings, prefs, categories } = data;
+  const { snapshot, snapshots, activeListId, settings, prefs, categories } = data;
   const { task, start, update, end, cancel } = useTask();
   const toast = useToast();
 
@@ -60,6 +62,10 @@ export function App() {
 
   const deferredQuery = useDeferredValue(query);
   const items = snapshot?.items ?? NO_ITEMS;
+  const sourceTitle = snapshot?.title ?? (isWatchLater(activeListId) ? WATCH_LATER_TITLE : activeListId);
+  // Watch later always has a remove entry. Another playlist has one only
+  // when it is the user's own, which the scan shows by finding its label.
+  const canRemove = isWatchLater(activeListId) || Boolean(snapshot?.removeLabel);
   const busy = task !== null;
   const hasApiKey = Boolean(settings.apiKey);
   const buckets = useMemo(() => createBuckets(settings.durationBounds), [settings.durationBounds]);
@@ -97,6 +103,36 @@ export function App() {
     setActiveGroup(ALL_GROUP_KEY);
   }, [prefs.sortBy]);
 
+  // Another list starts with nothing selected.
+  useEffect(() => {
+    setSelected(new Set());
+    setFailures(new Map());
+    setActiveGroup(ALL_GROUP_KEY);
+  }, [activeListId]);
+
+  // The lists for the menu: Watch later first, even before its first scan,
+  // then the other scanned lists, newest first.
+  const sources = useMemo(() => {
+    const entries = Object.values(snapshots).sort((a, b) => {
+      if (isWatchLater(a.listId) !== isWatchLater(b.listId)) {
+        return isWatchLater(a.listId) ? -1 : 1;
+      }
+
+      return b.collectedAt - a.collectedAt;
+    });
+    const list = entries.map((entry) => ({
+      listId: entry.listId,
+      title: entry.title,
+      description: `${formatCount(entry.items.length)}개 · ${formatDateTime(entry.collectedAt)} 스캔`,
+    }));
+
+    if (!snapshots[WATCH_LATER_ID]) {
+      list.unshift({ listId: WATCH_LATER_ID, title: WATCH_LATER_TITLE, description: '아직 스캔하지 않음' });
+    }
+
+    return list;
+  }, [snapshots]);
+
   // Keep the selection and the failure marks to videos that still exist.
   useEffect(() => {
     const ids = new Set(items.map((item) => item.videoId));
@@ -130,33 +166,37 @@ export function App() {
     toast.add({ title, color: 'success', timeout: 4000 });
   }, [toast]);
 
-  const saveList = useCallback(({ items: list, prefix, stamp, format, kind }) => {
+  const saveList = useCallback(({ items: list, suffix, stamp, format, kind }) => {
     const isJson = format === 'json';
 
     return downloadText({
-      filename: buildFileName({ prefix, stamp, extension: format }),
-      text: isJson ? buildJson({ items: list, categories, kind, exportedAt: Date.now() }) : buildCsv(list, categories),
+      filename: buildFileName({ prefix: `${toFileSlug(activeListId)}-${suffix}`, stamp, extension: format }),
+      text: isJson
+        ? buildJson({ items: list, categories, kind, exportedAt: Date.now(), listId: activeListId, listTitle: sourceTitle })
+        : buildCsv(list, categories),
       type: isJson ? 'application/json' : 'text/csv',
     });
-  }, [categories]);
+  }, [categories, activeListId, sourceTitle]);
 
   // -------------------------------------------------------------------------
   // Scanning
 
-  const handleScan = async () => {
+  // Scans a list and, once it succeeds, shows it. A failed scan of a new
+  // playlist leaves the current list on screen.
+  const scanList = async (listId) => {
     const controller = start({ kind: 'scan', label: 'YouTube 탭을 준비하는 중…' });
     const onProgress = (progress) => update({ label: describeScanProgress(progress) });
 
     setMessage('');
 
     try {
-      let { tab } = await prepareWatchLaterTab({ activate: false });
+      let { tab } = await prepareListTab({ listId, activate: false });
       let collected = null;
 
       update({ label: '목록을 스캔하는 중…' });
 
       try {
-        collected = await runJob({ tabId: tab.id, command: { type: 'collect', mode: 'auto' }, signal: controller.signal, onProgress });
+        collected = await runJob({ tabId: tab.id, command: { type: 'collect', listId, mode: 'auto' }, signal: controller.signal, onProgress });
       } catch (error) {
         if (error.code !== 'needs-dom') {
           throw error;
@@ -164,25 +204,26 @@ export function App() {
 
         // Scrolling only works in a visible tab, so the tab comes to the front.
         update({ label: '페이지 데이터로 읽지 못해 스크롤 방식으로 다시 스캔합니다…' });
-        ({ tab } = await prepareWatchLaterTab({ activate: true }));
-        collected = await runJob({ tabId: tab.id, command: { type: 'collect', mode: 'dom' }, signal: controller.signal, onProgress });
+        ({ tab } = await prepareListTab({ listId, activate: true }));
+        collected = await runJob({ tabId: tab.id, command: { type: 'collect', listId, mode: 'dom' }, signal: controller.signal, onProgress });
       }
 
-      const next = createSnapshot({ ...collected, collectedAt: Date.now() });
-      const ids = new Set(next.items.map((item) => item.videoId));
+      const next = createSnapshot({ ...collected, listId, collectedAt: Date.now() });
+      const lists = await data.saveSnapshot(next);
+      const ids = new Set(Object.values(lists).flatMap((entry) => entry.items.map((item) => item.videoId)));
 
-      await data.saveSnapshot(next);
+      data.setActiveListId(listId);
       await store.clearPendingRemovals();
       setFailures(new Map());
 
-      // Drop category entries of videos that are no longer in the list.
+      // Drop category entries of videos that are in none of the kept lists.
       const kept = new Map([...categories].filter(([videoId]) => ids.has(videoId)));
 
       if (kept.size !== categories.size) {
         await data.saveCategories(kept);
       }
 
-      announce(`${formatCount(next.items.length)}개를 스캔했습니다.`);
+      announce(`${next.title}: ${formatCount(next.items.length)}개를 스캔했습니다.`);
     } catch (error) {
       if (isAbortError(error)) {
         announce('스캔을 취소했습니다.');
@@ -192,6 +233,20 @@ export function App() {
     } finally {
       end();
     }
+  };
+
+  const handleScan = () => scanList(activeListId);
+
+  const handleForgetSource = async () => {
+    if (isWatchLater(activeListId)) {
+      return;
+    }
+
+    const title = sourceTitle;
+
+    await data.forgetSnapshot(activeListId);
+    data.setActiveListId(WATCH_LATER_ID);
+    announce(`${title} 목록을 기록에서 지웠습니다.`);
   };
 
   // -------------------------------------------------------------------------
@@ -206,7 +261,7 @@ export function App() {
     setMessage('');
 
     try {
-      await saveList({ items, prefix: 'wl-export', stamp: formatFileStamp(new Date()), format, kind: 'export' });
+      await saveList({ items, suffix: 'export', stamp: formatFileStamp(new Date()), format, kind: 'export' });
       announce(`${formatCount(items.length)}개를 ${format.toUpperCase()} 파일로 내보냈습니다.`);
     } catch (error) {
       setMessage(error.message);
@@ -323,12 +378,12 @@ export function App() {
       if (backup) {
         const stamp = formatFileStamp(new Date());
 
-        await saveList({ items: targets, prefix: 'wl-delete-backup', stamp, format: 'json', kind: 'delete-backup' });
-        await saveList({ items: targets, prefix: 'wl-delete-backup', stamp, format: 'csv', kind: 'delete-backup' });
+        await saveList({ items: targets, suffix: 'delete-backup', stamp, format: 'json', kind: 'delete-backup' });
+        await saveList({ items: targets, suffix: 'delete-backup', stamp, format: 'csv', kind: 'delete-backup' });
         update({ label: 'YouTube 탭을 준비하는 중…' });
       }
 
-      const { tab } = await prepareWatchLaterTab({ activate: true });
+      const { tab } = await prepareListTab({ listId: activeListId, activate: true });
 
       update({ label: `${verb} 준비 중… 0 / ${formatCount(targets.length)}`, value: 0, max: targets.length });
 
@@ -338,6 +393,8 @@ export function App() {
           type: 'remove',
           targets: targets.map(({ videoId, title }) => ({ videoId, title })),
           options: {
+            listId: activeListId,
+            listTitle: sourceTitle,
             delayMin: settings.removeDelayMin * 1000,
             delayMax: settings.removeDelayMax * 1000,
             dryRun,
@@ -353,7 +410,7 @@ export function App() {
             // job does not rewrite a growing list thousands of times. The
             // finally block below applies all of them.
             if (removed.size % PENDING_SAVE_INTERVAL === 0) {
-              store.savePendingRemovals(removed).catch(() => {});
+              store.savePendingRemovals(activeListId, removed).catch(() => {});
             }
           }
 
@@ -363,7 +420,7 @@ export function App() {
 
           update({
             label: progress.paused
-              ? '일시 정지: 나중에 볼 동영상 탭이 화면에 보이면 이어서 진행합니다.'
+              ? '일시 정지: 재생목록 탭이 화면에 보이면 이어서 진행합니다.'
               : `${verb} 중… ${formatCount(progress.done)} / ${formatCount(progress.total)} · ${currentTitle}`,
             value: progress.done,
             max: progress.total,
@@ -467,7 +524,7 @@ export function App() {
         selected={selected.has(row.item.videoId)}
         failure={failures.get(row.item.videoId)}
         isMusic={isMusicVideo(row.item, categories)}
-        // Loading a video into the current tab could replace the Watch later
+        // Loading a video into the current tab could replace the playlist
         // tab a running job works in.
         openDisabled={busy}
         onSelect={handleSelect}
@@ -562,6 +619,13 @@ export function App() {
         isTabView={IS_TAB_VIEW}
         busy={busy}
         hasItems={items.length > 0}
+        sources={sources}
+        activeListId={activeListId}
+        sourceTitle={sourceTitle}
+        canForget={!isWatchLater(activeListId) && Boolean(snapshot)}
+        onSelectSource={data.setActiveListId}
+        onAddPlaylist={() => setDialog('add-playlist')}
+        onForgetSource={handleForgetSource}
         filtersOpen={prefs.filtersOpen}
         filtersActive={filtersActive}
         onToggleFilters={() => data.updatePrefs({ filtersOpen: !prefs.filtersOpen })}
@@ -591,6 +655,7 @@ export function App() {
           selectedCount={selected.size}
           totalCount={items.length}
           busy={busy}
+          canRemove={canRemove}
           onSelectAll={() => setSelected(new Set(items.map((item) => item.videoId)))}
           onClear={() => setSelected(new Set())}
           onRemove={() => setDialog('remove')}
@@ -598,7 +663,7 @@ export function App() {
       )}
       <main className="list-area">
         {emptyReason === 'none' || emptyReason === 'empty' ? (
-          <EmptyState reason={emptyReason} busy={busy} onScan={handleScan} />
+          <EmptyState reason={emptyReason} busy={busy} listTitle={sourceTitle} onScan={handleScan} />
         ) : grouped ? (
           <Panes className="group-panes" resizable handleLabel="그룹 목록 너비 조절" locale="ko">
             <Pane defaultSize="34%" minSize={110} maxSize="60%">
@@ -622,9 +687,18 @@ export function App() {
       <RemoveDialog
         open={dialog === 'remove'}
         items={selectedItems}
+        listTitle={sourceTitle}
         defaultTestCount={settings.testModeCount}
         onClose={() => setDialog(null)}
         onConfirm={runRemoval}
+      />
+      <AddPlaylistDialog
+        open={dialog === 'add-playlist'}
+        onClose={() => setDialog(null)}
+        onSubmit={(listId) => {
+          setDialog(null);
+          scanList(listId);
+        }}
       />
       <ResultDialog
         result={result}

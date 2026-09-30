@@ -2,6 +2,7 @@ import { Checkbox, Chip, IconButton, Tooltip, VisuallyHidden } from 'neba';
 import { memo } from 'react';
 
 import { formatDuration } from '../lib/format.js';
+import { toThumbnailUrl } from '../lib/snapshot.js';
 
 import { ExternalIcon, PlayIcon } from './icons.jsx';
 
@@ -55,7 +56,7 @@ export const VideoRow = memo(function VideoRow({
     >
       <Checkbox checked={selected} onCheckedChange={() => onSelect(item.videoId, { range: false })} aria-label={`선택: ${title}`} />
       <div className="video-thumb">
-        <img src={item.thumbnail} alt="" width="96" height="54" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
+        <img src={toThumbnailUrl(item.videoId)} alt="" width="96" height="54" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
         {item.watchedPercent > 0 && (
           <span className="video-progress" aria-hidden="true">
             <span style={{ width: `${item.watchedPercent}%` }} />
