@@ -1,0 +1,86 @@
+# Contributing to yt-easy
+
+Thank you for contributing to the project. Your contributions will help us take the project to the next level.
+
+This project adheres to the [Contributor Covenant](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html) code of conduct, version 2.1, reproduced in [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Your contribution implies that you have read and agree to this policy. Any behavior that undermines the quality of the project community, including this policy, will be warned or restricted by the maintainers.
+
+## Issues
+
+Issues can be created on the following page: https://github.com/jooy2/yt-easy/issues
+
+Alternatively, you can reach the maintainers at https://cdget.com/contact. However, we prefer to track progress via GitHub Issues.
+
+When creating an issue, keep the following in mind:
+
+- Please specify the correct category selection based on the format of the issue (e.g., bug report, feature request).
+- Check to see if there are duplicate issues.
+- Describe in detail what is happening and what needs to be fixed. You may need additional materials such as images or video.
+- Use appropriate keyword titles to make it easy for others to search and understand.
+- Please use English in all content.
+- Describe the environment in which the issue occurs: the Chrome version and the language of the YouTube interface.
+- Do not paste your Watch later list, an API key, or cookies into an issue.
+
+## How to contribute (Pull Requests)
+
+### Write the code you want to change
+
+Here's the process for contributing to the project:
+
+1. Clone the project (or rebase to the latest commit in the main branch).
+1. Open `chrome://extensions`, turn on **Developer mode**, and load the project folder with **Load unpacked**. There is no package to install and no build step.
+1. Set up EditorConfig in your IDE. The project has no linter or formatter; follow the style of the surrounding code.
+1. Write the code that needs to be fixed. After editing, click the reload button of the extension in `chrome://extensions`, then reload the YouTube tab so it gets the new content script.
+1. Update the documentation (if it exists) or create a new one.
+1. Add or modify tests as needed, and run them with `node --test` (Node.js 22 or newer). You should also verify that existing tests pass.
+
+A few rules are specific to this project:
+
+- Every DOM selector, page data key, and menu label that depends on YouTube lives in `src/content/selectors.js`. Keep new ones there.
+- Removal must stay at a person's pace. Do not shorten the minimum delay or remove the pauses between steps.
+- The extension reads only the signed-in account's Watch later list. Do not add collection of anything else.
+- New permissions need a reason in the pull request description. Prefer an optional permission that is requested when the feature is used.
+
+### Write a commit message
+
+While we don't have strict restrictions on commit messages, we recommend that you follow the recommendations below whenever possible:
+
+- Write in English.
+- Use the ` symbol to name functions, variables, or folders and files.
+- Use a format like `xxx: message (fixes #1)`. The content in parentheses is optional.
+- The message includes a summary of what was modified.
+- It's a good idea to separate multiple modifications into their own commit messages.
+
+It is recommended that you include a tag at the beginning of the commit message. Between the tag and the message, use `: ` between the tag and the message.
+
+tags conform to the ["Udacity Git Commit Message Style Guide"](https://udacity.github.io/git-styleguide). However, you are welcome to use tags not listed here for additional situations.
+
+- `feat`: A new feature
+- `fix`: A bug fix
+- `docs`: Changes to documentation
+- `style`: Formatting, missing semicolons, etc.; no code change
+- `refactor`: Refactoring production code
+- `test`: Adding tests, refactoring test; no production code change
+- `chore`: Updating build tasks, package manager configs, etc.; no production code change
+
+Informal tags:
+
+- `package`: Modifications to package settings, modules, or GitHub projects
+- `typo`: Fix typos
+
+### Create a pull request
+
+When creating a pull request, keep the following in mind:
+
+- Include a specific description of what the modification is, why it needs to be made, and how it works.
+- Check to see if there are duplicate pull requests.
+- Please use English in all content.
+
+Typically, a project maintainer will review and test your code before merging it into the project. This process can take some time, and they may ask you for further edits or clarifications in the comments.
+
+## Reporting a security issue
+
+A security vulnerability does not go in a general issue. [SECURITY.md](SECURITY.md) describes how to report one privately.
+
+## Contact
+
+For anything that does not belong in an issue or a pull request, reach the maintainers at https://cdget.com/contact.
