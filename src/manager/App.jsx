@@ -1,10 +1,11 @@
-import { useToast } from 'neba';
+import { Pane, Panes, useToast } from 'neba';
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
 
 import { AppHeader } from './components/AppHeader.jsx';
 import { EmptyState } from './components/EmptyState.jsx';
 import { FilterBar } from './components/FilterBar.jsx';
-import { GroupRow } from './components/GroupRow.jsx';
+import { ALL_GROUP_KEY, GroupRail } from './components/GroupRail.jsx';
+import { ListHeader } from './components/ListHeader.jsx';
 import { RemoveDialog } from './components/RemoveDialog.jsx';
 import { ResultDialog } from './components/ResultDialog.jsx';
 import { SelectionBar } from './components/SelectionBar.jsx';
@@ -25,13 +26,12 @@ import { MUSIC_CATEGORY_ID, buildSearchText, buildView, createBuckets } from './
 
 const IS_TAB_VIEW = new URLSearchParams(location.search).get('view') === 'tab';
 const ITEM_ROW_HEIGHT = 72;
-const GROUP_ROW_HEIGHT = 44;
 const PENDING_SAVE_INTERVAL = 10;
 const NO_ITEMS = [];
 
 const isAbortError = (error) => error?.name === 'AbortError';
 
-const getRowHeight = (row) => (row.type === 'group' ? GROUP_ROW_HEIGHT : ITEM_ROW_HEIGHT);
+const getRowHeight = () => ITEM_ROW_HEIGHT;
 
 const describeScanProgress = ({ count, paused }) => (paused
   ? `${formatCount(count)}개까지 읽었습니다. YouTube 탭이 화면에 보이면 이어서 진행합니다.`
@@ -45,7 +45,7 @@ export function App() {
 
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(() => new Set());
-  const [collapsed, setCollapsed] = useState(() => new Set());
+  const [activeGroup, setActiveGroup] = useState(ALL_GROUP_KEY);
   // Reasons for videos whose last removal failed, shown on their rows.
   const [failures, setFailures] = useState(() => new Map());
   const [message, setMessage] = useState('');
@@ -71,11 +71,21 @@ export function App() {
     groupBy: prefs.groupBy,
     sortBy: prefs.sortBy,
     sortDir: prefs.sortDir,
-    collapsed,
-  }), [items, searchTexts, deferredQuery, durationFilter, hasApiKey, prefs, categories, buckets, collapsed]);
+  }), [items, searchTexts, deferredQuery, durationFilter, hasApiKey, prefs, categories, buckets]);
 
-  const viewIds = useMemo(() => view.items.map((item) => item.videoId), [view.items]);
+  // With grouping, the list shows the group chosen in the rail. A group that
+  // a filter emptied falls back to all videos.
+  const activeGroupEntry = view.groups.find((group) => group.key === activeGroup) ?? null;
+  const shownItems = activeGroupEntry ? activeGroupEntry.items : view.items;
+  const shownIds = useMemo(() => shownItems.map((item) => item.videoId), [shownItems]);
+  const shownRows = useMemo(() => shownItems.map((item) => ({ key: item.videoId, item })), [shownItems]);
+  const shownSeconds = useMemo(() => shownItems.reduce((sum, item) => sum + (item.durationSeconds ?? 0), 0), [shownItems]);
   const filtersActive = query.trim() !== '' || durationFilter !== 'all' || (hasApiKey && prefs.categoryFilter !== 'all');
+
+  // A new grouping starts from all videos.
+  useEffect(() => {
+    setActiveGroup(ALL_GROUP_KEY);
+  }, [prefs.groupBy]);
 
   // Keep the selection and the failure marks to videos that still exist.
   useEffect(() => {
@@ -386,38 +396,11 @@ export function App() {
 
   const handleToggle = useCallback((videoId) => setSelected((current) => toggleOne(current, videoId)), []);
 
-  const handleSelectGroup = useCallback((videoIds, checked) => {
-    setSelected((current) => (checked ? addAll(current, videoIds) : removeAll(current, videoIds)));
-  }, []);
-
-  const handleToggleCollapse = useCallback((key) => {
-    setCollapsed((current) => {
-      const next = new Set(current);
-
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
-
-      return next;
-    });
-  }, []);
+  const handleToggleShown = (checked) => {
+    setSelected((current) => (checked ? addAll(current, shownIds) : removeAll(current, shownIds)));
+  };
 
   const renderRow = (row, layout) => {
-    if (row.type === 'group') {
-      return (
-        <GroupRow
-          key={row.key}
-          group={row}
-          {...layout}
-          coverage={readCoverage(selected, row.videoIds)}
-          onSelectGroup={handleSelectGroup}
-          onToggleCollapse={handleToggleCollapse}
-        />
-      );
-    }
-
     const categoryId = categories.get(row.item.videoId);
 
     return (
@@ -477,9 +460,35 @@ export function App() {
     emptyReason = 'none';
   } else if (items.length === 0) {
     emptyReason = 'empty';
-  } else if (view.rows.length === 0) {
+  } else if (view.items.length === 0) {
     emptyReason = 'filtered';
   }
+
+  const grouped = prefs.groupBy !== 'none';
+  const listTitle = activeGroupEntry?.label ?? (grouped ? '전체' : '전체 목록');
+  const listPane = (
+    <div className="list-pane">
+      <ListHeader
+        title={listTitle}
+        count={shownItems.length}
+        totalSeconds={shownSeconds}
+        coverage={readCoverage(selected, shownIds)}
+        onToggleAll={handleToggleShown}
+      />
+      {emptyReason === 'filtered' ? (
+        <EmptyState reason="filtered" />
+      ) : (
+        <VirtualList
+          className="video-list"
+          label={`${listTitle} 영상 목록`}
+          rows={shownRows}
+          getHeight={getRowHeight}
+          renderRow={renderRow}
+          resetKey={`${deferredQuery}|${durationFilter}|${prefs.categoryFilter}|${prefs.groupBy}|${prefs.sortBy}|${prefs.sortDir}|${activeGroup}`}
+        />
+      )}
+    </div>
+  );
 
   if (!data.ready) {
     return null;
@@ -519,26 +528,30 @@ export function App() {
         <SelectionBar
           selectedCount={selected.size}
           totalCount={items.length}
-          viewCount={view.items.length}
           busy={busy}
           onSelectAll={() => setSelected(new Set(items.map((item) => item.videoId)))}
-          onSelectView={() => setSelected((current) => addAll(current, viewIds))}
           onClear={() => setSelected(new Set())}
           onRemove={() => setDialog('remove')}
         />
       )}
       <main className="list-area">
-        {emptyReason ? (
+        {emptyReason === 'none' || emptyReason === 'empty' ? (
           <EmptyState reason={emptyReason} busy={busy} onScan={handleScan} />
+        ) : grouped ? (
+          <Panes className="group-panes" resizable handleLabel="그룹 목록 너비 조절" locale="ko">
+            <Pane defaultSize="34%" minSize={110} maxSize="60%">
+              <GroupRail
+                groupBy={prefs.groupBy}
+                groups={view.groups}
+                totalCount={view.items.length}
+                activeKey={activeGroupEntry ? activeGroup : ALL_GROUP_KEY}
+                onSelect={setActiveGroup}
+              />
+            </Pane>
+            <Pane minSize={180}>{listPane}</Pane>
+          </Panes>
         ) : (
-          <VirtualList
-            className="video-list"
-            label="나중에 볼 동영상 목록"
-            rows={view.rows}
-            getHeight={getRowHeight}
-            renderRow={renderRow}
-            resetKey={`${deferredQuery}|${durationFilter}|${prefs.categoryFilter}|${prefs.groupBy}|${prefs.sortBy}|${prefs.sortDir}`}
-          />
+          listPane
         )}
       </main>
       <SettingsDialog open={dialog === 'settings'} settings={settings} onClose={() => setDialog(null)} onSave={handleSaveSettings} />

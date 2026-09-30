@@ -65,16 +65,15 @@ The stored list does not follow changes you make on YouTube. Scan again after yo
 
 ### Find what you want
 
-- **보기** groups the list by channel, with the channels that have the most videos first, or by length.
+- **보기** groups the list by channel or by length. The groups appear as tabs down the left side, with the channels that have the most videos first, and choosing one shows only its videos on the right. Drag the line between the two to resize them, and use the arrow keys to move between groups.
 - **정렬** sorts by list order (**추가순**), length, or channel name. The button next to it switches between ascending and descending.
 - **길이** shows a single length range. Change the ranges in **설정**.
 - The search box matches every word you type against titles and channel names.
-- Click a group heading to fold it.
 - The filter button at the top folds the search box and the options away, so the list gets more room. A dot on the button shows that a search or a filter still narrows the list.
 
 ### Remove videos
 
-1. Select videos with their checkboxes, a group's checkbox, **전체 선택**, or **검색 결과 선택**, which selects everything the current search and filters show.
+1. Select videos with their checkboxes, or with the checkbox at the top of the list, which selects every video the list shows: the chosen group, narrowed by the search and filters. **전체 선택** selects the whole Watch later list.
 1. Click **선택 항목 삭제** and check the list in the dialog.
 1. The first time, turn on **드라이런**. It opens each video's menu and finds the remove entry without clicking it, which shows that removal works with your YouTube layout and language. Then turn on **테스트 모드** to remove only the first few videos, and check the result on YouTube.
 1. Click **삭제 시작**.

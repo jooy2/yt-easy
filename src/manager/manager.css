@@ -149,24 +149,103 @@ body {
 /* List */
 
 .list-area {
-  position: relative;
+  display: flex;
   flex: 1;
+  flex-direction: column;
   min-height: 160px;
 }
 
+.group-panes {
+  flex: 1;
+  min-height: 0;
+}
+
+.list-pane {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  container-type: inline-size;
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--neba-border);
+}
+
+.list-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.list-meta {
+  flex: none;
+  margin: 0;
+  color: var(--neba-muted-fg);
+  font-size: 12px;
+}
+
 .video-list {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+/* Group rail */
+
+/* neba sizes a vertical tab list to its longest tab. Here it fills the
+   pane instead, so every tab, and the selection line, lines up. */
+.group-rail {
+  gap: 0;
+  height: 100%;
+  min-width: 0;
+}
+
+.group-rail > [role="tablist"] {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  max-height: 100%;
+}
+
+.group-rail [role="tab"] {
+  width: 100%;
+  min-width: 0;
+}
+
+.rail-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: start;
+}
+
+.rail-count {
+  color: var(--neba-muted-fg);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
 }
 
 .virtual-content {
   position: relative;
 }
 
-.video-row,
-.group-row {
+.video-row {
   position: absolute;
   top: 0;
   left: 0;
@@ -237,56 +316,6 @@ body {
 .video-number {
   flex: none;
   font-variant-numeric: tabular-nums;
-}
-
-.group-row {
-  background: var(--neba-panel);
-}
-
-.group-toggle {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  min-height: 32px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: start;
-  cursor: pointer;
-}
-
-.group-toggle:focus-visible {
-  outline: 2px solid var(--neba-primary-ring);
-  outline-offset: 2px;
-  border-radius: var(--neba-radius-sm);
-}
-
-.group-caret {
-  display: inline-flex;
-  flex: none;
-  transition: transform var(--neba-duration) var(--neba-ease);
-}
-
-.group-toggle[aria-expanded="true"] .group-caret {
-  transform: rotate(90deg);
-}
-
-.group-label {
-  overflow: hidden;
-  font-weight: 600;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.group-meta {
-  flex: none;
-  margin-inline-start: auto;
-  color: var(--neba-muted-fg);
-  font-size: 12px;
 }
 
 .empty-state {
@@ -361,8 +390,16 @@ code {
   white-space: nowrap;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .group-caret {
-    transition: none;
+/* A narrow list pane, such as beside the group rail in the side panel,
+   gives the titles more room by shrinking the thumbnails. */
+@container (max-width: 340px) {
+  .video-row {
+    gap: 8px;
+    padding: 0 8px;
+  }
+
+  .video-thumb {
+    width: 64px;
+    height: 36px;
   }
 }

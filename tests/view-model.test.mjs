@@ -42,7 +42,6 @@ const baseInput = (overrides = {}) => ({
   groupBy: 'none',
   sortBy: 'position',
   sortDir: 'asc',
-  collapsed: new Set(),
   ...overrides,
 });
 
@@ -100,38 +99,39 @@ describe('buildView', () => {
   });
 
   it('groups by channel with the largest channels first', () => {
-    const { rows } = buildView(baseInput({ groupBy: 'channel' }));
-    const groups = rows.filter((row) => row.type === 'group');
+    const { groups } = buildView(baseInput({ groupBy: 'channel' }));
 
     assert.deepEqual(groups.map((group) => [group.label, group.count]), [['가나다 채널', 2], ['Zeta', 2], ['Alpha', 1]]);
     assert.equal(groups[0].totalSeconds, 3900);
-    assert.equal(rows.length, 8);
+    assert.deepEqual(positions(groups[1].items), [2, 5]);
   });
 
   it('orders channel groups by name when sorting by channel', () => {
-    const { rows } = buildView(baseInput({ groupBy: 'channel', sortBy: 'channel', sortDir: 'desc' }));
+    const { groups } = buildView(baseInput({ groupBy: 'channel', sortBy: 'channel', sortDir: 'desc' }));
 
-    assert.deepEqual(rows.filter((row) => row.type === 'group').map((group) => group.label), ['Zeta', 'Alpha', '가나다 채널']);
+    assert.deepEqual(groups.map((group) => group.label), ['Zeta', 'Alpha', '가나다 채널']);
   });
 
-  it('groups by duration in bucket order and hides the rows of a collapsed group', () => {
-    const { rows } = buildView(baseInput({ groupBy: 'duration', collapsed: new Set(['duration:gte-60']) }));
+  it('groups by duration in bucket order and leaves out empty buckets', () => {
+    const { groups } = buildView(baseInput({ groupBy: 'duration' }));
 
-    assert.deepEqual(rows.map((row) => (row.type === 'group' ? row.label : row.item.position)), [
-      '5분 미만', 2,
-      '5–20분', 5,
-      '20–60분', 4,
-      '60분 이상',
-      '길이 정보 없음', 3,
+    assert.deepEqual(groups.map((group) => [group.label, positions(group.items)]), [
+      ['5분 미만', [2]],
+      ['5–20분', [5]],
+      ['20–60분', [4]],
+      ['60분 이상', [1]],
+      ['길이 정보 없음', [3]],
     ]);
   });
 
   it('reverses duration groups but keeps unknown last when sorting by length descending', () => {
-    const { rows } = buildView(baseInput({ groupBy: 'duration', sortBy: 'duration', sortDir: 'desc' }));
+    const { groups } = buildView(baseInput({ groupBy: 'duration', sortBy: 'duration', sortDir: 'desc' }));
 
-    assert.deepEqual(rows.filter((row) => row.type === 'group').map((group) => group.label), [
-      '60분 이상', '20–60분', '5–20분', '5분 미만', '길이 정보 없음',
-    ]);
+    assert.deepEqual(groups.map((group) => group.label), ['60분 이상', '20–60분', '5–20분', '5분 미만', '길이 정보 없음']);
+  });
+
+  it('returns no groups without grouping', () => {
+    assert.deepEqual(buildView(baseInput()).groups, []);
   });
 });
 

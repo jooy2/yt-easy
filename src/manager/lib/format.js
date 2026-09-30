@@ -30,7 +30,9 @@ export const formatTotalDuration = (seconds) => {
   const minutes = Math.floor((seconds % 3600) / 60);
 
   if (hours > 0) {
-    return minutes > 0 ? `${hours}시간 ${minutes}분` : `${hours}시간`;
+    const text = `${NUMBER_FORMAT.format(hours)}시간`;
+
+    return minutes > 0 ? `${text} ${minutes}분` : text;
   }
 
   return minutes > 0 ? `${minutes}분` : `${Math.floor(seconds)}초`;

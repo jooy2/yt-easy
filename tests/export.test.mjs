@@ -62,6 +62,7 @@ describe('formatting', () => {
     assert.equal(formatTotalDuration(12000), '3시간 20분');
     assert.equal(formatTotalDuration(7200), '2시간');
     assert.equal(formatTotalDuration(45), '45초');
+    assert.equal(formatTotalDuration(5032 * 3600 + 58 * 60), '5,032시간 58분');
   });
 
   it('builds file names in the yt-easy folder', () => {

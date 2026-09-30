@@ -199,40 +199,18 @@ export const groupItems = ({ items, groupBy, sortBy, sortDir, buckets }) => {
   return [];
 };
 
-const toItemRow = (item) => ({ type: 'item', key: item.videoId, item });
+// Adds the totals the group list shows next to each group.
+const describeGroup = (group) => ({
+  ...group,
+  count: group.items.length,
+  totalSeconds: group.items.reduce((sum, item) => sum + (item.durationSeconds ?? 0), 0),
+});
 
-export const buildRows = (groups, collapsed) => {
-  const rows = [];
-
-  for (const group of groups) {
-    const isCollapsed = collapsed.has(group.key);
-
-    rows.push({
-      type: 'group',
-      key: group.key,
-      label: group.label,
-      count: group.items.length,
-      totalSeconds: group.items.reduce((sum, item) => sum + (item.durationSeconds ?? 0), 0),
-      videoIds: group.items.map((item) => item.videoId),
-      collapsed: isCollapsed,
-    });
-
-    if (!isCollapsed) {
-      rows.push(...group.items.map(toItemRow));
-    }
-  }
-
-  return rows;
-};
-
+// `items` is the filtered and sorted list. `groups` splits it by channel or
+// length, each group keeping the same order, and is empty without grouping.
 export const buildView = (input) => {
   const items = sortItems(filterItems(input), input.sortBy, input.sortDir);
+  const groups = input.groupBy === 'none' ? [] : groupItems({ ...input, items }).map(describeGroup);
 
-  if (input.groupBy === 'none') {
-    return { items, rows: items.map(toItemRow) };
-  }
-
-  const groups = groupItems({ ...input, items });
-
-  return { items, rows: buildRows(groups, input.collapsed) };
+  return { items, groups };
 };
