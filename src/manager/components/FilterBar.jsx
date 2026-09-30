@@ -22,9 +22,9 @@ const WATCH_ITEMS = [
 ];
 
 const CATEGORY_ITEMS = [
-  { value: 'all', label: '음악 여부 전체' },
-  { value: 'music', label: '음악' },
-  { value: 'other', label: '음악 아님' },
+  { value: 'all', label: '모든 영상 종류' },
+  { value: 'music', label: '음악만' },
+  { value: 'other', label: '음악 제외' },
 ];
 
 // Search and every view option on one line that wraps when the panel is
@@ -63,10 +63,11 @@ export function FilterBar({ open, query, onQueryChange, prefs, durationFilter, o
         <Select aria-label="시청 여부" items={WATCH_ITEMS} value={prefs.watchFilter} onValueChange={(value) => onPrefsChange({ watchFilter: value })} />
         <div className="filter-pair">
           <Select
-            aria-label="음악 여부"
+            aria-label="영상 종류"
             items={CATEGORY_ITEMS}
-            value={prefs.categoryFilter}
+            value={hasApiKey ? prefs.categoryFilter : 'all'}
             onValueChange={(value) => onPrefsChange({ categoryFilter: value })}
+            disabled={!hasApiKey}
           />
           <Tooltip content={hasApiKey ? 'YouTube Data API로 카테고리 확인' : '설정에 API 키를 넣으면 쓸 수 있습니다'}>
             <Button variant="outline" onClick={onFetchCategories} disabled={!canFetchCategories} focusableWhenDisabled>

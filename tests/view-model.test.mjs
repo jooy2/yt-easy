@@ -7,7 +7,7 @@ import {
   createBuckets,
   findBucket,
   matchesCategory,
-  readMusic,
+  isMusicVideo,
   normalizeViewPrefs,
   sortItems,
 } from '../src/manager/lib/view-model.js';
@@ -108,16 +108,6 @@ describe('buildView', () => {
     assert.deepEqual(positions(buildView(baseInput({ categories, categoryFilter: 'other' })).items), [2, 3, 4, 5]);
   });
 
-  it('estimates music from the badge when the API has not looked a video up', () => {
-    const badged = ITEMS.map((entry, index) => ({ ...entry, musicBadge: [true, true, false, null, true][index] }));
-    // The API says video 2 is not music, which overrides its badge.
-    const categories = new Map([[ITEMS[1].videoId, '27']]);
-    const input = (categoryFilter) => baseInput({ items: badged, searchTexts: new Map(), categories, categoryFilter });
-
-    assert.deepEqual(positions(buildView(input('music')).items), [1, 5]);
-    assert.deepEqual(positions(buildView(input('other')).items), [2, 3, 4]);
-  });
-
   it('groups by channel with the largest channels first', () => {
     const { groups } = buildView(baseInput({ groupBy: 'channel' }));
 
@@ -155,13 +145,14 @@ describe('buildView', () => {
   });
 });
 
-describe('readMusic, matchesCategory, and normalizeViewPrefs', () => {
-  it('falls back to the badge when the API had no record of a video', () => {
-    const item = { videoId: 'aaaaaaaaaaa', musicBadge: true };
+describe('isMusicVideo, matchesCategory, and normalizeViewPrefs', () => {
+  it('counts only videos the API filed under Music as music', () => {
+    const item = { videoId: 'aaaaaaaaaaa' };
 
-    assert.deepEqual(readMusic(item, new Map([['aaaaaaaaaaa', '']])), { isMusic: true, source: 'badge' });
-    assert.deepEqual(readMusic(item, new Map([['aaaaaaaaaaa', '10']])), { isMusic: true, source: 'api' });
-    assert.deepEqual(readMusic({ videoId: 'bbbbbbbbbbb', musicBadge: null }, new Map()), { isMusic: false, source: null });
+    assert.equal(isMusicVideo(item, new Map([['aaaaaaaaaaa', '10']])), true);
+    assert.equal(isMusicVideo(item, new Map([['aaaaaaaaaaa', '27']])), false);
+    assert.equal(isMusicVideo(item, new Map([['aaaaaaaaaaa', '']])), false);
+    assert.equal(isMusicVideo(item, new Map()), false);
     assert.equal(matchesCategory('all', item, new Map()), true);
   });
 

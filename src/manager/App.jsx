@@ -23,7 +23,7 @@ import { addAll, readCoverage, removeAll, selectRange, toggleOne } from './lib/s
 import { createSnapshot, removeFromSnapshot } from './lib/snapshot.js';
 import * as store from './lib/store.js';
 import { prepareWatchLaterTab, runJob } from './lib/tab-bridge.js';
-import { buildSearchText, buildView, createBuckets, readMusic } from './lib/view-model.js';
+import { buildSearchText, buildView, createBuckets, isMusicVideo } from './lib/view-model.js';
 
 const IS_TAB_VIEW = new URLSearchParams(location.search).get('view') === 'tab';
 const ITEM_ROW_HEIGHT = 72;
@@ -71,7 +71,7 @@ export function App() {
     searchTexts,
     query: deferredQuery,
     durationFilter,
-    categoryFilter: prefs.categoryFilter,
+    categoryFilter: hasApiKey ? prefs.categoryFilter : 'all',
     watchFilter: prefs.watchFilter,
     categories,
     buckets,
@@ -90,7 +90,7 @@ export function App() {
   const filtersActive = query.trim() !== ''
     || durationFilter !== 'all'
     || prefs.watchFilter !== 'all'
-    || prefs.categoryFilter !== 'all';
+    || (hasApiKey && prefs.categoryFilter !== 'all');
 
   // A new grouping starts from all videos.
   useEffect(() => {
@@ -459,8 +459,6 @@ export function App() {
   };
 
   const renderRow = (row, layout) => {
-    const music = readMusic(row.item, categories);
-
     return (
       <VideoRow
         key={row.key}
@@ -468,8 +466,7 @@ export function App() {
         {...layout}
         selected={selected.has(row.item.videoId)}
         failure={failures.get(row.item.videoId)}
-        isMusic={music.isMusic}
-        musicSource={music.source}
+        isMusic={isMusicVideo(row.item, categories)}
         // Loading a video into the current tab could replace the Watch later
         // tab a running job works in.
         openDisabled={busy}
@@ -505,7 +502,7 @@ export function App() {
 
   const categoryNote = useMemo(() => {
     if (!hasApiKey) {
-      return '음악 여부는 재생시간 배지의 음표 표시로 추정합니다. 설정에 YouTube Data API 키를 넣으면 카테고리로 정확히 확인합니다.';
+      return '음악 필터는 YouTube Data API 키가 있어야 쓸 수 있습니다. 설정에서 키를 넣어 주세요.';
     }
 
     if (items.length === 0) {
@@ -513,7 +510,7 @@ export function App() {
     }
 
     const known = items.filter((item) => categories.get(item.videoId)).length;
-    const rest = known < items.length ? ' 나머지는 음표 표시로 추정하며, [카테고리 확인]으로 확인할 수 있습니다.' : '';
+    const rest = known < items.length ? ' 확인하지 않은 영상은 음악이 아닌 것으로 칩니다. [카테고리 확인]을 누르면 나머지를 확인합니다.' : '';
 
     return `카테고리 확인 ${formatCount(known)} / ${formatCount(items.length)}개.${rest}`;
   }, [hasApiKey, items, categories]);

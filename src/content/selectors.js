@@ -78,9 +78,6 @@
     // How far a video was watched, in percent, for the account.
     watchedBarKey: 'thumbnailOverlayProgressBarViewModel',
     legacyWatchedKey: 'thumbnailOverlayResumePlaybackRenderer',
-    // The icon YouTube puts on the length badge of music. It closely follows
-    // the Music category, but only the Data API gives the category itself.
-    musicBadgeImage: 'MUSIC',
     videoContentType: 'LOCKUP_CONTENT_TYPE_VIDEO',
     removeActionPrefix: 'ACTION_REMOVE_VIDEO',
 

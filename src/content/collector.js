@@ -244,16 +244,6 @@
     return clampPercent(bar.startPercent);
   });
 
-  const hasMusicBadge = (contentImage) => Boolean(findDeep(contentImage, (value) => {
-    const icon = value.thumbnailBadgeViewModel?.icon;
-
-    if (!icon) {
-      return null;
-    }
-
-    return findDeep(icon, (inner) => (inner.clientResource?.imageName === PAGE_DATA.musicBadgeImage ? true : null));
-  }));
-
   const readLockup = (lockup, listId) => {
     if (lockup.contentType && lockup.contentType !== PAGE_DATA.videoContentType) {
       return null;
@@ -285,7 +275,6 @@
         durationText,
         thumbnail: pickLargestImage(lockup.contentImage?.thumbnailViewModel?.image?.sources),
         watchedPercent: readWatchedPercent(lockup.contentImage),
-        musicBadge: hasMusicBadge(lockup.contentImage),
       },
       removeLabel: findRemoveLabel(metadata?.menuButton),
     };

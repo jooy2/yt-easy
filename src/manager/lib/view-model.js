@@ -84,30 +84,19 @@ export const findBucket = (buckets, seconds) => {
 
 export const buildSearchText = (item) => normalizeText(`${item.title}\n${item.channelName}`);
 
-// Whether a video is music, and how that is known: 'api' when the Data API
-// gave its category, 'badge' when estimated from the music note YouTube puts
-// on the length badge, or null when neither is available.
-export const readMusic = (item, categories) => {
-  const categoryId = categories.get(item.videoId);
+// Only the Data API knows a video's category, so a video it has not looked
+// up counts as not music.
+export const isMusicVideo = (item, categories) => categories.get(item.videoId) === MUSIC_CATEGORY_ID;
 
-  if (categoryId) {
-    return { isMusic: categoryId === MUSIC_CATEGORY_ID, source: 'api' };
-  }
-
-  if (typeof item.musicBadge === 'boolean') {
-    return { isMusic: item.musicBadge, source: 'badge' };
-  }
-
-  return { isMusic: false, source: null };
-};
-
+// 'music' keeps only music, 'other' keeps everything that is not known to be
+// music.
 export const matchesCategory = (filter, item, categories) => {
   if (filter === 'music') {
-    return readMusic(item, categories).isMusic;
+    return isMusicVideo(item, categories);
   }
 
   if (filter === 'other') {
-    return !readMusic(item, categories).isMusic;
+    return !isMusicVideo(item, categories);
   }
 
   return true;
