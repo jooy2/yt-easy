@@ -1,8 +1,9 @@
-import { Alert, Button, Dialog, NumberField, TextField } from 'neba';
+import { Alert, Button, Dialog, NumberField, TextField, TextLink } from 'neba';
 import { useEffect, useState } from 'react';
 
-import { locale, t } from '../../i18n/runtime.js';
+import { locale, t, tParts } from '../../i18n/runtime.js';
 import { SETTINGS_LIMITS, formatBounds, validateSettingsForm } from '../lib/settings.js';
+import { GOOGLE_PRIVACY_URL, YOUTUBE_TERMS_URL } from '../lib/video-info.js';
 
 const toForm = (settings) => ({
   boundsText: formatBounds(settings.durationBounds),
@@ -142,6 +143,12 @@ export function SettingsDialog({ open, settings, onClose, onSave }) {
           invalid={Boolean(errors.apiKey)}
           fullWidth
         />
+        <p className="hint">
+          {tParts('settings.api-terms', {
+            terms: <TextLink key="terms" href={YOUTUBE_TERMS_URL} newTab locale={locale}>{t('settings.youtube-terms')}</TextLink>,
+            privacy: <TextLink key="privacy" href={GOOGLE_PRIVACY_URL} newTab locale={locale}>{t('settings.google-privacy')}</TextLink>,
+          })}
+        </p>
         {message && <Alert color="danger" locale={locale}>{message}</Alert>}
         <button type="submit" hidden aria-hidden="true" tabIndex={-1} />
       </form>

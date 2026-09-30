@@ -111,7 +111,7 @@ Videos are removed in list order, one at a time. The job stops on its own when t
 The page does not show a video's category or its exact publish date and view count, so these come from the YouTube Data API and need an API key you create:
 
 1. In the [Google Cloud console](https://console.cloud.google.com/), create a project, enable **YouTube Data API v3**, and create an API key. Under the key's restrictions, allow only YouTube Data API v3, and leave the application restriction at none: the extension sends no referrer, so a website restriction would reject it.
-1. Paste the key into **Settings** > **YouTube Data API key** and save. Chrome then asks for access to `www.googleapis.com`; the extension does not request it before this point.
+1. Paste the key into **Settings** > **YouTube Data API key** and save. The lookup uses YouTube API Services, so using it means agreeing to the [YouTube Terms of Service](https://www.youtube.com/t/terms); the settings link to them and to the Google Privacy Policy. Chrome then asks for access to `www.googleapis.com`; the extension does not request it before this point.
 1. Click **Look up video info** in the filter row. The manager looks up 50 videos per request and remembers the results, so the next lookup only covers new videos. Looking up 5,000 videos takes 100 requests, which uses 100 units of the default daily quota of 10,000. The category names come from one more request.
 
 With the information in place:

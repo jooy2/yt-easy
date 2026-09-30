@@ -231,6 +231,7 @@
   "settings": {
     "api-key-desc": "Used only to look up categories, publish dates, and view counts. The key is kept in the extension storage of this Chrome profile, and saving it asks for access to www.googleapis.com. Save it empty to remove the key and the access.",
     "api-key-label": "YouTube Data API key (optional)",
+    "api-terms": "Looking up video info uses YouTube API Services. By using it, you agree to the {terms}. Google handles the data it receives under the {privacy}.",
     "bounds-desc": "Separate with commas. 5, 20, 60 gives under 5 min, 5–20 min, 20–60 min, and 60 min and over.",
     "bounds-label": "Length range bounds (minutes)",
     "delay-hint": "After each removal, the extension waits a random time in this range. It cannot be shorter than 1 second.",
@@ -244,9 +245,11 @@
     "error-delay-min": "The minimum pause must be from {min} to {max} seconds.",
     "error-delay-order": "The maximum pause cannot be shorter than the minimum.",
     "error-test-count": "The test mode count must be a whole number from 1 to {max}.",
+    "google-privacy": "Google Privacy Policy",
     "key-not-saved": "The API key was not saved, because access to www.googleapis.com was not allowed.",
     "saved": "Settings saved.",
-    "test-count-label": "Default count for test mode"
+    "test-count-label": "Default count for test mode",
+    "youtube-terms": "YouTube Terms of Service"
   },
   "sort": {
     "category": "Category",

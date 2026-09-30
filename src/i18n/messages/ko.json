@@ -231,6 +231,7 @@
   "settings": {
     "api-key-desc": "영상 종류, 게시일, 조회수를 가져올 때만 씁니다. 키는 이 Chrome 프로필의 확장 프로그램 저장소에 저장되고, 저장할 때 www.googleapis.com 접근 권한을 요청합니다. 비워 두고 저장하면 키와 권한을 지웁니다.",
     "api-key-label": "YouTube Data API 키 (선택)",
+    "api-terms": "영상 정보 가져오기는 YouTube API 서비스를 사용합니다. 이 기능을 사용하면 {terms}에 동의하게 됩니다. Google은 받은 데이터를 {privacy}에 따라 처리합니다.",
     "bounds-desc": "쉼표로 구분합니다. 5, 20, 60이면 5분 미만, 5–20분, 20–60분, 60분 이상으로 나눕니다.",
     "bounds-label": "재생시간 구간 경계 (분)",
     "delay-hint": "한 건을 삭제할 때마다 이 범위에서 무작위로 기다립니다. 1초보다 짧게는 설정할 수 없습니다.",
@@ -244,9 +245,11 @@
     "error-delay-min": "최소 간격은 {min}초에서 {max}초 사이여야 합니다.",
     "error-delay-order": "최대 간격은 최소 간격보다 짧을 수 없습니다.",
     "error-test-count": "테스트 모드 개수는 1부터 {max} 사이의 정수여야 합니다.",
+    "google-privacy": "Google 개인정보처리방침",
     "key-not-saved": "www.googleapis.com 접근 권한을 허용하지 않아 API 키를 저장하지 않았습니다.",
     "saved": "설정을 저장했습니다.",
-    "test-count-label": "테스트 모드 기본 개수"
+    "test-count-label": "테스트 모드 기본 개수",
+    "youtube-terms": "YouTube 서비스 약관"
   },
   "sort": {
     "category": "영상 종류순",

@@ -5,6 +5,11 @@ import { locale, t } from '../../i18n/runtime.js';
 
 export const GOOGLE_API_ORIGINS = ['https://www.googleapis.com/*'];
 
+// The YouTube API Services policies ask an app that uses them to link to
+// these two pages where the user turns the feature on.
+export const YOUTUBE_TERMS_URL = 'https://www.youtube.com/t/terms';
+export const GOOGLE_PRIVACY_URL = 'https://www.google.com/policies/privacy';
+
 const API_BASE = 'https://www.googleapis.com/youtube/v3';
 const BATCH_SIZE = 50;
 const BATCH_DELAY_MIN = 400;
