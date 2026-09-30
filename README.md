@@ -18,7 +18,7 @@ The YouTube Data API has returned an empty list for Watch later since 2016, so a
 - Shows how much of each video you have watched, and filters by it.
 - Selects videos one by one, a whole group at once, the whole list, or everything the current search and filters show.
 - Removes the selected videos one at a time, with a random pause between them, a progress bar, and a cancel button. Videos that could not be removed are marked in the list.
-- Saves the videos about to be removed as JSON and CSV before anything is removed.
+- Can save the videos about to be removed as JSON and CSV before anything is removed.
 - Offers a test mode that handles only the first few videos, and a dry run that finds the remove menu without clicking it.
 - Exports the whole list as JSON or CSV.
 - Tells music videos apart: estimated from the music note YouTube puts on the length badge, and confirmed by category if you supply a YouTube Data API key.
@@ -86,7 +86,7 @@ Clicking anywhere else on a row selects it, so opening a video never changes the
 1. The first time, turn on **드라이런**. It opens each video's menu and finds the remove entry without clicking it, which shows that removal works with your YouTube layout and language. Then turn on **테스트 모드** to remove only the first few videos, and check the result on YouTube.
 1. Click **삭제 시작**.
 
-Before removing anything, the manager saves the selected videos as `wl-delete-backup-<date>-<time>.json` and `.csv` in the `yt-easy` folder of your Downloads folder. It starts only after both files are saved.
+To keep a copy of what you remove, turn on **삭제 전에 대상 목록을 백업 파일로 저장** in the dialog. The manager then saves the selected videos as `wl-delete-backup-<date>-<time>.json` and `.csv` in the `yt-easy` folder of your Downloads folder, and starts removing only after both files are saved. The switch is off each time the dialog opens.
 
 The Watch later tab then comes to the front and shows a progress card. Keep that tab on screen until the job finishes: Chrome pauses pages in background tabs, and the removal pauses with them. Do not scroll or click on the page while it runs. You can cancel from the manager or from the card, and closing the manager cancels the job too.
 

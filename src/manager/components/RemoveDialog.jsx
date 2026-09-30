@@ -11,6 +11,7 @@ export function RemoveDialog({ open, items, defaultTestCount, onClose, onConfirm
   const [testMode, setTestMode] = useState(false);
   const [testCount, setTestCount] = useState(defaultTestCount);
   const [dryRun, setDryRun] = useState(false);
+  const [backup, setBackup] = useState(false);
   const cancelRef = useRef(null);
 
   useEffect(() => {
@@ -18,6 +19,7 @@ export function RemoveDialog({ open, items, defaultTestCount, onClose, onConfirm
       setTestMode(false);
       setTestCount(defaultTestCount);
       setDryRun(false);
+      setBackup(false);
     }
   }, [open, defaultTestCount]);
 
@@ -28,7 +30,7 @@ export function RemoveDialog({ open, items, defaultTestCount, onClose, onConfirm
       return;
     }
 
-    onConfirm({ targets: testMode ? items.slice(0, testCount) : items, dryRun });
+    onConfirm({ targets: testMode ? items.slice(0, testCount) : items, dryRun, backup: backup && !dryRun });
   };
 
   return (
@@ -81,7 +83,17 @@ export function RemoveDialog({ open, items, defaultTestCount, onClose, onConfirm
           checked={dryRun}
           onCheckedChange={setDryRun}
         />
-        <p className="hint">삭제하기 전에 대상 목록을 JSON과 CSV 파일로 다운로드 폴더의 <code>yt-easy</code> 폴더에 저장합니다. 두 파일이 모두 저장돼야 삭제를 시작합니다.</p>
+        <Switch
+          label="삭제 전에 대상 목록을 백업 파일로 저장"
+          description={(
+            <>
+              JSON과 CSV 파일을 다운로드 폴더의 <code>yt-easy</code> 폴더에 저장하고, 두 파일이 모두 저장된 뒤에 삭제를 시작합니다.
+            </>
+          )}
+          checked={backup && !dryRun}
+          onCheckedChange={setBackup}
+          disabled={dryRun}
+        />
         <p className="hint">진행하는 동안 나중에 볼 동영상 탭이 앞으로 나옵니다. 끝날 때까지 그 탭을 화면에 띄워 두세요.</p>
       </div>
     </Dialog>

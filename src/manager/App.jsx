@@ -309,8 +309,8 @@ export function App() {
     setSelected((current) => removeAll(current, removedIds));
   };
 
-  const runRemoval = async ({ targets, dryRun }) => {
-    const controller = start({ kind: 'remove', label: dryRun ? 'YouTube 탭을 준비하는 중…' : '삭제 대상을 백업 파일로 저장하는 중…' });
+  const runRemoval = async ({ targets, dryRun, backup }) => {
+    const controller = start({ kind: 'remove', label: backup ? '삭제 대상을 백업 파일로 저장하는 중…' : 'YouTube 탭을 준비하는 중…' });
     const removed = new Set();
     const verb = dryRun ? '확인' : '삭제';
     let currentTitle = '';
@@ -320,7 +320,7 @@ export function App() {
     setMessage('');
 
     try {
-      if (!dryRun) {
+      if (backup) {
         const stamp = formatFileStamp(new Date());
 
         await saveList({ items: targets, prefix: 'wl-delete-backup', stamp, format: 'json', kind: 'delete-backup' });

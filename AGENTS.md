@@ -51,7 +51,7 @@ These are not style preferences. A change that breaks one of them does not get m
 1. **Touch only the user's own Watch later list.** Do not collect or send anything else, and do not add analytics or remote logging.
 1. **Remove through the page's own menu.** Deletion is UI automation on the Watch later page by design. Verify each removal by checking that the row is gone, and stop the job when the page does not behave as expected.
 1. **Keep permissions minimal.** A new permission needs a reason. Hosts that only some users need are `optional_host_permissions`, requested when the feature is turned on.
-1. **Back up before removing.** A removal starts only after the JSON and CSV backups are saved.
+1. **Offer a backup before removing.** The removal dialog has a backup switch, off by default. When it is on, the removal starts only after the JSON and CSV backups are saved.
 1. **The UI is Korean.** Everything a user sees is written in Korean. Code, comments, and documents are in English.
 1. **Build the manager from neba.** Use [neba](https://neba.cdget.com) components before writing a control by hand, and style custom parts with neba's CSS tokens (`--neba-*`) so light and dark mode keep working. Logic that does not need React belongs in `src/manager/lib/`, where the tests can reach it.
 
