@@ -41,3 +41,6 @@ node_modules/
 Thumbs.db
 [Dd]esktop.ini
 $RECYCLE.BIN/
+
+# Build output
+dist/

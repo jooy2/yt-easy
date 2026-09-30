@@ -1,0 +1,21 @@
+{
+  "name": "yt-easy",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A Chrome extension that sorts, exports, and bulk-removes videos in your YouTube Watch later list.",
+  "type": "module",
+  "author": "CDGet (https://cdget.com)",
+  "license": "MIT",
+  "homepage": "https://github.com/jooy2/yt-easy",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

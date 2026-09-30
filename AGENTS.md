@@ -8,12 +8,13 @@ A Chrome extension (Manifest V3) for managing the signed-in account's YouTube "W
 
 The YouTube Data API returns an empty list for Watch later, so the extension works in the signed-in browser instead: it reads the Watch later page and clicks through its menus the way a person would.
 
-There is no build step and no dependency. The folder is loaded as it is with **Load unpacked**. Tests run with Node.js's built-in test runner.
+`npm run build` bundles the manager page with esbuild and writes the loadable extension to `dist/`, which is what **Load unpacked** points at. `dist/` is generated and never committed. Tests run with Node.js's built-in test runner (`npm test`).
 
 ## Layout
 
 ```text
 manifest.json          Permissions, content scripts, side panel
+scripts/build.mjs      Builds dist/: bundles the manager, copies everything else
 icons/                 icon.svg is the source; the PNGs are rendered from it
 src/background.js      Opens the side panel from the toolbar icon
 src/content/           Content scripts on www.youtube.com (classic scripts)
@@ -24,8 +25,9 @@ src/content/           Content scripts on www.youtube.com (classic scripts)
   remover.js             Removes videos through each row's menu
   overlay.js             Progress card shown on the Watch later page
   main.js                Ping and job messages from the manager
-src/manager/           Side panel page (ES modules), also openable in a tab
+src/manager/           Side panel page, bundled by esbuild; also openable in a tab
 tests/                 node --test; fixtures are synthetic
+dist/                  Build output, loaded into Chrome (not committed)
 ```
 
 ## How the pieces talk
@@ -50,7 +52,11 @@ These are not style preferences. A change that breaks one of them does not get m
 ## Checking a change
 
 ```bash
-node --test
+npm run build
+```
+
+```bash
+npm test
 ```
 
 The collector tests load the content scripts into a `vm` context with synthetic page data shaped like YouTube's. When YouTube changes its data, update the fixtures in `tests/helpers/fixtures.mjs` together with the parser.

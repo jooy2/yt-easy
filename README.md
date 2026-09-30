@@ -32,13 +32,25 @@ The interface is in Korean.
 
 ## Install
 
-1. Download or clone this repository.
+The extension is built from source before it is loaded. You need [Node.js](https://nodejs.org/) 22.12 or newer.
+
+1. Clone this repository and open a terminal in it.
+1. Install the dependencies and build the extension. The build writes the loadable extension to `dist/`.
+
+   ```bash
+   npm install
+   ```
+
+   ```bash
+   npm run build
+   ```
+
 1. Open `chrome://extensions` in Chrome 116 or newer.
 1. Turn on **Developer mode** in the top-right corner.
-1. Click **Load unpacked** and select the repository folder, the one that contains `manifest.json`.
+1. Click **Load unpacked** and select the `dist` folder inside the repository.
 1. Pin the extension from the puzzle icon in the toolbar, so that its icon stays at hand.
 
-To update, pull the latest changes, click the reload button on the extension's card in `chrome://extensions`, and reload any open YouTube tab.
+To update, pull the latest changes, run `npm install` and `npm run build` again, click the reload button on the extension's card in `chrome://extensions`, and reload any open YouTube tab.
 
 ## Usage
 
@@ -122,13 +134,19 @@ Videos in category 10 (Music) get a **음악** badge, and the **카테고리** f
 
 ## Development
 
-There is no build step. Edit the files, click the reload button of the extension in `chrome://extensions`, and reload the YouTube tab.
-
-The tests use Node.js's built-in test runner and need no packages. They are run with Node.js 24, as in CI.
+`npm run watch` rebuilds `dist/` whenever a file changes, without minifying and with source maps. After a rebuild, click the reload button of the extension in `chrome://extensions`, and reload the YouTube tab when a content script changed.
 
 ```bash
-node --test
+npm run watch
 ```
+
+The tests use Node.js's built-in test runner. They are run with Node.js 24, as in CI.
+
+```bash
+npm test
+```
+
+`dist/THIRD_PARTY_NOTICES.txt` lists the packages bundled into the build, with their licenses.
 
 [AGENTS.md](AGENTS.md) describes the layout and the rules a change has to follow.
 

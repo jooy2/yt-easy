@@ -9,10 +9,10 @@ Please read the caveats below to ensure a fast merge.
 You should familiarize yourself with the files `README.md`, `CONTRIBUTING.md`, and `CODE_OF_CONDUCT.md` in the root of your project.
 
 - If an issue has been created for this, add `(fixes #{ISSUE_NUMBER})` to the end of the commit description. In `{ISSUE_NUMBER}`, please include the relevant issue number.
-- Run `node --test` and make sure every test passes.
+- Run `npm run build` and `npm test`, and make sure both succeed.
 - Load the extension unpacked and try the change on the Watch later page. Say in the description what you tried.
 - Keep YouTube-specific selectors, data keys, and menu labels in `src/content/selectors.js`.
-- Do not add a build step, a dependency, or a permission without explaining why in the description.
+- Do not add a package or a permission without explaining why in the description, and do not commit `dist/`.
 - Removal must stay at a person's pace, and the extension must not read anything beyond your own Watch later list.
 - If this PR is not yet complete, keep the PR in draft status. If it's no longer valid, close the PR with an explanation.
 
