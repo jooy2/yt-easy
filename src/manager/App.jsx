@@ -666,7 +666,8 @@ export function App() {
           <EmptyState reason={emptyReason} busy={busy} listTitle={sourceTitle} onScan={handleScan} />
         ) : grouped ? (
           <Panes className="group-panes" resizable handleLabel="그룹 목록 너비 조절" locale="ko">
-            <Pane defaultSize="34%" minSize={110} maxSize="60%">
+            {/* neba reads a bare number as a percentage, so pixel limits are strings. */}
+            <Pane defaultSize="34%" minSize="110px" maxSize="60%">
               <GroupRail
                 grouping={grouping}
                 channelOrder={prefs.channelOrder}
@@ -677,7 +678,7 @@ export function App() {
                 onSelect={setActiveGroup}
               />
             </Pane>
-            <Pane minSize={180}>{listPane}</Pane>
+            <Pane minSize="180px">{listPane}</Pane>
           </Panes>
         ) : (
           listPane
