@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "yt-easy",
+  "version": "0.1.0",
+  "description": "YouTube '나중에 볼 동영상' 목록을 분류하고, 여러 개를 골라 한 번에 삭제합니다.",
+  "minimum_chrome_version": "116",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_title": "나중에 볼 동영상 관리",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "side_panel": {
+    "default_path": "src/manager/manager.html"
+  },
+  "permissions": ["storage", "sidePanel", "downloads"],
+  "host_permissions": ["https://www.youtube.com/*"],
+  "optional_host_permissions": ["https://www.googleapis.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": [
+        "src/content/selectors.js",
+        "src/content/util.js",
+        "src/content/page.js",
+        "src/content/collector.js",
+        "src/content/remover.js",
+        "src/content/overlay.js",
+        "src/content/main.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
