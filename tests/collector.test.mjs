@@ -84,7 +84,18 @@ describe('collector.readBrowseData', () => {
       durationSeconds: 3723,
       durationText: '1:02:03',
       thumbnail: `https://i.ytimg.com/vi/${videoId(1)}/hqdefault.jpg?size=large`,
+      watchedPercent: null,
     }]);
+  });
+
+  it('reads how much of a video was watched, but not a segment bar', () => {
+    const data = initialData([
+      lockup({ videoId: videoId(1), watched: 45 }),
+      lockup({ videoId: videoId(2), watched: 100 }),
+      lockup({ videoId: videoId(3), watched: 30, segmented: true }),
+    ]);
+
+    assert.deepEqual(plain(collector.readBrowseData(data)).items.map((item) => item.watchedPercent), [45, 100, null]);
   });
 
   it('ignores entries of other lists and their continuation', () => {
@@ -143,6 +154,7 @@ describe('collector.readBrowseData', () => {
         lengthSeconds: '754',
         lengthText: { simpleText: '12:34' },
         thumbnail: { thumbnails: [{ url: 'https://i.ytimg.com/vi/x/1.jpg', width: 120 }] },
+        thumbnailOverlays: [{ thumbnailOverlayResumePlaybackRenderer: { percentDurationWatched: 30 } }],
         menu: {
           menuRenderer: {
             items: [{
@@ -166,6 +178,7 @@ describe('collector.readBrowseData', () => {
       durationSeconds: 754,
       durationText: '12:34',
       thumbnail: 'https://i.ytimg.com/vi/x/1.jpg',
+      watchedPercent: 30,
     });
   });
 });

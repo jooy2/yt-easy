@@ -14,6 +14,13 @@ const SORT_ITEMS = [
   { value: 'channel', label: '채널명순' },
 ];
 
+const WATCH_ITEMS = [
+  { value: 'all', label: '시청 여부 전체' },
+  { value: 'unwatched', label: '안 본 영상' },
+  { value: 'partial', label: '보다 만 영상' },
+  { value: 'watched', label: '다 본 영상' },
+];
+
 const CATEGORY_ITEMS = [
   { value: 'all', label: '모든 카테고리' },
   { value: 'music', label: '음악' },
@@ -54,6 +61,7 @@ export function FilterBar({ open, query, onQueryChange, prefs, durationFilter, o
           </Tooltip>
         </div>
         <Select aria-label="길이" items={durationItems} value={durationFilter} onValueChange={(value) => onPrefsChange({ durationFilter: value })} />
+        <Select aria-label="시청 여부" items={WATCH_ITEMS} value={prefs.watchFilter} onValueChange={(value) => onPrefsChange({ watchFilter: value })} />
         <div className="filter-pair">
           <Select
             aria-label="카테고리"

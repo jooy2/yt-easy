@@ -26,6 +26,7 @@ export const sanitizeItem = (raw, position) => {
   }
 
   const seconds = raw.durationSeconds;
+  const watched = raw.watchedPercent;
 
   return {
     position,
@@ -36,6 +37,7 @@ export const sanitizeItem = (raw, position) => {
     durationSeconds: Number.isInteger(seconds) && seconds >= 0 ? seconds : null,
     durationText: clip(raw.durationText, 20),
     thumbnail: isThumbnailUrl(raw.thumbnail) ? raw.thumbnail : `https://i.ytimg.com/vi/${raw.videoId}/mqdefault.jpg`,
+    watchedPercent: Number.isInteger(watched) && watched >= 0 && watched <= 100 ? watched : null,
   };
 };
 

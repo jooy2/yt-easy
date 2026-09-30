@@ -90,6 +90,16 @@ describe('buildView', () => {
     assert.deepEqual(positions(buildView(baseInput({ durationFilter: 'unknown' })).items), [3]);
   });
 
+  it('filters by how much was watched', () => {
+    const watched = ITEMS.map((entry, index) => ({ ...entry, watchedPercent: [null, 0, 40, 90, 100][index] }));
+    const input = (watchFilter) => baseInput({ items: watched, searchTexts: new Map(), watchFilter });
+
+    assert.deepEqual(positions(buildView(input('unwatched')).items), [1, 2]);
+    assert.deepEqual(positions(buildView(input('partial')).items), [3]);
+    assert.deepEqual(positions(buildView(input('watched')).items), [4, 5]);
+    assert.deepEqual(positions(buildView(input('all')).items), [1, 2, 3, 4, 5]);
+  });
+
   it('filters by music category', () => {
     const categories = new Map([[ITEMS[0].videoId, '10'], [ITEMS[1].videoId, '27'], [ITEMS[2].videoId, '']]);
 
@@ -149,6 +159,7 @@ describe('matchesCategory and normalizeViewPrefs', () => {
       sortDir: 'desc',
       durationFilter: 'lt-5',
       categoryFilter: 'all',
+      watchFilter: 'all',
       filtersOpen: true,
     });
   });

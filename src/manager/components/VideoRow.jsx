@@ -1,4 +1,4 @@
-import { Checkbox, Chip, IconButton, Tooltip } from 'neba';
+import { Checkbox, Chip, IconButton, Tooltip, VisuallyHidden } from 'neba';
 import { memo } from 'react';
 
 import { formatDuration } from '../lib/format.js';
@@ -54,22 +54,21 @@ export const VideoRow = memo(function VideoRow({
       onMouseDown={handleMouseDown}
     >
       <Checkbox checked={selected} onCheckedChange={() => onSelect(item.videoId, { range: false })} aria-label={`선택: ${title}`} />
-      <img
-        className="video-thumb"
-        src={item.thumbnail}
-        alt=""
-        width="96"
-        height="54"
-        loading="lazy"
-        decoding="async"
-        referrerPolicy="no-referrer"
-      />
+      <div className="video-thumb">
+        <img src={item.thumbnail} alt="" width="96" height="54" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
+        {item.watchedPercent > 0 && (
+          <span className="video-progress" aria-hidden="true">
+            <span style={{ width: `${item.watchedPercent}%` }} />
+          </span>
+        )}
+      </div>
       <div className="video-text">
         <p className="video-title" title={item.title}>{title}</p>
         <div className="video-meta">
           <span className="video-channel">{item.channelName || '채널 정보 없음'}</span>
           <span className="video-number">{item.durationText || formatDuration(item.durationSeconds) || '길이 정보 없음'}</span>
           <span className="video-number">#{item.position}</span>
+          {item.watchedPercent > 0 && <VisuallyHidden>{item.watchedPercent}% 시청</VisuallyHidden>}
           {isMusic && <Chip size="xs" color="success" variant="outline">음악</Chip>}
           {failure && <Chip size="xs" color="danger" variant="outline" title={failure}>삭제 실패</Chip>}
         </div>

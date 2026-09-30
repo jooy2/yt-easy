@@ -3,11 +3,16 @@
 export const MUSIC_CATEGORY_ID = '10';
 export const UNKNOWN_BUCKET_KEY = 'unknown';
 
+// A video counts as watched from this share of its length. YouTube keeps the
+// red bar short of full when the end credits were skipped.
+export const WATCHED_PERCENT = 90;
+
 export const VIEW_OPTIONS = Object.freeze({
   groupBy: ['none', 'channel', 'duration'],
   sortBy: ['position', 'duration', 'channel'],
   sortDir: ['asc', 'desc'],
   categoryFilter: ['all', 'music', 'other', 'unknown'],
+  watchFilter: ['all', 'unwatched', 'partial', 'watched'],
 });
 
 export const DEFAULT_VIEW_PREFS = Object.freeze({
@@ -16,6 +21,7 @@ export const DEFAULT_VIEW_PREFS = Object.freeze({
   sortDir: 'asc',
   durationFilter: 'all',
   categoryFilter: 'all',
+  watchFilter: 'all',
   filtersOpen: true,
 });
 
@@ -94,7 +100,26 @@ export const matchesCategory = (filter, categoryId) => {
   return true;
 };
 
-export const filterItems = ({ items, searchTexts, query, durationFilter, categoryFilter, categories, buckets }) => {
+// `percent` is null for a video without a red bar.
+export const matchesWatch = (filter, percent) => {
+  const watched = percent ?? 0;
+
+  if (filter === 'unwatched') {
+    return watched === 0;
+  }
+
+  if (filter === 'partial') {
+    return watched > 0 && watched < WATCHED_PERCENT;
+  }
+
+  if (filter === 'watched') {
+    return watched >= WATCHED_PERCENT;
+  }
+
+  return true;
+};
+
+export const filterItems = ({ items, searchTexts, query, durationFilter, categoryFilter, watchFilter = 'all', categories, buckets }) => {
   const terms = normalizeText(query).split(/\s+/).filter(Boolean);
   const bucket = durationFilter === 'all' ? null : buckets.find((entry) => entry.key === durationFilter);
 
@@ -108,6 +133,10 @@ export const filterItems = ({ items, searchTexts, query, durationFilter, categor
     }
 
     if (bucket && findBucket(buckets, item.durationSeconds) !== bucket) {
+      return false;
+    }
+
+    if (!matchesWatch(watchFilter, item.watchedPercent)) {
       return false;
     }
 

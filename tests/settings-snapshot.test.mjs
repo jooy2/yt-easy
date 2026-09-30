@@ -58,9 +58,9 @@ describe('settings', () => {
 
 describe('snapshot', () => {
   const raw = [
-    { videoId: 'aaaaaaaaaaa', title: 'A', channelName: 'X', durationSeconds: 10, thumbnail: 'https://i.ytimg.com/vi/aaaaaaaaaaa/hq.jpg' },
+    { videoId: 'aaaaaaaaaaa', title: 'A', channelName: 'X', durationSeconds: 10, thumbnail: 'https://i.ytimg.com/vi/aaaaaaaaaaa/hq.jpg', watchedPercent: 45 },
     { videoId: 'not-an-id', title: 'Invalid' },
-    { videoId: 'bbbbbbbbbbb', title: 'B', durationSeconds: -3, thumbnail: 'javascript:alert(1)' },
+    { videoId: 'bbbbbbbbbbb', title: 'B', durationSeconds: -3, thumbnail: 'javascript:alert(1)', watchedPercent: 140 },
     { videoId: 'aaaaaaaaaaa', title: 'Repeated' },
     { videoId: 'ccccccccccc', title: 'C', durationSeconds: 1.5, thumbnail: 'https://evil.example/ytimg.com.jpg' },
   ];
@@ -80,6 +80,8 @@ describe('snapshot', () => {
     assert.equal(third.thumbnail, 'https://i.ytimg.com/vi/ccccccccccc/mqdefault.jpg');
     assert.equal(second.durationSeconds, null);
     assert.equal(third.durationSeconds, null);
+    assert.equal(first.watchedPercent, 45);
+    assert.equal(second.watchedPercent, null);
   });
 
   it('renumbers the list after a removal', () => {

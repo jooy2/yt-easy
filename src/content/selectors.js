@@ -36,6 +36,11 @@
       'ytd-thumbnail-overlay-time-status-renderer #text',
       '.badge-shape-wiz__text',
     ].join(', '),
+    // The red bar under a thumbnail; its width is how much was watched.
+    itemWatchedBar: [
+      '.ytThumbnailOverlayProgressBarHostWatchedProgressBarSegment',
+      'ytd-thumbnail-overlay-resume-playback-renderer #progress',
+    ].join(', '),
 
     // The "more actions" button of one row.
     itemMenuButton: [
@@ -70,6 +75,9 @@
       legacy: 'playlistVideoRenderer',
     },
     continuationKeys: ['continuationItemViewModel', 'continuationItemRenderer'],
+    // How far a video was watched, in percent, for the account.
+    watchedBarKey: 'thumbnailOverlayProgressBarViewModel',
+    legacyWatchedKey: 'thumbnailOverlayResumePlaybackRenderer',
     videoContentType: 'LOCKUP_CONTENT_TYPE_VIDEO',
     removeActionPrefix: 'ACTION_REMOVE_VIDEO',
 

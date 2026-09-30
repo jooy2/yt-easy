@@ -19,6 +19,8 @@ export const lockup = ({
   duration = '4:05',
   listId = 'WL',
   contentType = 'LOCKUP_CONTENT_TYPE_VIDEO',
+  watched = null,
+  segmented = false,
 }) => ({
   lockupViewModel: {
     contentId: videoId,
@@ -32,7 +34,14 @@ export const lockup = ({
           ],
         },
         overlays: [
-          { thumbnailBottomOverlayViewModel: { badges: [{ thumbnailBadgeViewModel: { text: duration } }] } },
+          {
+            thumbnailBottomOverlayViewModel: {
+              ...(watched == null
+                ? {}
+                : { progressBar: { thumbnailOverlayProgressBarViewModel: { startPercent: watched, enableSegmentView: segmented } } }),
+              badges: [{ thumbnailBadgeViewModel: { text: duration } }],
+            },
+          },
           {
             // The hover button also carries a remove action, with a label
             // that is not the menu entry. It must not be picked up.

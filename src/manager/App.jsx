@@ -72,6 +72,7 @@ export function App() {
     query: deferredQuery,
     durationFilter,
     categoryFilter: hasApiKey ? prefs.categoryFilter : 'all',
+    watchFilter: prefs.watchFilter,
     categories,
     buckets,
     groupBy: prefs.groupBy,
@@ -86,7 +87,10 @@ export function App() {
   const shownIds = useMemo(() => shownItems.map((item) => item.videoId), [shownItems]);
   const shownRows = useMemo(() => shownItems.map((item) => ({ key: item.videoId, item })), [shownItems]);
   const shownSeconds = useMemo(() => shownItems.reduce((sum, item) => sum + (item.durationSeconds ?? 0), 0), [shownItems]);
-  const filtersActive = query.trim() !== '' || durationFilter !== 'all' || (hasApiKey && prefs.categoryFilter !== 'all');
+  const filtersActive = query.trim() !== ''
+    || durationFilter !== 'all'
+    || prefs.watchFilter !== 'all'
+    || (hasApiKey && prefs.categoryFilter !== 'all');
 
   // A new grouping starts from all videos.
   useEffect(() => {
@@ -543,7 +547,7 @@ export function App() {
           rows={shownRows}
           getHeight={getRowHeight}
           renderRow={renderRow}
-          resetKey={`${deferredQuery}|${durationFilter}|${prefs.categoryFilter}|${prefs.groupBy}|${prefs.sortBy}|${prefs.sortDir}|${activeGroup}`}
+          resetKey={`${deferredQuery}|${durationFilter}|${prefs.categoryFilter}|${prefs.watchFilter}|${prefs.groupBy}|${prefs.sortBy}|${prefs.sortDir}|${activeGroup}`}
         />
       )}
     </div>

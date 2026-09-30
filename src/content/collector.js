@@ -224,6 +224,26 @@
     return texts.find((text) => util.parseDurationText(text) != null) ?? texts[0] ?? '';
   };
 
+  const clampPercent = (value) => {
+    const number = Number(value);
+
+    return Number.isFinite(number) ? Math.max(0, Math.min(100, Math.round(number))) : null;
+  };
+
+  // The red bar YouTube draws under the thumbnail of a video you started. A
+  // segmented bar marks a part of the video rather than what was watched, so
+  // it is skipped. No bar means the video was not watched, or YouTube keeps
+  // no watch history for the account.
+  const readWatchedPercent = (contentImage) => findDeep(contentImage, (value) => {
+    const bar = value[PAGE_DATA.watchedBarKey];
+
+    if (!bar || bar.enableSegmentView) {
+      return null;
+    }
+
+    return clampPercent(bar.startPercent);
+  });
+
   const readLockup = (lockup, listId) => {
     if (lockup.contentType && lockup.contentType !== PAGE_DATA.videoContentType) {
       return null;
@@ -254,6 +274,7 @@
         durationSeconds: util.parseDurationText(durationText),
         durationText,
         thumbnail: pickLargestImage(lockup.contentImage?.thumbnailViewModel?.image?.sources),
+        watchedPercent: readWatchedPercent(lockup.contentImage),
       },
       removeLabel: findRemoveLabel(metadata?.menuButton),
     };
@@ -276,6 +297,7 @@
         durationSeconds: Number.isFinite(lengthSeconds) ? lengthSeconds : util.parseDurationText(durationText),
         durationText,
         thumbnail: pickLargestImage(renderer.thumbnail?.thumbnails),
+        watchedPercent: findDeep(renderer.thumbnailOverlays, (value) => clampPercent(value[PAGE_DATA.legacyWatchedKey]?.percentDurationWatched)),
       },
       removeLabel: findRemoveLabel(renderer.menu),
     };
@@ -564,6 +586,7 @@
 
     const titleElement = element.querySelector(SELECTORS.itemTitle);
     const durationText = util.textOf(element.querySelector(SELECTORS.itemDuration));
+    const watchedBar = element.querySelector(SELECTORS.itemWatchedBar);
 
     return {
       videoId,
@@ -572,6 +595,7 @@
       durationSeconds: util.parseDurationText(durationText),
       durationText,
       thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+      watchedPercent: watchedBar ? clampPercent(Number.parseFloat(watchedBar.style.width)) : null,
     };
   };
 

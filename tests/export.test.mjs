@@ -13,6 +13,7 @@ const ITEM = {
   durationSeconds: 245,
   durationText: '4:05',
   thumbnail: 'https://i.ytimg.com/vi/abcdefghijk/hqdefault.jpg',
+  watchedPercent: 45,
 };
 
 describe('CSV', () => {
@@ -35,8 +36,8 @@ describe('CSV', () => {
     const lines = csv.split('\r\n');
 
     assert.ok(csv.startsWith('﻿'));
-    assert.equal(lines[0], '﻿position,video_id,title,channel_name,channel_id,duration_seconds,duration,category_id,url,thumbnail');
-    assert.equal(lines[1], `1,abcdefghijk,"Title, with ""quotes""",채널,UCchannel,245,4:05,10,https://www.youtube.com/watch?v=abcdefghijk,${ITEM.thumbnail}`);
+    assert.equal(lines[0], '﻿position,video_id,title,channel_name,channel_id,duration_seconds,duration,category_id,watched_percent,url,thumbnail');
+    assert.equal(lines[1], `1,abcdefghijk,"Title, with ""quotes""",채널,UCchannel,245,4:05,10,45,https://www.youtube.com/watch?v=abcdefghijk,${ITEM.thumbnail}`);
     assert.equal(lines[2], '');
   });
 });
@@ -51,6 +52,7 @@ describe('JSON', () => {
     assert.equal(json.count, 1);
     assert.equal(json.items[0].url, 'https://www.youtube.com/watch?v=abcdefghijk');
     assert.equal(json.items[0].categoryId, null);
+    assert.equal(json.items[0].watchedPercent, 45);
   });
 });
 

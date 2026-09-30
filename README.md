@@ -15,6 +15,7 @@ The YouTube Data API has returned an empty list for Watch later since 2016, so a
 - Scans the whole list, including lists of several thousand videos: video ID, title, channel name, channel ID, length, thumbnail, and position in the list.
 - Groups the list by channel or by length range, with ranges you set yourself.
 - Searches titles and channel names, and sorts by list order, length, or channel name.
+- Shows how much of each video you have watched, and filters by it.
 - Selects videos one by one, a whole group at once, the whole list, or everything the current search and filters show.
 - Removes the selected videos one at a time, with a random pause between them, a progress bar, and a cancel button. Videos that could not be removed are marked in the list.
 - Saves the videos about to be removed as JSON and CSV before anything is removed.
@@ -68,6 +69,7 @@ The stored list does not follow changes you make on YouTube. Scan again after yo
 - **보기** groups the list by channel or by length. The groups appear as tabs down the left side, with the channels that have the most videos first, and choosing one shows only its videos on the right. Drag the line between the two to resize them, and use the arrow keys to move between groups.
 - **정렬** sorts by list order (**추가순**), length, or channel name. The button next to it switches between ascending and descending.
 - **길이** shows a single length range. Change the ranges in **설정**.
+- **시청 여부** narrows the list by how much of each video you have watched: **안 본 영상**, **보다 만 영상** (under 90%), or **다 본 영상** (90% or more). The amount comes from the red bar YouTube draws under a thumbnail, and the rows show the same bar. It follows your YouTube watch history, so with the history paused or turned off, every video counts as not watched.
 - The search box matches every word you type against titles and channel names.
 - The filter button at the top folds the search box and the options away, so the list gets more room. A dot on the button shows that a search or a filter still narrows the list.
 
@@ -126,7 +128,7 @@ Videos in category 10 (Music) get a **음악** badge, and the **카테고리** f
 ## Privacy
 
 - Everything the extension keeps stays in your Chrome profile. It has no server of its own.
-- Requests to YouTube are the ones the Watch later page itself makes for your own list, sent from the YouTube tab.
+- Requests to YouTube are the ones the Watch later page itself makes for your own list, sent from the YouTube tab. How much of a video you watched is part of that list; the extension does not read your watch history.
 - With an API key, the IDs of the videos in your list are sent to the YouTube Data API to look up their categories, and nothing else is.
 - The API key is stored in plain text in the extension's storage, like any other setting. [SECURITY.md](SECURITY.md) has the details.
 
