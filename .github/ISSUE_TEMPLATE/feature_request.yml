@@ -1,0 +1,23 @@
+name: 'Feature request'
+description: Suggest a new feature or a change to an existing one.
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before creating an issue, please read the following:
+
+        - Search to see if the same request already exists, and keep the title concise and accurate so that it's easy for others to understand and search for.
+        - Please create a separate issue for each type of issue.
+        - Please be as detailed as possible and write in English so that we can handle your issue quickly.
+        - yt-easy works at the pace of a person and only touches your own Watch later list. Requests that go against that will be declined.
+  - type: textarea
+    attributes:
+      label: Describe the feature
+      description: What should the extension do, and where in the manager would you expect it?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Why do you need it?
+      description: Describe the situation that made you want this feature.

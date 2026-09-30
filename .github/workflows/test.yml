@@ -1,0 +1,26 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Check syntax and run unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Check that the manifest is valid JSON
+        run: node -e "JSON.parse(require('node:fs').readFileSync('manifest.json', 'utf8'))"
+      - name: Check the syntax of every script
+        run: find src -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Run unit tests
+        run: node --test

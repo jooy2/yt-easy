@@ -1,0 +1,53 @@
+name: 'Bug report'
+description: Report something in yt-easy that does not work as described.
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before creating an issue, please read the following:
+
+        - Read the `README.md` in the repository root, including the troubleshooting section.
+        - Search to see if the same issue already exists, and keep the title concise and accurate so that it's easy for others to understand and search for.
+        - Please create a separate issue for each type of issue.
+        - Please be as detailed as possible and write in English so that we can handle your issue quickly.
+        - Do not paste your Watch later list, an API key, or cookies into the issue.
+  - type: dropdown
+    attributes:
+      label: Which part is affected?
+      options:
+        - Collecting the list
+        - Grouping, search, or sorting
+        - Removing videos
+        - Export or backup files
+        - Music category lookup
+        - Settings
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Describe the problem
+      description: |
+        Describe what you did, what you expected, and what happened instead. Include the message the extension showed, and any error from the console of the Watch later tab or the manager. A screenshot helps when the page layout is involved; crop out anything personal.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Chrome version
+      description: From `chrome://version`.
+      placeholder: '154.0.8037.93'
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: YouTube interface language
+      description: The removal step reads menu labels, so the language matters.
+      placeholder: 'Korean'
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: yt-easy version
+      description: The `version` in `manifest.json`, or the commit you installed from.
+      placeholder: '0.1.0'

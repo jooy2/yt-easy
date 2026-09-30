@@ -1,0 +1,23 @@
+# Normalize line endings for text, and keep binaries untouched.
+* text=auto eol=lf
+
+# Source
+*.js   text eol=lf
+*.mjs  text eol=lf
+*.html text eol=lf
+*.css  text eol=lf
+*.json text eol=lf
+
+# Documents and configuration
+*.md   text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.svg  text eol=lf
+
+# Images
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
