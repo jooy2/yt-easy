@@ -35,7 +35,7 @@ const getRowHeight = (row) => (row.type === 'group' ? GROUP_ROW_HEIGHT : ITEM_RO
 
 const describeScanProgress = ({ count, paused }) => (paused
   ? `${formatCount(count)}개까지 읽었습니다. YouTube 탭이 화면에 보이면 이어서 진행합니다.`
-  : `${formatCount(count)}개 수집 중…`);
+  : `${formatCount(count)}개 스캔 중…`);
 
 export function App() {
   const data = useManagerData();
@@ -75,6 +75,7 @@ export function App() {
   }), [items, searchTexts, deferredQuery, durationFilter, hasApiKey, prefs, categories, buckets, collapsed]);
 
   const viewIds = useMemo(() => view.items.map((item) => item.videoId), [view.items]);
+  const filtersActive = query.trim() !== '' || durationFilter !== 'all' || (hasApiKey && prefs.categoryFilter !== 'all');
 
   // Keep the selection and the failure marks to videos that still exist.
   useEffect(() => {
@@ -132,7 +133,7 @@ export function App() {
       let { tab } = await prepareWatchLaterTab({ activate: false });
       let collected = null;
 
-      update({ label: '목록을 수집하는 중…' });
+      update({ label: '목록을 스캔하는 중…' });
 
       try {
         collected = await runJob({ tabId: tab.id, command: { type: 'collect', mode: 'auto' }, signal: controller.signal, onProgress });
@@ -142,7 +143,7 @@ export function App() {
         }
 
         // Scrolling only works in a visible tab, so the tab comes to the front.
-        update({ label: '페이지 데이터로 읽지 못해 스크롤 방식으로 다시 수집합니다…' });
+        update({ label: '페이지 데이터로 읽지 못해 스크롤 방식으로 다시 스캔합니다…' });
         ({ tab } = await prepareWatchLaterTab({ activate: true }));
         collected = await runJob({ tabId: tab.id, command: { type: 'collect', mode: 'dom' }, signal: controller.signal, onProgress });
       }
@@ -161,10 +162,10 @@ export function App() {
         await data.saveCategories(kept);
       }
 
-      announce(`${formatCount(next.items.length)}개를 수집했습니다.`);
+      announce(`${formatCount(next.items.length)}개를 스캔했습니다.`);
     } catch (error) {
       if (isAbortError(error)) {
-        announce('수집을 취소했습니다.');
+        announce('스캔을 취소했습니다.');
       } else {
         setMessage(error.message);
       }
@@ -446,7 +447,7 @@ export function App() {
       parts.push(`표시 ${formatCount(view.items.length)}개`);
     }
 
-    parts.push(`${formatDateTime(snapshot.collectedAt)} 수집`);
+    parts.push(`${formatDateTime(snapshot.collectedAt)} 스캔`);
 
     if (snapshot.method === 'dom') {
       parts.push('스크롤 방식');
@@ -490,34 +491,42 @@ export function App() {
         isTabView={IS_TAB_VIEW}
         busy={busy}
         hasItems={items.length > 0}
+        filtersOpen={prefs.filtersOpen}
+        filtersActive={filtersActive}
+        onToggleFilters={() => data.updatePrefs({ filtersOpen: !prefs.filtersOpen })}
         onScan={handleScan}
         onExport={handleExport}
         onOpenSettings={() => setDialog('settings')}
         onOpenInTab={() => chrome.tabs.create({ url: chrome.runtime.getURL('src/manager/manager.html?view=tab') })}
       />
+      {snapshot && (
+        <FilterBar
+          open={prefs.filtersOpen}
+          query={query}
+          onQueryChange={setQuery}
+          prefs={prefs}
+          durationFilter={durationFilter}
+          onPrefsChange={data.updatePrefs}
+          buckets={buckets}
+          hasApiKey={hasApiKey}
+          canFetchCategories={hasApiKey && !busy && items.length > 0}
+          categoryNote={categoryNote}
+          onFetchCategories={handleFetchCategories}
+        />
+      )}
       <StatusBar summary={summary} task={task} onCancel={cancel} message={message} onDismissMessage={() => setMessage('')} />
-      <FilterBar
-        query={query}
-        onQueryChange={setQuery}
-        prefs={prefs}
-        durationFilter={durationFilter}
-        onPrefsChange={data.updatePrefs}
-        buckets={buckets}
-        hasApiKey={hasApiKey}
-        canFetchCategories={hasApiKey && !busy && items.length > 0}
-        categoryNote={categoryNote}
-        onFetchCategories={handleFetchCategories}
-      />
-      <SelectionBar
-        selectedCount={selected.size}
-        totalCount={items.length}
-        viewCount={view.items.length}
-        busy={busy}
-        onSelectAll={() => setSelected(new Set(items.map((item) => item.videoId)))}
-        onSelectView={() => setSelected((current) => addAll(current, viewIds))}
-        onClear={() => setSelected(new Set())}
-        onRemove={() => setDialog('remove')}
-      />
+      {snapshot && (
+        <SelectionBar
+          selectedCount={selected.size}
+          totalCount={items.length}
+          viewCount={view.items.length}
+          busy={busy}
+          onSelectAll={() => setSelected(new Set(items.map((item) => item.videoId)))}
+          onSelectView={() => setSelected((current) => addAll(current, viewIds))}
+          onClear={() => setSelected(new Set())}
+          onRemove={() => setDialog('remove')}
+        />
+      )}
       <main className="list-area">
         {emptyReason ? (
           <EmptyState reason={emptyReason} busy={busy} onScan={handleScan} />

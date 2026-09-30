@@ -143,12 +143,13 @@ describe('matchesCategory and normalizeViewPrefs', () => {
   });
 
   it('replaces values that are not options', () => {
-    assert.deepEqual(normalizeViewPrefs({ groupBy: 'channel', sortBy: 'nope', sortDir: 'desc', durationFilter: 'lt-5' }), {
+    assert.deepEqual(normalizeViewPrefs({ groupBy: 'channel', sortBy: 'nope', sortDir: 'desc', durationFilter: 'lt-5', filtersOpen: 'no' }), {
       groupBy: 'channel',
       sortBy: 'position',
       sortDir: 'desc',
       durationFilter: 'lt-5',
       categoryFilter: 'all',
+      filtersOpen: true,
     });
   });
 });

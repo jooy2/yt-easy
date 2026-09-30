@@ -507,7 +507,7 @@
 
     while (page.token) {
       if (pages >= MAX_PAGES) {
-        throw new CollectError('목록이 예상보다 깁니다. 수집을 멈췄습니다.');
+        throw new CollectError('목록이 예상보다 깁니다. 스캔을 멈췄습니다.');
       }
 
       await util.sleep(util.randomBetween(PAGE_DELAY_MIN, PAGE_DELAY_MAX), signal);
@@ -579,7 +579,7 @@
     const { page } = ns;
 
     if (!page.isWatchLaterPage() || !page.getPlaylistRoot()) {
-      throw new CollectError('나중에 볼 동영상 페이지에서만 스크롤 방식으로 수집할 수 있습니다.', { code: 'needs-page' });
+      throw new CollectError('나중에 볼 동영상 페이지에서만 스크롤 방식으로 스캔할 수 있습니다.', { code: 'needs-page' });
     }
 
     const onPause = () => onProgress?.({ count: page.getItemElements().length, paused: true });

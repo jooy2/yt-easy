@@ -79,7 +79,7 @@
       post({
         type: 'error',
         code: error.code ?? 'failed',
-        message: error.name === 'CollectError' ? error.message : '목록을 수집하는 중 오류가 발생했습니다.',
+        message: error.name === 'CollectError' ? error.message : '목록을 스캔하는 중 오류가 발생했습니다.',
       });
     }
   };
@@ -136,7 +136,7 @@
     } catch (error) {
       console.error('yt-easy: removal failed.', error);
       overlay.finish('오류로 중단했습니다.');
-      post({ type: 'error', message: '삭제 중 오류가 발생해 중단했습니다. 목록을 다시 수집해 결과를 확인해 주세요.' });
+      post({ type: 'error', message: '삭제 중 오류가 발생해 중단했습니다. 목록을 다시 스캔해 결과를 확인해 주세요.' });
     }
   };
 

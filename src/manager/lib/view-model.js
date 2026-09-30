@@ -16,6 +16,7 @@ export const DEFAULT_VIEW_PREFS = Object.freeze({
   sortDir: 'asc',
   durationFilter: 'all',
   categoryFilter: 'all',
+  filtersOpen: true,
 });
 
 const collator = new Intl.Collator('ko', { sensitivity: 'base', numeric: true });
@@ -36,6 +37,10 @@ export const normalizeViewPrefs = (stored) => {
   // buckets later.
   if (typeof input.durationFilter === 'string') {
     prefs.durationFilter = input.durationFilter;
+  }
+
+  if (typeof input.filtersOpen === 'boolean') {
+    prefs.filtersOpen = input.filtersOpen;
   }
 
   return prefs;

@@ -141,7 +141,7 @@
     }
 
     if (page.getItemElements().length < rowsBefore) {
-      throw new WrongRowError('대상이 아닌 영상이 삭제됐을 수 있어 중단했습니다. 목록을 다시 수집해 확인해 주세요.');
+      throw new WrongRowError('대상이 아닌 영상이 삭제됐을 수 있어 중단했습니다. 목록을 다시 스캔해 확인해 주세요.');
     }
 
     return fail('unconfirmed');

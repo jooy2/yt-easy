@@ -7,6 +7,11 @@ body,
   height: 100%;
 }
 
+/* Layout rules below set `display`, which would otherwise override `hidden`. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   min-width: 300px;
   margin: 0;
@@ -31,29 +36,28 @@ body {
 /* Header */
 
 .app-header {
-  display: grid;
-  gap: 8px;
-  padding: 10px 12px 8px;
-}
-
-.app-header-top {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px 8px;
+  padding: 10px 12px;
 }
 
 .app-title {
+  flex: 1 1 auto;
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
-.app-header-tools,
-.app-actions {
+.app-header-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
 }
 
 /* Status */
@@ -61,7 +65,8 @@ body {
 .status-bar {
   display: grid;
   gap: 8px;
-  padding: 0 12px 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--neba-border);
 }
 
 .status-bar:empty {
@@ -102,7 +107,14 @@ body {
 .filter-row {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 6px;
+}
+
+.filter-search {
+  flex: 1 1 150px;
+  min-width: 120px;
+  max-width: 260px;
 }
 
 .filter-pair {
@@ -281,6 +293,24 @@ body {
   height: 100%;
   box-sizing: border-box;
   padding: 24px;
+}
+
+.empty-lead {
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.empty-steps {
+  max-width: 340px;
+  margin: 12px auto 0;
+  padding-inline-start: 20px;
+  color: var(--neba-muted-fg);
+  text-align: start;
+  list-style: decimal;
+}
+
+.empty-steps li + li {
+  margin-top: 4px;
 }
 
 /* Dialogs */

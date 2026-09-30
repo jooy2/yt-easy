@@ -12,7 +12,7 @@ The YouTube Data API has returned an empty list for Watch later since 2016, so a
 
 ## Features
 
-- Collects the whole list, including lists of several thousand videos: video ID, title, channel name, channel ID, length, thumbnail, and position in the list.
+- Scans the whole list, including lists of several thousand videos: video ID, title, channel name, channel ID, length, thumbnail, and position in the list.
 - Groups the list by channel or by length range, with ranges you set yourself.
 - Searches titles and channel names, and sorts by list order, length, or channel name.
 - Selects videos one by one, a whole group at once, the whole list, or everything the current search and filters show.
@@ -26,7 +26,7 @@ The interface is in Korean.
 
 ## How it works
 
-- **Collecting**: the extension fetches the Watch later page, reads the first 100 videos from the data embedded in it, and requests the rest 100 at a time with the same request the page sends while you scroll, pausing about a second between requests. This works while the tab is in the background and does not need thousands of rows drawn on screen. If the page data cannot be read, the extension scrolls the Watch later tab to the end and reads the rows instead.
+- **Scanning**: the extension fetches the Watch later page, reads the first 100 videos from the data embedded in it, and requests the rest 100 at a time with the same request the page sends while you scroll, pausing about a second between requests. This works while the tab is in the background and does not need thousands of rows drawn on screen. If the page data cannot be read, the extension scrolls the Watch later tab to the end and reads the rows instead.
 - **Removing**: on the Watch later page, the extension opens each video's menu and chooses the remove entry, as a person would, then checks that the row disappeared before moving on.
 - **Storing**: the list and the settings are kept in the extension's storage in your Chrome profile.
 - **The manager** is built with React and the [neba](https://neba.cdget.com) component library, and only the rows on screen are drawn, so a list of thousands of videos scrolls smoothly.
@@ -57,11 +57,11 @@ To update, pull the latest changes, run `npm install` and `npm run build` again,
 
 Sign in to YouTube in Chrome first. Click the extension's icon to open the manager in the side panel. **새 탭에서 열기** opens the same manager in a full tab when you want more room.
 
-### Collect the list
+### Scan the list
 
-Click **목록 수집**. The manager opens the Watch later page in a tab if none is open, reads the list, and keeps it in the extension's storage. A list of 5,000 videos takes one to two minutes.
+Click **스캔 시작**, at the top of the manager or in the middle of the empty list on first use. The manager opens the Watch later page in a tab if none is open, reads the list, and keeps it in the extension's storage. A list of 5,000 videos takes one to two minutes.
 
-The stored list does not follow changes you make on YouTube. Collect again after you change the list there.
+The stored list does not follow changes you make on YouTube. Scan again after you change the list there.
 
 ### Find what you want
 
@@ -70,6 +70,7 @@ The stored list does not follow changes you make on YouTube. Collect again after
 - **길이** shows a single length range. Change the ranges in **설정**.
 - The search box matches every word you type against titles and channel names.
 - Click a group heading to fold it.
+- The filter button at the top folds the search box and the options away, so the list gets more room. A dot on the button shows that a search or a filter still narrows the list.
 
 ### Remove videos
 
@@ -86,7 +87,7 @@ Videos are removed in list order, one at a time. The job stops on its own when t
 
 ### Export
 
-**JSON 내보내기** and **CSV 내보내기** save the whole list to the `yt-easy` folder of your Downloads folder. The CSV is UTF-8 with a byte order mark, so spreadsheet apps show Korean titles correctly.
+**내보내기** at the top saves the whole list as a JSON or a CSV file in the `yt-easy` folder of your Downloads folder. The CSV is UTF-8 with a byte order mark, so spreadsheet apps show Korean titles correctly.
 
 ### Tell music videos apart (optional)
 
@@ -126,10 +127,10 @@ Videos in category 10 (Music) get a **음악** badge, and the **카테고리** f
 
 ## Troubleshooting
 
-- **"YouTube에 로그인되어 있지 않습니다"**: sign in to YouTube in this Chrome profile, then collect again.
+- **"YouTube에 로그인되어 있지 않습니다"**: sign in to YouTube in this Chrome profile, then scan again.
 - **"YouTube 탭에 연결하지 못했습니다"**: reload the Watch later tab. A tab that was open before the extension was installed or reloaded has no content script until it loads again. The manager tries one reload by itself first.
-- **Collection switches to scrolling**: when the page data cannot be read, the manager brings the Watch later tab to the front and scrolls it to the end instead. This is slower, and a channel may be recorded by its handle instead of its channel ID.
-- **"메뉴에서 삭제 항목을 찾지 못했습니다"**: YouTube changed its menu, or shows it in a language the extension does not know. The manager reads the label of the remove entry from the page data while collecting, so collect again first. If removal still fails, add your label to `REMOVE_MENU_LABELS` in `src/content/selectors.js`.
+- **Scanning switches to scrolling**: when the page data cannot be read, the manager brings the Watch later tab to the front and scrolls it to the end instead. This is slower, and a channel may be recorded by its handle instead of its channel ID.
+- **"메뉴에서 삭제 항목을 찾지 못했습니다"**: YouTube changed its menu, or shows it in a language the extension does not know. The manager reads the label of the remove entry from the page data while scanning, so scan again first. If removal still fails, add your label to `REMOVE_MENU_LABELS` in `src/content/selectors.js`.
 - **Anything else after a YouTube redesign**: every selector and data key that depends on YouTube lives in `src/content/selectors.js`. Run a dry run after changing it.
 - A YouTube playlist holds at most 5,000 videos. Unavailable videos, such as deleted or private ones, may be hidden from the Watch later page and are then not collected.
 

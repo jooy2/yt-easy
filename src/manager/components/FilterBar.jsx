@@ -21,25 +21,26 @@ const CATEGORY_ITEMS = [
   { value: 'unknown', label: '카테고리 미확인' },
 ];
 
-export function FilterBar({ query, onQueryChange, prefs, durationFilter, onPrefsChange, buckets, hasApiKey, canFetchCategories, categoryNote, onFetchCategories }) {
+// Search and every view option on one line that wraps when the panel is
+// narrow. Folding it away keeps whatever it currently filters.
+export function FilterBar({ open, query, onQueryChange, prefs, durationFilter, onPrefsChange, buckets, hasApiKey, canFetchCategories, categoryNote, onFetchCategories }) {
   const durationItems = [{ value: 'all', label: '모든 길이' }, ...buckets.map((bucket) => ({ value: bucket.key, label: bucket.label }))];
   const ascending = prefs.sortDir === 'asc';
-  const sortLabel = ascending ? '오름차순. 눌러서 내림차순으로 바꾸기' : '내림차순. 눌러서 오름차순으로 바꾸기';
 
   return (
-    <section className="filter-bar" aria-label="검색과 보기">
-      <TextField
-        type="search"
-        value={query}
-        onChange={(event) => onQueryChange(event.target.value)}
-        placeholder="제목 또는 채널 검색"
-        aria-label="제목 또는 채널 검색"
-        autoComplete="off"
-        spellCheck={false}
-        startIcon={<SearchIcon />}
-        fullWidth
-      />
+    <section id="filter-panel" className="filter-bar" aria-label="검색과 필터" hidden={!open}>
       <div className="filter-row">
+        <TextField
+          className="filter-search"
+          type="search"
+          value={query}
+          onChange={(event) => onQueryChange(event.target.value)}
+          placeholder="제목, 채널 검색"
+          aria-label="제목 또는 채널 검색"
+          autoComplete="off"
+          spellCheck={false}
+          startIcon={<SearchIcon />}
+        />
         <Select aria-label="보기" items={GROUP_ITEMS} value={prefs.groupBy} onValueChange={(value) => onPrefsChange({ groupBy: value })} />
         <div className="filter-pair">
           <Select aria-label="정렬 기준" items={SORT_ITEMS} value={prefs.sortBy} onValueChange={(value) => onPrefsChange({ sortBy: value })} />
@@ -47,7 +48,7 @@ export function FilterBar({ query, onQueryChange, prefs, durationFilter, onPrefs
             <IconButton
               variant="outline"
               icon={ascending ? <ArrowUpIcon /> : <ArrowDownIcon />}
-              label={sortLabel}
+              label={ascending ? '오름차순. 눌러서 내림차순으로 바꾸기' : '내림차순. 눌러서 오름차순으로 바꾸기'}
               onClick={() => onPrefsChange({ sortDir: ascending ? 'desc' : 'asc' })}
             />
           </Tooltip>
