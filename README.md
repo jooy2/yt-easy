@@ -29,6 +29,7 @@ The interface is in Korean.
 - **Collecting**: the extension fetches the Watch later page, reads the first 100 videos from the data embedded in it, and requests the rest 100 at a time with the same request the page sends while you scroll, pausing about a second between requests. This works while the tab is in the background and does not need thousands of rows drawn on screen. If the page data cannot be read, the extension scrolls the Watch later tab to the end and reads the rows instead.
 - **Removing**: on the Watch later page, the extension opens each video's menu and chooses the remove entry, as a person would, then checks that the row disappeared before moving on.
 - **Storing**: the list and the settings are kept in the extension's storage in your Chrome profile.
+- **The manager** is built with React and the [neba](https://neba.cdget.com) component library, and only the rows on screen are drawn, so a list of thousands of videos scrolls smoothly.
 
 ## Install
 

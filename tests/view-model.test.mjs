@@ -9,7 +9,7 @@ import {
   matchesCategory,
   normalizeViewPrefs,
   sortItems,
-} from '../src/manager/view-model.js';
+} from '../src/manager/lib/view-model.js';
 
 const item = (position, fields = {}) => ({
   position,

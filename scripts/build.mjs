@@ -18,14 +18,13 @@ const FLAGS = new Set(process.argv.slice(2));
 const IS_WATCH = FLAGS.has('--watch');
 const IS_DEV = IS_WATCH || FLAGS.has('--dev');
 
-const MANAGER_ENTRY = 'src/manager/app.js';
+const MANAGER_ENTRY = 'src/manager/main.jsx';
 const STATIC_ENTRIES = [
   'manifest.json',
   'icons',
   'src/background.js',
   'src/content',
   'src/manager/manager.html',
-  'src/manager/manager.css',
 ];
 const LICENSE_FILE_PATTERN = /^(licen[cs]e|copying)(\.|$)/i;
 

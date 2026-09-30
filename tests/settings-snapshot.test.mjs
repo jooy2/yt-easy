@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { DEFAULT_SETTINGS, normalizeSettings, parseBounds, validateSettingsForm } from '../src/manager/settings.js';
-import { createSnapshot, readSnapshot, removeFromSnapshot } from '../src/manager/snapshot.js';
+import { DEFAULT_SETTINGS, normalizeSettings, parseBounds, validateSettingsForm } from '../src/manager/lib/settings.js';
+import { createSnapshot, readSnapshot, removeFromSnapshot } from '../src/manager/lib/snapshot.js';
 
 describe('settings', () => {
   it('parses bounds in any order and drops duplicates', () => {

@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { buildCsv, buildFileName, buildJson, escapeCsvCell } from '../src/manager/export.js';
-import { formatDuration, formatFileStamp, formatTotalDuration } from '../src/manager/format.js';
+import { buildCsv, buildFileName, buildJson, escapeCsvCell } from '../src/manager/lib/export.js';
+import { formatDuration, formatFileStamp, formatTotalDuration } from '../src/manager/lib/format.js';
 
 const ITEM = {
   position: 1,

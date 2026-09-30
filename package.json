@@ -17,5 +17,10 @@
   },
   "devDependencies": {
     "esbuild": "^0.28.2"
+  },
+  "dependencies": {
+    "neba": "^1.17.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   }
 }

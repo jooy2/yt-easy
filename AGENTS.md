@@ -26,6 +26,11 @@ src/content/           Content scripts on www.youtube.com (classic scripts)
   overlay.js             Progress card shown on the Watch later page
   main.js                Ping and job messages from the manager
 src/manager/           Side panel page, bundled by esbuild; also openable in a tab
+  main.jsx               Entry: neba providers and styles
+  App.jsx                State, and the scan, export, category, and removal flows
+  components/            React components built from neba
+  hooks/                 Stored data and the running task
+  lib/                   Plain modules without React: filtering, export, storage, messaging
 tests/                 node --test; fixtures are synthetic
 dist/                  Build output, loaded into Chrome (not committed)
 ```
@@ -35,7 +40,7 @@ dist/                  Build output, loaded into Chrome (not committed)
 - The manager finds or opens the Watch later tab (`tab-bridge.js`), pings its content script, and runs one job over a port named `yt-easy-job`. Commands are `collect` and `remove`; the content script answers with `progress`, then `done`, `error`, or `cancelled`.
 - Closing the manager closes the port, and the content script cancels the job. Nothing runs unattended.
 - The content scripts share one namespace, `globalThis.ytEasy`, and load in the order listed in `manifest.json`. A file may only use what an earlier file defined, unless it reads it lazily inside a function.
-- Only the manager writes to `chrome.storage.local`. Everything the content script returns is checked in `src/manager/snapshot.js` before it is stored or shown.
+- Only the manager writes to `chrome.storage.local`. Everything the content script returns is checked in `src/manager/lib/snapshot.js` before it is stored or shown.
 
 ## Rules
 
@@ -48,6 +53,7 @@ These are not style preferences. A change that breaks one of them does not get m
 1. **Keep permissions minimal.** A new permission needs a reason. Hosts that only some users need are `optional_host_permissions`, requested when the feature is turned on.
 1. **Back up before removing.** A removal starts only after the JSON and CSV backups are saved.
 1. **The UI is Korean.** Everything a user sees is written in Korean. Code, comments, and documents are in English.
+1. **Build the manager from neba.** Use [neba](https://neba.cdget.com) components before writing a control by hand, and style custom parts with neba's CSS tokens (`--neba-*`) so light and dark mode keep working. Logic that does not need React belongs in `src/manager/lib/`, where the tests can reach it.
 
 ## Checking a change
 
