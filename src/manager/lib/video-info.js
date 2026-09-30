@@ -128,7 +128,19 @@ export const readCategoryItems = (body) => new Map((body?.items ?? [])
   .filter((item) => CATEGORY_ID_PATTERN.test(item.id ?? '') && typeof item.snippet?.title === 'string')
   .map((item) => [item.id, item.snippet.title.trim()]));
 
+// The category names come in the manager's language, so they are asked for
+// again when that changes, as after Chrome's language changed. Earlier
+// versions kept no language with the names and always asked in Korean.
+const LEGACY_NAMES_LOCALE = 'ko';
+
+export const readNamesLocale = (stored) => (typeof stored === 'string' && /^[a-z]{2,3}$/.test(stored) ? stored : LEGACY_NAMES_LOCALE);
+
+export const needsCategoryNames = ({ names, namesLocale, currentLocale = locale }) => names.size === 0 || namesLocale !== currentLocale;
+
 export const requestApiPermission = () => chrome.permissions.request({ origins: GOOGLE_API_ORIGINS });
+
+// Checks the access without asking for it, so it works outside a click.
+export const hasApiPermission = () => chrome.permissions.contains({ origins: GOOGLE_API_ORIGINS });
 
 export const removeApiPermission = () => chrome.permissions.remove({ origins: GOOGLE_API_ORIGINS });
 

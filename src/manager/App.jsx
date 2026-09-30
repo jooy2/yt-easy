@@ -26,7 +26,14 @@ import { createSnapshot, removeFromSnapshot } from './lib/snapshot.js';
 import { WATCH_LATER_ID, WATCH_LATER_TITLE, isWatchLater, readSourceTitle, toFileSlug } from './lib/sources.js';
 import * as store from './lib/store.js';
 import { prepareListTab, runJob } from './lib/tab-bridge.js';
-import { fetchCategoryNames, fetchVideoInfo, removeApiPermission, requestApiPermission } from './lib/video-info.js';
+import {
+  fetchCategoryNames,
+  fetchVideoInfo,
+  hasApiPermission,
+  needsCategoryNames,
+  removeApiPermission,
+  requestApiPermission,
+} from './lib/video-info.js';
 import {
   INFO_SORTS,
   buildSearchText,
@@ -165,6 +172,37 @@ export function App() {
       return next.size === current.size ? current : next;
     });
   }, [items]);
+
+  // Category names kept in another language than the manager's are asked for
+  // again once, with the key and the access the user already gave. Without
+  // them nothing is sent, and the next lookup of video info asks instead.
+  const namesStale = hasApiKey && categoryNames.size > 0
+    && needsCategoryNames({ names: categoryNames, namesLocale: data.categoryNamesLocale });
+  const { saveCategoryNames } = data;
+
+  useEffect(() => {
+    if (!namesStale) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+
+    const refresh = async () => {
+      if (!(await hasApiPermission().catch(() => false))) {
+        return;
+      }
+
+      try {
+        await saveCategoryNames(await fetchCategoryNames({ apiKey: settings.apiKey, signal: controller.signal }));
+      } catch {
+        // The names stay as they are until the next lookup of video info.
+      }
+    };
+
+    refresh();
+
+    return () => controller.abort();
+  }, [namesStale, settings.apiKey, saveCategoryNames]);
 
   // Closing a tab mid-removal would cancel it; ask first.
   useEffect(() => {
@@ -316,7 +354,7 @@ export function App() {
     update({ value: 0, max: targets.length });
 
     try {
-      if (categoryNames.size === 0) {
+      if (needsCategoryNames({ names: categoryNames, namesLocale: data.categoryNamesLocale })) {
         await data.saveCategoryNames(await fetchCategoryNames({ apiKey: settings.apiKey, signal: controller.signal }));
       }
 

@@ -6,6 +6,7 @@ const KEYS = Object.freeze({
   settings: 'settings',
   videoInfo: 'videoInfo',
   categoryNames: 'categoryNames',
+  categoryNamesLocale: 'categoryNamesLocale',
   pendingRemovals: 'pendingRemovals',
   viewPrefs: 'viewPrefs',
 });
@@ -37,7 +38,11 @@ export const saveViewPrefs = (prefs) => chrome.storage.local.set({ [KEYS.viewPre
 
 export const saveVideoInfo = (info) => chrome.storage.local.set({ [KEYS.videoInfo]: Object.fromEntries(info) });
 
-export const saveCategoryNames = (names) => chrome.storage.local.set({ [KEYS.categoryNames]: Object.fromEntries(names) });
+// The names and the language they came in, written together.
+export const saveCategoryNames = (names, locale) => chrome.storage.local.set({
+  [KEYS.categoryNames]: Object.fromEntries(names),
+  [KEYS.categoryNamesLocale]: locale,
+});
 
 // Videos removed during a job that has not finished yet. If the manager
 // closes mid-job, the next start applies them to the stored list.

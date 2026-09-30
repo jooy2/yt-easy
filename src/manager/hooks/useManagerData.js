@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { locale } from '../../i18n/runtime.js';
 import { normalizeSettings } from '../lib/settings.js';
 import { isVideoId, pruneSnapshots, readSnapshot, removeFromSnapshot } from '../lib/snapshot.js';
 import { WATCH_LATER_ID, isListId, isWatchLater } from '../lib/sources.js';
 import * as store from '../lib/store.js';
+import { readNamesLocale } from '../lib/video-info.js';
 import { normalizeViewPrefs } from '../lib/view-model.js';
 
 const CATEGORY_ID_PATTERN = /^\d{1,4}$/;
@@ -68,6 +70,7 @@ export const useManagerData = () => {
   const [prefs, setPrefs] = useState(() => normalizeViewPrefs(null));
   const [videoInfo, setVideoInfo] = useState(() => new Map());
   const [categoryNames, setCategoryNames] = useState(() => new Map());
+  const [categoryNamesLocale, setCategoryNamesLocale] = useState(locale);
   const snapshotsRef = useRef(snapshots);
 
   useEffect(() => {
@@ -124,6 +127,7 @@ export const useManagerData = () => {
       setPrefs(normalizeViewPrefs(data.viewPrefs));
       setVideoInfo(info);
       setCategoryNames(readCategoryNames(data.categoryNames));
+      setCategoryNamesLocale(readNamesLocale(data.categoryNamesLocale));
       setReady(true);
     };
 
@@ -157,6 +161,10 @@ export const useManagerData = () => {
 
       if (changes.categoryNames) {
         setCategoryNames(readCategoryNames(changes.categoryNames.newValue));
+      }
+
+      if (changes.categoryNamesLocale) {
+        setCategoryNamesLocale(readNamesLocale(changes.categoryNamesLocale.newValue));
       }
     };
 
@@ -208,9 +216,11 @@ export const useManagerData = () => {
     await store.saveVideoInfo(next);
   }, []);
 
+  // Names are always asked for in the manager's language.
   const saveCategoryNames = useCallback(async (next) => {
     setCategoryNames(next);
-    await store.saveCategoryNames(next);
+    setCategoryNamesLocale(locale);
+    await store.saveCategoryNames(next, locale);
   }, []);
 
   const updatePrefs = useCallback((patch) => {
@@ -229,6 +239,7 @@ export const useManagerData = () => {
     prefs,
     videoInfo,
     categoryNames,
+    categoryNamesLocale,
     saveSettings,
     saveVideoInfo,
     setVideoInfo,

@@ -116,7 +116,7 @@ The page does not show a video's category or its exact publish date and view cou
 
 With the information in place:
 
-- The category menu filters by any category found in the list, such as **Music** or **Gaming**, and also offers **Not music** and **Unknown category**. The category names come in the language of the manager.
+- The category menu filters by any category found in the list, such as **Music** or **Gaming**, and also offers **Not music** and **Unknown category**. The category names come in the language of the manager. When Chrome's language changes, the manager asks for the names again the next time it opens, with the key and the access you already gave; that request sends nothing from your list.
 - **Publish date**, **View count**, and **Category** become available in the sort menu. The rows show the date or the view count while the list is sorted by it, and the category of each video as a badge.
 - A view count is the count at the moment it was looked up. Once every video has been looked up, the button reads **Refresh view counts** and looks all of them up again.
 - A video that has not been looked up yet, or that the API has no record of, goes last in these sorts and counts as **Unknown category**.
