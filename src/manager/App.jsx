@@ -1,5 +1,5 @@
 import { Pane, Panes, useToast } from 'neba';
-import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AppHeader } from './components/AppHeader.jsx';
 import { EmptyState } from './components/EmptyState.jsx';
@@ -19,7 +19,7 @@ import { fetchCategories, removeApiPermission, requestApiPermission } from './li
 import { buildCsv, buildFileName, buildJson, downloadText } from './lib/export.js';
 import { formatCount, formatDateTime, formatFileStamp } from './lib/format.js';
 import { openInCurrentTab, openInNewTab } from './lib/open-video.js';
-import { addAll, readCoverage, removeAll, toggleOne } from './lib/selection.js';
+import { addAll, readCoverage, removeAll, selectRange, toggleOne } from './lib/selection.js';
 import { createSnapshot, removeFromSnapshot } from './lib/snapshot.js';
 import * as store from './lib/store.js';
 import { prepareWatchLaterTab, runJob } from './lib/tab-bridge.js';
@@ -31,6 +31,11 @@ const PENDING_SAVE_INTERVAL = 10;
 const NO_ITEMS = [];
 
 const isAbortError = (error) => error?.name === 'AbortError';
+
+// Keys typed into a field, or inside a popup, belong to that control.
+const isOwnedByControl = (target) => Boolean(target?.closest?.(
+  'input, textarea, select, [contenteditable="true"], [contenteditable=""], [role="listbox"], [role="menu"], [role="dialog"]',
+));
 
 const getRowHeight = () => ITEM_ROW_HEIGHT;
 
@@ -395,7 +400,47 @@ export function App() {
   // -------------------------------------------------------------------------
   // Rows
 
-  const handleToggle = useCallback((videoId) => setSelected((current) => toggleOne(current, videoId)), []);
+  // The latest shown list and the anchor of the last plain click, read by
+  // the stable handlers below so the rows do not re-render on every change.
+  const shownIdsRef = useRef(shownIds);
+  const anchorRef = useRef(null);
+  const dialogOpenRef = useRef(false);
+
+  shownIdsRef.current = shownIds;
+  dialogOpenRef.current = dialog !== null || result !== null;
+
+  const handleSelect = useCallback((videoId, { range }) => {
+    const anchorId = anchorRef.current;
+
+    if (range && anchorId && shownIdsRef.current.includes(anchorId)) {
+      setSelected((current) => selectRange({ selected: current, videoIds: shownIdsRef.current, anchorId, targetId: videoId }));
+      return;
+    }
+
+    anchorRef.current = videoId;
+    setSelected((current) => toggleOne(current, videoId));
+  }, []);
+
+  // Ctrl+A (⌘+A on a Mac) selects every video shown, and Escape clears the
+  // selection, unless a field or a popup has the keyboard.
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (dialogOpenRef.current || isOwnedByControl(event.target)) {
+        return;
+      }
+
+      if ((event.metaKey || event.ctrlKey) && !event.altKey && event.key.toLowerCase() === 'a') {
+        event.preventDefault();
+        setSelected((current) => addAll(current, shownIdsRef.current));
+      } else if (event.key === 'Escape') {
+        setSelected((current) => (current.size > 0 ? new Set() : current));
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   const handleOpen = useCallback((videoId) => {
     openInCurrentTab(videoId).catch(() => setMessage('영상을 열지 못했습니다.'));
@@ -423,7 +468,7 @@ export function App() {
         // Loading a video into the current tab could replace the Watch later
         // tab a running job works in.
         openDisabled={busy}
-        onToggle={handleToggle}
+        onSelect={handleSelect}
         onOpen={handleOpen}
         onOpenNewTab={handleOpenNewTab}
       />

@@ -79,7 +79,7 @@ Clicking anywhere else on a row selects it, so opening a video never changes the
 
 ### Remove videos
 
-1. Select videos with their checkboxes, or with the checkbox at the top of the list, which selects every video the list shows: the chosen group, narrowed by the search and filters. **전체 선택** selects the whole Watch later list.
+1. Select videos by clicking their rows or checkboxes. Shift+click selects every video between the last one you clicked and this one, or clears them if you had just cleared that one. The checkbox at the top of the list, or ⌘+A (Ctrl+A on Windows and Linux), selects every video the list shows: the chosen group, narrowed by the search and filters. **전체 선택** selects the whole Watch later list, and Esc clears the selection.
 1. Click **선택 항목 삭제** and check the list in the dialog.
 1. The first time, turn on **드라이런**. It opens each video's menu and finds the remove entry without clicking it, which shows that removal works with your YouTube layout and language. Then turn on **테스트 모드** to remove only the first few videos, and check the result on YouTube.
 1. Click **삭제 시작**.

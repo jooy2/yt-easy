@@ -136,14 +136,33 @@ body {
 }
 
 .selection-count {
+  flex: none;
   margin: 0;
   font-weight: 600;
+}
+
+/* Shown only where it fits on the line; the README lists the shortcuts. */
+.selection-hint {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--neba-muted-fg);
+  font-size: 11px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .selection-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+}
+
+@media (max-width: 519px) {
+  .selection-hint {
+    display: none;
+  }
 }
 
 /* List */
