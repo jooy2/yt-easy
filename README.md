@@ -8,7 +8,7 @@
 
 The YouTube Data API has returned an empty list for Watch later since 2016, so a tool built on the API cannot read it. yt-easy works inside the browser you are signed in to instead: it reads the Watch later page the way the page reads itself, and removes videos by clicking through the same menu you would.
 
-> yt-easy is a personal tool. It is not published on the Chrome Web Store, and it is not affiliated with or endorsed by YouTube or Google.
+> yt-easy is not on the Chrome Web Store yet. Until it is, install it from source as described below. It is not affiliated with or endorsed by YouTube or Google.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset=".github/resources/screenshots/channels-dark.webp">
@@ -161,6 +161,8 @@ With the information in place:
 - Requests to YouTube are the ones a playlist page itself makes for the list you chose to scan, sent from the YouTube tab. How much of a video you watched is part of that list; the extension does not read your watch history.
 - With an API key, the IDs of the videos in your list are sent to the YouTube Data API to look up their categories, publish dates, and view counts, and nothing else is.
 - The API key is stored in plain text in the extension's storage, like any other setting. [SECURITY.md](SECURITY.md) has the details.
+
+[PRIVACY.md](PRIVACY.md) is the full privacy policy, and the one the Chrome Web Store listing links to.
 
 ## Troubleshooting
 

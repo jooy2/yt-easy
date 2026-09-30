@@ -4,7 +4,7 @@ Guidance for AI agents (and humans) working in this repository. Written in Engli
 
 ## What this repository is
 
-A Chrome extension (Manifest V3) for managing the signed-in account's YouTube "Watch later" list and playlists: collect a list, group and filter it, export it, and remove many videos at once. It is a personal tool, installed unpacked and not published on the Chrome Web Store.
+A Chrome extension (Manifest V3) for managing the signed-in account's YouTube "Watch later" list and playlists: collect a list, group and filter it, export it, and remove many videos at once. For now it is installed unpacked from `dist/`; a Chrome Web Store release is planned.
 
 The YouTube Data API returns an empty list for Watch later, so the extension works in the signed-in browser instead: it reads playlist pages (Watch later is the playlist `WL`) and clicks through their menus the way a person would.
 
@@ -17,7 +17,7 @@ manifest.json          Permissions, content scripts, side panel
 scripts/build.mjs      Builds dist/: bundles the manager and src/content/i18n.js, writes _locales, copies everything else
 scripts/screenshots/   Captures the README screenshots and the Web Store images (sample.json, promo.html)
 icons/                 logo.png is the source; the icon PNGs are resized from it
-.github/resources/     Logo, README screenshots, and Web Store images
+.github/resources/     Logo, README screenshots, and Web Store images; store/listing.md holds the store text
 src/background.js      Opens the side panel from the toolbar icon
 src/i18n/              Messages and the function that formats them
   messages/              en.json is the base; every other locale has the same keys
@@ -57,7 +57,7 @@ These are not style preferences. A change that breaks one of them does not get m
 
 1. **Keep YouTube-specific details in `src/content/selectors.js`.** DOM selectors, page data keys, and menu labels go there, so a YouTube redesign is fixed in one file. List the current markup first and keep the older one as a fallback.
 1. **Work at a person's pace.** Removal waits at least one second between videos (`SETTINGS_LIMITS.delayMin`, and `DELAY_MIN_LIMIT` in `main.js`). Collection waits between continuation requests. Do not remove these pauses or run requests in parallel.
-1. **Touch only the lists the user chooses.** Watch later, or a playlist the user named. Do not collect or send anything else, and do not add analytics or remote logging.
+1. **Touch only the lists the user chooses.** Watch later, or a playlist the user named. Do not collect or send anything else, and do not add analytics or remote logging. A change to what the extension reads, stores, or sends updates `PRIVACY.md` and `.github/resources/store/listing.md` in the same change.
 1. **Remove through the page's own menu.** Deletion is UI automation on the playlist page by design, and is offered only where the menu has a remove entry: Watch later and the user's own playlists. Verify each removal by checking that the row is gone, and stop the job when the page does not behave as expected.
 1. **Keep permissions minimal.** A new permission needs a reason. Hosts that only some users need are `optional_host_permissions`, requested when the feature is turned on.
 1. **Offer a backup before removing.** The removal dialog has a backup switch, off by default. When it is on, the removal starts only after the JSON and CSV backups are saved.
