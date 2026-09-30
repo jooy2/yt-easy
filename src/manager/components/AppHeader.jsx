@@ -1,5 +1,7 @@
 import { Badge, Button, IconButton, Menu, MenuItem, MenuRadioGroup, MenuRadioItem, MenuSeparator, Tooltip } from 'neba';
 
+import { t } from '../../i18n/runtime.js';
+
 import { ChevronDownIcon, DownloadIcon, FilterIcon, ScanIcon, SettingsIcon, WindowIcon } from './icons.jsx';
 
 // The list being managed, which opens a menu of the scanned lists, then
@@ -24,7 +26,7 @@ export function AppHeader({
   onOpenSettings,
   onOpenInTab,
 }) {
-  const filterLabel = filtersOpen ? '검색과 필터 접기' : '검색과 필터 펼치기';
+  const filterLabel = t(filtersOpen ? 'header.filters-collapse' : 'header.filters-expand');
 
   return (
     <header className="app-header">
@@ -39,7 +41,7 @@ export function AppHeader({
               className="source-button"
               endIcon={<ChevronDownIcon />}
               disabled={busy}
-              aria-label={`목록 바꾸기. 지금 목록: ${sourceTitle}`}
+              aria-label={t('source.switch-label', { title: sourceTitle })}
             >
               <span className="source-title">{sourceTitle}</span>
             </Button>
@@ -53,26 +55,26 @@ export function AppHeader({
             ))}
           </MenuRadioGroup>
           <MenuSeparator />
-          <MenuItem onClick={onAddPlaylist}>재생목록 추가…</MenuItem>
-          {canForget && <MenuItem color="danger" onClick={onForgetSource}>이 목록을 기록에서 지우기</MenuItem>}
+          <MenuItem onClick={onAddPlaylist}>{t('source.add')}</MenuItem>
+          {canForget && <MenuItem color="danger" onClick={onForgetSource}>{t('source.forget')}</MenuItem>}
         </Menu>
       </div>
       <div className="app-header-actions">
         <Button variant="solid" color="primary" startIcon={<ScanIcon />} onClick={onScan} disabled={busy}>
-          스캔 시작
+          {t('common.scan')}
         </Button>
         <Menu
           disabled={busy || !hasItems}
           trigger={(
             <Button variant="outline" startIcon={<DownloadIcon />} disabled={busy || !hasItems}>
-              내보내기
+              {t('header.export')}
             </Button>
           )}
         >
-          <MenuItem onClick={() => onExport('json')}>JSON 파일로 저장</MenuItem>
-          <MenuItem onClick={() => onExport('csv')}>CSV 파일로 저장</MenuItem>
+          <MenuItem onClick={() => onExport('json')}>{t('header.export-json')}</MenuItem>
+          <MenuItem onClick={() => onExport('csv')}>{t('header.export-csv')}</MenuItem>
         </Menu>
-        <Badge dot color="primary" invisible={filtersOpen || !filtersActive} label="필터 적용 중">
+        <Badge dot color="primary" invisible={filtersOpen || !filtersActive} label={t('header.filters-active')}>
           <Tooltip content={filterLabel}>
             <IconButton
               variant={filtersOpen ? 'outline' : 'text'}
@@ -85,12 +87,12 @@ export function AppHeader({
             />
           </Tooltip>
         </Badge>
-        <Tooltip content="설정">
-          <IconButton variant="text" icon={<SettingsIcon />} label="설정" onClick={onOpenSettings} disabled={busy} />
+        <Tooltip content={t('common.settings')}>
+          <IconButton variant="text" icon={<SettingsIcon />} label={t('common.settings')} onClick={onOpenSettings} disabled={busy} />
         </Tooltip>
         {!isTabView && (
-          <Tooltip content="새 탭에서 열기">
-            <IconButton variant="text" icon={<WindowIcon />} label="새 탭에서 열기" onClick={onOpenInTab} />
+          <Tooltip content={t('header.open-tab')}>
+            <IconButton variant="text" icon={<WindowIcon />} label={t('header.open-tab')} onClick={onOpenInTab} />
           </Tooltip>
         )}
       </div>

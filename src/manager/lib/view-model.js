@@ -4,6 +4,8 @@
 // `info` maps video IDs to what the Data API told about them: { c: category
 // ID, p: publish time, v: view count, t: when it was looked up }. `names`
 // maps category IDs to their names.
+import { locale, t } from '../../i18n/runtime.js';
+
 export const MUSIC_CATEGORY_ID = '10';
 export const UNKNOWN_BUCKET_KEY = 'unknown';
 
@@ -49,9 +51,9 @@ export const readGrouping = (sortBy) => {
   return 'none';
 };
 
-const collator = new Intl.Collator('ko', { sensitivity: 'base', numeric: true });
+const collator = new Intl.Collator(locale, { sensitivity: 'base', numeric: true });
 
-const normalizeText = (text) => String(text ?? '').normalize('NFKC').toLocaleLowerCase('ko');
+const normalizeText = (text) => String(text ?? '').normalize('NFKC').toLocaleLowerCase(locale);
 
 const readCategoryFilter = (value) => {
   // Before other categories could be chosen, music was 'music'.
@@ -102,15 +104,15 @@ export const createBuckets = (bounds) => {
   for (const bound of bounds) {
     buckets.push({
       key: previous === 0 ? `lt-${bound}` : `${previous}-${bound}`,
-      label: previous === 0 ? `${bound}분 미만` : `${previous}–${bound}분`,
+      label: previous === 0 ? t('duration.under', { max: bound }) : t('duration.range', { min: previous, max: bound }),
       min: previous * 60,
       max: bound * 60,
     });
     previous = bound;
   }
 
-  buckets.push({ key: `gte-${previous}`, label: `${previous}분 이상`, min: previous * 60, max: Infinity });
-  buckets.push({ key: UNKNOWN_BUCKET_KEY, label: '길이 정보 없음', min: null, max: null });
+  buckets.push({ key: `gte-${previous}`, label: t('duration.over', { min: previous }), min: previous * 60, max: Infinity });
+  buckets.push({ key: UNKNOWN_BUCKET_KEY, label: t('duration.unknown'), min: null, max: null });
 
   return buckets;
 };
@@ -131,10 +133,10 @@ export const readCategoryId = (item, info) => info.get(item.videoId)?.c ?? '';
 
 export const readCategoryName = (categoryId, names) => {
   if (!categoryId) {
-    return '종류 미확인';
+    return t('category.unknown');
   }
 
-  return names.get(categoryId) ?? `카테고리 ${categoryId}`;
+  return names.get(categoryId) ?? t('category.fallback', { id: categoryId });
 };
 
 // Only the Data API knows a video's category, so a video it has not looked
@@ -277,7 +279,7 @@ const groupByChannel = ({ items, sortDir, groupOrder }) => {
     const key = item.channelId || (item.channelName ? `name:${item.channelName}` : 'unknown');
 
     if (!groups.has(key)) {
-      groups.set(key, { key: `channel:${key}`, label: item.channelName || '채널 정보 없음', items: [] });
+      groups.set(key, { key: `channel:${key}`, label: item.channelName || t('common.no-channel'), items: [] });
     }
 
     groups.get(key).items.push(item);

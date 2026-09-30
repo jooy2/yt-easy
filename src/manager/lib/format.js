@@ -1,6 +1,11 @@
-const NUMBER_FORMAT = new Intl.NumberFormat('ko-KR');
-const DATE_FORMAT = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium' });
-const DATE_TIME_FORMAT = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' });
+import { locale, t } from '../../i18n/runtime.js';
+
+const NUMBER_FORMAT = new Intl.NumberFormat(locale);
+const DATE_FORMAT = new Intl.DateTimeFormat(locale, { dateStyle: 'medium' });
+const DATE_TIME_FORMAT = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' });
+// Truncated rather than rounded, as YouTube writes view counts: 1,290,000
+// is "1.2M", never "1.3M".
+const COMPACT_FORMAT = new Intl.NumberFormat(locale, { notation: 'compact', roundingMode: 'trunc' });
 
 const pad = (value) => String(value).padStart(2, '0');
 
@@ -10,25 +15,9 @@ export const formatDateTime = (timestamp) => DATE_TIME_FORMAT.format(new Date(ti
 
 export const formatDate = (timestamp) => DATE_FORMAT.format(new Date(timestamp));
 
-const KOREAN_UNITS = [
-  [100000000, '억'],
-  [10000, '만'],
-];
-
-// A view count the way YouTube writes it: "조회수 950회", "3.2만회",
-// "1234만회", "1.2억회". One decimal only while the unit count is below 10.
-export const formatViews = (count) => {
-  const [size, unit] = KOREAN_UNITS.find(([value]) => count >= value) ?? [];
-
-  if (!size) {
-    return `조회수 ${NUMBER_FORMAT.format(count)}회`;
-  }
-
-  const value = count / size;
-  const text = value < 10 ? String(Math.floor(value * 10) / 10) : String(Math.floor(value));
-
-  return `조회수 ${text}${unit}회`;
-};
+// A view count the way YouTube writes it: "950 views", "3.2K views",
+// "1.2M views", or "조회수 3.2만회" in Korean.
+export const formatViews = (count) => t('format.views', { count, views: COMPACT_FORMAT.format(count) });
 
 // 245 -> "4:05", 3723 -> "1:02:03". Unknown durations return ''.
 export const formatDuration = (seconds) => {
@@ -43,22 +32,20 @@ export const formatDuration = (seconds) => {
   return hours > 0 ? `${hours}:${pad(minutes)}:${pad(rest)}` : `${minutes}:${pad(rest)}`;
 };
 
-// A total for a group heading: "3시간 20분", "45분", "30초".
+// A total for a group heading: "3 hr 20 min", "45 min", "30 sec".
 export const formatTotalDuration = (seconds) => {
   if (!Number.isFinite(seconds) || seconds <= 0) {
-    return '0분';
+    return t('format.minutes', { minutes: 0 });
   }
 
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
 
   if (hours > 0) {
-    const text = `${NUMBER_FORMAT.format(hours)}시간`;
-
-    return minutes > 0 ? `${text} ${minutes}분` : text;
+    return minutes > 0 ? t('format.hours-minutes', { hours, minutes }) : t('format.hours', { hours });
   }
 
-  return minutes > 0 ? `${minutes}분` : `${Math.floor(seconds)}초`;
+  return minutes > 0 ? t('format.minutes', { minutes }) : t('format.seconds', { seconds: Math.floor(seconds) });
 };
 
 // Local time as "20260930-141502", for file names.

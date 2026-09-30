@@ -1,5 +1,7 @@
 import { Alert, Button, ProgressLinear } from 'neba';
 
+import { locale, t } from '../../i18n/runtime.js';
+
 // The summary line, the running task with its progress, and the last error.
 export function StatusBar({ summary, task, onCancel, message, onDismissMessage }) {
   return (
@@ -11,7 +13,7 @@ export function StatusBar({ summary, task, onCancel, message, onDismissMessage }
             <p className="task-label" role="status">{task.label}</p>
             {task.cancellable && (
               <Button size="xs" variant="outline" onClick={onCancel} disabled={task.cancelling}>
-                취소
+                {t('common.cancel')}
               </Button>
             )}
           </div>
@@ -19,7 +21,7 @@ export function StatusBar({ summary, task, onCancel, message, onDismissMessage }
         </div>
       )}
       {message && (
-        <Alert color="danger" onClose={onDismissMessage} locale="ko">
+        <Alert color="danger" onClose={onDismissMessage} locale={locale}>
           {message}
         </Alert>
       )}

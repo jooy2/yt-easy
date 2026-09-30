@@ -1,6 +1,8 @@
 // Looks up what the page does not show: each video's category, publish date,
 // and view count, with the YouTube Data API. It runs only with an API key the
 // user supplied.
+import { locale, t } from '../../i18n/runtime.js';
+
 export const GOOGLE_API_ORIGINS = ['https://www.googleapis.com/*'];
 
 const API_BASE = 'https://www.googleapis.com/youtube/v3';
@@ -8,18 +10,19 @@ const BATCH_SIZE = 50;
 const BATCH_DELAY_MIN = 400;
 const BATCH_DELAY_MAX = 900;
 
-// Category names come back in this language, for this region's list.
-const CATEGORY_LANGUAGE = 'ko';
-const CATEGORY_REGION = 'KR';
+// Category names come back in the manager's language, from the list of the
+// region that speaks it.
+const CATEGORY_REGIONS = { en: 'US', ko: 'KR' };
 
+// Message keys for the reasons the API gives.
 const API_ERRORS = {
-  API_KEY_INVALID: 'API 키가 올바르지 않습니다.',
-  keyInvalid: 'API 키가 올바르지 않습니다.',
-  quotaExceeded: '오늘 쓸 수 있는 API 할당량을 모두 썼습니다. 내일 다시 시도해 주세요.',
-  dailyLimitExceeded: '오늘 쓸 수 있는 API 할당량을 모두 썼습니다. 내일 다시 시도해 주세요.',
-  accessNotConfigured: '이 키의 프로젝트에서 YouTube Data API v3가 사용 설정되어 있지 않습니다.',
-  SERVICE_DISABLED: '이 키의 프로젝트에서 YouTube Data API v3가 사용 설정되어 있지 않습니다.',
-  API_KEY_SERVICE_BLOCKED: '이 API 키로는 YouTube Data API를 쓸 수 없도록 제한되어 있습니다.',
+  API_KEY_INVALID: 'info.error-key',
+  keyInvalid: 'info.error-key',
+  quotaExceeded: 'info.error-quota',
+  dailyLimitExceeded: 'info.error-quota',
+  accessNotConfigured: 'info.error-disabled',
+  SERVICE_DISABLED: 'info.error-disabled',
+  API_KEY_SERVICE_BLOCKED: 'info.error-blocked',
 };
 
 const CATEGORY_ID_PATTERN = /^\d{1,4}$/;
@@ -52,13 +55,13 @@ const readApiError = async (response) => {
     const known = reasons.find((reason) => API_ERRORS[reason]);
 
     if (known) {
-      return API_ERRORS[known];
+      return t(API_ERRORS[known]);
     }
   } catch {
     // Not JSON; fall through to the status code.
   }
 
-  return `YouTube Data API 요청이 실패했습니다 (HTTP ${response.status}).`;
+  return t('info.error-http', { status: String(response.status) });
 };
 
 // The key goes in a header rather than the URL, so it does not end up in
@@ -155,10 +158,10 @@ export const fetchVideoInfo = async ({ apiKey, videoIds, signal, onBatch }) => {
   }
 };
 
-// The names of the categories, such as "음악" or "게임", in one call.
+// The names of the categories, such as "Music" or "Gaming", in one call.
 export const fetchCategoryNames = async ({ apiKey, signal }) => readCategoryItems(await requestApi({
   path: 'videoCategories',
-  params: { part: 'snippet', regionCode: CATEGORY_REGION, hl: CATEGORY_LANGUAGE, fields: 'items(id,snippet(title))' },
+  params: { part: 'snippet', regionCode: CATEGORY_REGIONS[locale] ?? 'US', hl: locale, fields: 'items(id,snippet(title))' },
   apiKey,
   signal,
 }));

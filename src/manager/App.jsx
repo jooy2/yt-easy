@@ -1,6 +1,8 @@
 import { Pane, Panes, useToast } from 'neba';
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 
+import { locale, t } from '../i18n/runtime.js';
+
 import { AddPlaylistDialog } from './components/AddPlaylistDialog.jsx';
 import { AppHeader } from './components/AppHeader.jsx';
 import { EmptyState } from './components/EmptyState.jsx';
@@ -17,11 +19,11 @@ import { VirtualList } from './components/VirtualList.jsx';
 import { useManagerData } from './hooks/useManagerData.js';
 import { useTask } from './hooks/useTask.js';
 import { buildCsv, buildFileName, buildJson, downloadText } from './lib/export.js';
-import { formatCount, formatDate, formatDateTime, formatFileStamp, formatViews } from './lib/format.js';
+import { formatDate, formatDateTime, formatFileStamp, formatViews } from './lib/format.js';
 import { openInCurrentTab, openInNewTab } from './lib/open-video.js';
 import { addAll, readCoverage, removeAll, selectRange, toggleOne } from './lib/selection.js';
 import { createSnapshot, removeFromSnapshot } from './lib/snapshot.js';
-import { WATCH_LATER_ID, WATCH_LATER_TITLE, isWatchLater, toFileSlug } from './lib/sources.js';
+import { WATCH_LATER_ID, WATCH_LATER_TITLE, isWatchLater, readSourceTitle, toFileSlug } from './lib/sources.js';
 import * as store from './lib/store.js';
 import { prepareListTab, runJob } from './lib/tab-bridge.js';
 import { fetchCategoryNames, fetchVideoInfo, removeApiPermission, requestApiPermission } from './lib/video-info.js';
@@ -52,9 +54,7 @@ const isOwnedByControl = (target) => Boolean(target?.closest?.(
 
 const getRowHeight = () => ITEM_ROW_HEIGHT;
 
-const describeScanProgress = ({ count, paused }) => (paused
-  ? `${formatCount(count)}개까지 읽었습니다. YouTube 탭이 화면에 보이면 이어서 진행합니다.`
-  : `${formatCount(count)}개 스캔 중…`);
+const describeScanProgress = ({ count, paused }) => t(paused ? 'scan.paused' : 'scan.progress', { count });
 
 export function App() {
   const data = useManagerData();
@@ -73,7 +73,7 @@ export function App() {
 
   const deferredQuery = useDeferredValue(query);
   const items = snapshot?.items ?? NO_ITEMS;
-  const sourceTitle = snapshot?.title ?? (isWatchLater(activeListId) ? WATCH_LATER_TITLE : activeListId);
+  const sourceTitle = readSourceTitle(activeListId, snapshot?.title);
   // Watch later always has a remove entry. Another playlist has one only
   // when it is the user's own, which the scan shows by finding its label.
   const canRemove = isWatchLater(activeListId) || Boolean(snapshot?.removeLabel);
@@ -139,12 +139,12 @@ export function App() {
     });
     const list = entries.map((entry) => ({
       listId: entry.listId,
-      title: entry.title,
-      description: `${formatCount(entry.items.length)}개 · ${formatDateTime(entry.collectedAt)} 스캔`,
+      title: readSourceTitle(entry.listId, entry.title),
+      description: t('source.description', { count: entry.items.length, time: formatDateTime(entry.collectedAt) }),
     }));
 
     if (!snapshots[WATCH_LATER_ID]) {
-      list.unshift({ listId: WATCH_LATER_ID, title: WATCH_LATER_TITLE, description: '아직 스캔하지 않음' });
+      list.unshift({ listId: WATCH_LATER_ID, title: WATCH_LATER_TITLE, description: t('source.not-scanned') });
     }
 
     return list;
@@ -201,7 +201,7 @@ export function App() {
   // Scans a list and, once it succeeds, shows it. A failed scan of a new
   // playlist leaves the current list on screen.
   const scanList = async (listId) => {
-    const controller = start({ kind: 'scan', label: 'YouTube 탭을 준비하는 중…' });
+    const controller = start({ kind: 'scan', label: t('common.preparing-tab') });
     const onProgress = (progress) => update({ label: describeScanProgress(progress) });
 
     setMessage('');
@@ -210,7 +210,7 @@ export function App() {
       let { tab } = await prepareListTab({ listId, activate: false });
       let collected = null;
 
-      update({ label: '목록을 스캔하는 중…' });
+      update({ label: t('scan.running') });
 
       try {
         collected = await runJob({ tabId: tab.id, command: { type: 'collect', listId, mode: 'auto' }, signal: controller.signal, onProgress });
@@ -220,7 +220,7 @@ export function App() {
         }
 
         // Scrolling only works in a visible tab, so the tab comes to the front.
-        update({ label: '페이지 데이터로 읽지 못해 스크롤 방식으로 다시 스캔합니다…' });
+        update({ label: t('scan.retry-dom') });
         ({ tab } = await prepareListTab({ listId, activate: true }));
         collected = await runJob({ tabId: tab.id, command: { type: 'collect', listId, mode: 'dom' }, signal: controller.signal, onProgress });
       }
@@ -240,10 +240,10 @@ export function App() {
         await data.saveVideoInfo(kept);
       }
 
-      announce(`${next.title}: ${formatCount(next.items.length)}개를 스캔했습니다.`);
+      announce(t('scan.done', { title: readSourceTitle(listId, next.title), count: next.items.length }));
     } catch (error) {
       if (isAbortError(error)) {
-        announce('스캔을 취소했습니다.');
+        announce(t('scan.cancelled'));
       } else {
         setMessage(error.message);
       }
@@ -263,7 +263,7 @@ export function App() {
 
     await data.forgetSnapshot(activeListId);
     data.setActiveListId(WATCH_LATER_ID);
-    announce(`${title} 목록을 기록에서 지웠습니다.`);
+    announce(t('source.forgotten', { title }));
   };
 
   // -------------------------------------------------------------------------
@@ -274,12 +274,12 @@ export function App() {
       return;
     }
 
-    start({ kind: 'export', label: '파일을 저장하는 중…', cancellable: false });
+    start({ kind: 'export', label: t('export.saving'), cancellable: false });
     setMessage('');
 
     try {
       await saveList({ items, suffix: 'export', stamp: formatFileStamp(new Date()), format, kind: 'export' });
-      announce(`${formatCount(items.length)}개를 ${format.toUpperCase()} 파일로 내보냈습니다.`);
+      announce(t('export.done', { count: items.length, format: format.toUpperCase() }));
     } catch (error) {
       setMessage(error.message);
     } finally {
@@ -302,14 +302,14 @@ export function App() {
     const granted = await requestApiPermission().catch(() => false);
 
     if (!granted) {
-      setMessage('www.googleapis.com 접근 권한을 허용해야 영상 정보를 가져올 수 있습니다.');
+      setMessage(t('info.permission-needed'));
       return;
     }
 
     const refreshing = missingInfoCount === 0;
     const targets = items.map((item) => item.videoId).filter((videoId) => refreshing || !isLookedUp(videoInfo, videoId));
-    const verb = refreshing ? '조회수를 새로 가져오는 중' : '영상 정보를 가져오는 중';
-    const controller = start({ kind: 'info', label: `${verb}… 0 / ${formatCount(targets.length)}` });
+    const progressKey = refreshing ? 'info.refreshing' : 'info.fetching';
+    const controller = start({ kind: 'info', label: t(progressKey, { done: 0, total: targets.length }) });
     const found = new Map(videoInfo);
 
     setMessage('');
@@ -330,10 +330,10 @@ export function App() {
           }
 
           data.setVideoInfo(new Map(found));
-          update({ label: `${verb}… ${formatCount(done)} / ${formatCount(total)}`, value: done, max: total });
+          update({ label: t(progressKey, { done, total }), value: done, max: total });
         },
       });
-      announce(refreshing ? '조회수를 새로 가져왔습니다.' : '영상 정보를 가져왔습니다.');
+      announce(t(refreshing ? 'info.refreshed' : 'info.fetched'));
     } catch (error) {
       if (!isAbortError(error)) {
         setMessage(error.message);
@@ -354,7 +354,7 @@ export function App() {
       const granted = await requestApiPermission().catch(() => false);
 
       if (!granted) {
-        return 'www.googleapis.com 접근 권한을 허용하지 않아 API 키를 저장하지 않았습니다.';
+        return t('settings.key-not-saved');
       }
     }
 
@@ -363,7 +363,7 @@ export function App() {
     }
 
     await data.saveSettings(next);
-    announce('설정을 저장했습니다.');
+    announce(t('settings.saved'));
 
     return null;
   };
@@ -384,9 +384,8 @@ export function App() {
   };
 
   const runRemoval = async ({ targets, dryRun, backup }) => {
-    const controller = start({ kind: 'remove', label: backup ? '삭제 대상을 백업 파일로 저장하는 중…' : 'YouTube 탭을 준비하는 중…' });
+    const controller = start({ kind: 'remove', label: t(backup ? 'remove.backing-up' : 'common.preparing-tab') });
     const removed = new Set();
-    const verb = dryRun ? '확인' : '삭제';
     let currentTitle = '';
     let outcome = null;
 
@@ -399,12 +398,12 @@ export function App() {
 
         await saveList({ items: targets, suffix: 'delete-backup', stamp, format: 'json', kind: 'delete-backup' });
         await saveList({ items: targets, suffix: 'delete-backup', stamp, format: 'csv', kind: 'delete-backup' });
-        update({ label: 'YouTube 탭을 준비하는 중…' });
+        update({ label: t('common.preparing-tab') });
       }
 
       const { tab } = await prepareListTab({ listId: activeListId, activate: true });
 
-      update({ label: `${verb} 준비 중… 0 / ${formatCount(targets.length)}`, value: 0, max: targets.length });
+      update({ label: t(dryRun ? 'remove.preparing-dry' : 'remove.preparing', { done: 0, total: targets.length }), value: 0, max: targets.length });
 
       outcome = await runJob({
         tabId: tab.id,
@@ -439,8 +438,8 @@ export function App() {
 
           update({
             label: progress.paused
-              ? '일시 정지: 재생목록 탭이 화면에 보이면 이어서 진행합니다.'
-              : `${verb} 중… ${formatCount(progress.done)} / ${formatCount(progress.total)} · ${currentTitle}`,
+              ? t('remove.paused')
+              : t(dryRun ? 'remove.progress-dry' : 'remove.progress', { done: progress.done, total: progress.total, title: currentTitle }),
             value: progress.done,
             max: progress.total,
           });
@@ -523,11 +522,11 @@ export function App() {
   }, []);
 
   const handleOpen = useCallback((videoId) => {
-    openInCurrentTab(videoId).catch(() => setMessage('영상을 열지 못했습니다.'));
+    openInCurrentTab(videoId).catch(() => setMessage(t('row.open-error')));
   }, []);
 
   const handleOpenNewTab = useCallback((videoId) => {
-    openInNewTab(videoId).catch(() => setMessage('영상을 열지 못했습니다.'));
+    openInNewTab(videoId).catch(() => setMessage(t('row.open-error')));
   }, []);
 
   const handleToggleShown = (checked) => {
@@ -573,16 +572,16 @@ export function App() {
       return '';
     }
 
-    const parts = [`전체 ${formatCount(items.length)}개`];
+    const parts = [t('status.total', { count: items.length })];
 
     if (view.items.length !== items.length) {
-      parts.push(`표시 ${formatCount(view.items.length)}개`);
+      parts.push(t('status.shown', { count: view.items.length }));
     }
 
-    parts.push(`${formatDateTime(snapshot.collectedAt)} 스캔`);
+    parts.push(t('status.scanned', { time: formatDateTime(snapshot.collectedAt) }));
 
     if (snapshot.method === 'dom') {
-      parts.push('스크롤 방식');
+      parts.push(t('status.by-scrolling'));
     }
 
     return parts.join(' · ');
@@ -590,7 +589,7 @@ export function App() {
 
   const infoNote = useMemo(() => {
     if (!hasApiKey) {
-      return '영상 종류, 게시일, 조회수는 YouTube Data API 키가 있어야 볼 수 있습니다. 설정에서 키를 넣어 주세요.';
+      return t('note.info-no-key');
     }
 
     if (items.length === 0) {
@@ -598,14 +597,14 @@ export function App() {
     }
 
     const times = items.map((item) => videoInfo.get(item.videoId)?.t ?? 0).filter((time) => time > 0);
-    const parts = [`영상 정보 ${formatCount(items.length - missingInfoCount)} / ${formatCount(items.length)}개 확인.`];
+    const parts = [t('note.info-coverage', { found: items.length - missingInfoCount, total: items.length })];
 
     if (times.length > 0) {
-      parts.push(`조회수는 ${formatDateTime(Math.min(...times))} 이후 기준입니다.`);
+      parts.push(t('note.info-views-since', { time: formatDateTime(Math.min(...times)) }));
     }
 
     if (missingInfoCount > 0) {
-      parts.push('[영상 정보 가져오기]를 누르면 나머지를 가져옵니다.');
+      parts.push(t('note.info-missing'));
     }
 
     return parts.join(' ');
@@ -623,7 +622,7 @@ export function App() {
 
   const grouping = readGrouping(sortBy);
   const grouped = grouping !== 'none';
-  const listTitle = activeGroupEntry?.label ?? (grouped ? '전체' : '전체 목록');
+  const listTitle = activeGroupEntry?.label ?? t(grouped ? 'list.group-all' : 'list.whole');
   const listPane = (
     <div className="list-pane">
       <ListHeader
@@ -638,7 +637,7 @@ export function App() {
       ) : (
         <VirtualList
           className="video-list"
-          label={`${listTitle} 영상 목록`}
+          label={t('list.aria-label', { title: listTitle })}
           rows={shownRows}
           getHeight={getRowHeight}
           renderRow={renderRow}
@@ -708,7 +707,7 @@ export function App() {
         {emptyReason === 'none' || emptyReason === 'empty' ? (
           <EmptyState reason={emptyReason} busy={busy} listTitle={sourceTitle} onScan={handleScan} />
         ) : grouped ? (
-          <Panes className="group-panes" resizable handleLabel="그룹 목록 너비 조절" locale="ko">
+          <Panes className="group-panes" resizable handleLabel={t('list.resize-handle')} locale={locale}>
             {/* neba reads a bare number as a percentage, so pixel limits are strings. */}
             <Pane defaultSize="34%" minSize="110px" maxSize="60%">
               <GroupRail

@@ -3,6 +3,7 @@
 // YouTube's styles and ours cannot affect each other.
 (() => {
   const ns = (globalThis.ytEasy ??= {});
+  const { t } = ns.i18n;
 
   const HIDE_DELAY = 6000;
 
@@ -56,7 +57,7 @@
 
     style.textContent = STYLE;
     card.className = 'card';
-    card.setAttribute('aria-label', 'yt-easy 작업 진행 상황');
+    card.setAttribute('aria-label', t('content.overlay-label'));
 
     const heading = document.createElement('p');
     const status = document.createElement('p');
@@ -71,10 +72,10 @@
     status.setAttribute('role', 'status');
     current.className = 'current';
     note.className = 'note';
-    note.textContent = '진행 중에는 이 탭을 화면에 띄워 두고, 페이지를 조작하지 마세요.';
+    note.textContent = t('content.overlay-note');
     actions.className = 'actions';
     cancel.type = 'button';
-    cancel.textContent = '취소';
+    cancel.textContent = t('common.cancel');
 
     actions.append(cancel);
     card.append(heading, status, current, progress, note, actions);
@@ -91,7 +92,7 @@
     }
 
     parts.heading.textContent = title;
-    parts.status.textContent = '준비 중…';
+    parts.status.textContent = t('content.overlay-preparing');
     parts.current.textContent = '';
     parts.progress.removeAttribute('value');
     parts.note.hidden = false;
@@ -111,8 +112,8 @@
     parts.progress.max = Math.max(total, 1);
     parts.progress.value = done;
     parts.status.textContent = paused
-      ? `일시 정지: 이 탭이 화면에 보이면 이어서 진행합니다 (${done}/${total})`
-      : `${done}/${total} 처리 · 성공 ${succeeded} · 실패 ${failed}`;
+      ? t('content.overlay-paused', { done, total })
+      : t('content.overlay-progress', { done, total, succeeded, failed });
 
     if (currentTitle !== undefined) {
       parts.current.textContent = currentTitle;

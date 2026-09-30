@@ -23,8 +23,8 @@ describe('reading Data API responses', () => {
   });
 
   it('reads category names', () => {
-    const names = readCategoryItems({ items: [{ id: '10', snippet: { title: ' 음악 ' } }, { id: 'x', snippet: { title: 'bad' } }, { id: '20' }] });
+    const names = readCategoryItems({ items: [{ id: '10', snippet: { title: ' Music ' } }, { id: 'x', snippet: { title: 'bad' } }, { id: '20' }] });
 
-    assert.deepEqual([...names], [['10', '음악']]);
+    assert.deepEqual([...names], [['10', 'Music']]);
   });
 });

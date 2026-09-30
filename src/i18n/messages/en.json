@@ -1,0 +1,286 @@
+{
+  "bridge": {
+    "connect-failed": "Could not connect to the YouTube tab. Reload the playlist tab and try again.",
+    "disconnected": "Lost the connection to the YouTube tab. It may have been closed or reloaded.",
+    "tab-busy": "Another job is already running in the YouTube tab.",
+    "tab-not-loaded": "The YouTube tab did not finish loading."
+  },
+  "category": {
+    "all": "All categories",
+    "badge-title": "YouTube category: {name}",
+    "fallback": "Category {id}",
+    "not-music": "Not music",
+    "unknown": "Unknown category"
+  },
+  "collect": {
+    "empty": "No videos were found in the list. The playlist may be empty or private, or the address may be wrong.",
+    "incomplete": "Could not load the list to the end. Reload the tab and try again.",
+    "needs-page": "Scanning by scrolling works only on the playlist page.",
+    "network": "Could not get the list because of a network error.",
+    "next-empty": "The next part of the list came back empty. Check that you are signed in.",
+    "next-failed": "Could not get the next part of the list.",
+    "next-http": "Could not get the next part of the list (HTTP {status}).",
+    "no-data": "Could not find the list data on the page.",
+    "page-http": "Could not load the playlist page (HTTP {status}).",
+    "signed-out": "You are not signed in to YouTube. Sign in and try again.",
+    "too-long": "The list is longer than expected, so the scan stopped."
+  },
+  "common": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "no-channel": "Unknown channel",
+    "preparing-tab": "Getting the YouTube tab ready…",
+    "save": "Save",
+    "scan": "Start scan",
+    "settings": "Settings",
+    "untitled": "(Untitled)"
+  },
+  "content": {
+    "error-busy": "Another job is already running.",
+    "error-list-id": "The playlist ID is not valid.",
+    "error-no-targets": "There are no videos to remove.",
+    "error-remove": "An error stopped the removal. Scan the list again to check the result.",
+    "error-scan": "An error occurred while scanning the list.",
+    "error-wrong-page": "This tab is not showing the chosen playlist.",
+    "outcome-cancelled": "Cancelled. {succeeded} succeeded · {failed} failed",
+    "outcome-checked": "Check finished. {succeeded} OK · {failed} failed",
+    "outcome-removed": "Removal finished. {succeeded} succeeded · {failed} failed",
+    "overlay-label": "yt-easy job progress",
+    "overlay-note": "Keep this tab on screen, and do not use the page while this runs.",
+    "overlay-paused": "Paused: continues when this tab is on screen ({done}/{total})",
+    "overlay-preparing": "Getting ready…",
+    "overlay-progress": "{done}/{total} handled · {succeeded} succeeded · {failed} failed",
+    "stopped-error": "Stopped because of an error.",
+    "title-dry": "yt-easy · Checking the remove entry (dry run)",
+    "title-remove": "yt-easy · Removing from {title}",
+    "title-remove-playlist": "yt-easy · Removing from the playlist"
+  },
+  "duration": {
+    "over": "{min} min and over",
+    "range": "{min}–{max} min",
+    "under": "Under {max} min",
+    "unknown": "Unknown length"
+  },
+  "empty": {
+    "empty": "The list is empty",
+    "filtered": "No videos match",
+    "lead": "The extension reads the whole list while you are signed in to YouTube. A list of thousands of videos takes one to two minutes. To pick another playlist, click the list name at the top.",
+    "step-pick": "Sort by channel or length, or search, to pick videos.",
+    "step-remove": "Remove them all at once with Remove selected. You can save a backup file first.",
+    "step-scan": "Click Start scan.",
+    "title": "Scan {title} to get started"
+  },
+  "export": {
+    "done": "Exported {count, plural, one {# video} other {# videos}} as a {format} file.",
+    "save-failed": "Could not save {file}.",
+    "save-failed-detail": "Could not save {file}. {detail}",
+    "save-timeout": "Saving {file} did not finish.",
+    "saving": "Saving the file…"
+  },
+  "failure": {
+    "error": "An unexpected error occurred.",
+    "list-stalled": "Could not load more of the list.",
+    "no-menu-button": "Could not find the menu button.",
+    "no-remove-entry": "Could not find the remove entry in the menu.",
+    "not-found": "Not found in the list.",
+    "unconfirmed": "The removal could not be confirmed."
+  },
+  "filter": {
+    "ascending": "Ascending",
+    "ascending-action": "Ascending. Switch to descending",
+    "category-label": "Category",
+    "descending": "Descending",
+    "descending-action": "Descending. Switch to ascending",
+    "duration-all": "All lengths",
+    "duration-label": "Length",
+    "info-fetch": "Look up video info",
+    "info-refresh": "Refresh view counts",
+    "info-tip-fetch": "Looks up the category, publish date, and view count with the YouTube Data API",
+    "info-tip-no-key": "Add an API key in Settings to use this",
+    "info-tip-refresh": "Looks up the view counts of all videos again",
+    "panel-label": "Search and filters",
+    "search-label": "Search titles or channels",
+    "search-placeholder": "Search titles and channels",
+    "sort-label": "Sort and group",
+    "watch-label": "Watch status"
+  },
+  "format": {
+    "hours": "{hours} hr",
+    "hours-minutes": "{hours} hr {minutes} min",
+    "minutes": "{minutes} min",
+    "seconds": "{seconds} sec",
+    "views": "{count, plural, one {{views} view} other {{views} views}}"
+  },
+  "header": {
+    "export": "Export",
+    "export-csv": "Save as CSV",
+    "export-json": "Save as JSON",
+    "filters-active": "Filters applied",
+    "filters-collapse": "Hide search and filters",
+    "filters-expand": "Show search and filters",
+    "open-tab": "Open in a new tab"
+  },
+  "info": {
+    "error-blocked": "This API key is restricted from using the YouTube Data API.",
+    "error-disabled": "YouTube Data API v3 is not enabled in the project of this key.",
+    "error-http": "The YouTube Data API request failed (HTTP {status}).",
+    "error-key": "The API key is not valid.",
+    "error-quota": "The API quota for today is used up. Try again tomorrow.",
+    "fetched": "Looked up the video info.",
+    "fetching": "Looking up video info… {done} / {total}",
+    "permission-needed": "Allow access to www.googleapis.com to look up video info.",
+    "refreshed": "Refreshed the view counts.",
+    "refreshing": "Refreshing view counts… {done} / {total}"
+  },
+  "list": {
+    "aria-label": "Videos in {title}",
+    "group-all": "All",
+    "meta": "{count, plural, one {# video} other {# videos}} · {duration}",
+    "resize-handle": "Resize the group list",
+    "select-all": "Select every video in {title}",
+    "whole": "All videos"
+  },
+  "manifest": {
+    "action-title": "Manage Watch later and playlists",
+    "description": "Sort, filter, export, and bulk-remove the videos in your YouTube Watch later list and playlists."
+  },
+  "note": {
+    "info-coverage": "Video info found for {found} of {total}.",
+    "info-missing": "Look up video info to get the rest.",
+    "info-no-key": "Category, publish date, and view count need a YouTube Data API key. Add one in Settings.",
+    "info-views-since": "View counts are from {time} or later."
+  },
+  "playlist": {
+    "error-empty": "Enter a playlist address or ID.",
+    "error-host": "Only YouTube playlist addresses can be used.",
+    "error-invalid": "This is not a playlist address or ID.",
+    "error-no-id": "The address has no playlist ID (list=…).",
+    "input-desc": "Open the playlist on YouTube and paste the address from the address bar. If it is your own playlist, you can remove videos from it too.",
+    "input-label": "Playlist address or ID",
+    "title": "Scan a playlist"
+  },
+  "rail": {
+    "by-count": "Count",
+    "by-count-title": "Groups with the most videos first",
+    "by-name": "Name",
+    "category": "Categories",
+    "channel": "Channels",
+    "duration": "Length ranges",
+    "order-label": "Order of {label}"
+  },
+  "remove": {
+    "backing-up": "Saving the videos to remove as backup files…",
+    "backup": "Save the list as backup files before removing",
+    "backup-desc": "Saves a JSON and a CSV file to the {folder} folder in your Downloads folder, and starts removing only after both are saved.",
+    "dry-run": "Dry run: find the remove entry without clicking it",
+    "hint": "The playlist tab comes to the front while this runs. Keep it on screen until the job finishes.",
+    "more": "and {count} more",
+    "paused": "Paused: continues when the playlist tab is on screen.",
+    "preparing": "Getting ready to remove… {done} / {total}",
+    "preparing-dry": "Getting ready to check… {done} / {total}",
+    "preview-label": "Videos to remove",
+    "progress": "Removing… {done} / {total} · {title}",
+    "progress-dry": "Checking… {done} / {total} · {title}",
+    "start": "Start removing",
+    "start-dry": "Start checking",
+    "summary": "Removes {count, plural, one {the selected video} other {the # selected videos}} from {title}, one at a time in list order.",
+    "test-count": "How many to handle",
+    "test-count-error": "Enter a whole number from 1 to {max}.",
+    "test-mode": "Test mode: handle only the first few",
+    "title": "Remove selected videos"
+  },
+  "result": {
+    "cancelled": "The job was cancelled.",
+    "dry-ok": "The remove entry was found for every video. Turn off dry run to remove them for real.",
+    "failed": "{count} failed",
+    "failed-heading": "Failed videos",
+    "ok": "{count} OK",
+    "removed": "{count} removed",
+    "select-failed": "Select failed only",
+    "skipped": "{count} not handled",
+    "title": "Removal result",
+    "title-dry": "Dry run result"
+  },
+  "row": {
+    "failed": "Removal failed",
+    "open-current": "Open in this tab",
+    "open-current-label": "Open in this tab: {title}",
+    "open-error": "Could not open the video.",
+    "open-new": "Open in a new tab",
+    "open-new-label": "Open in a new tab: {title}",
+    "select": "Select: {title}",
+    "watched": "{percent}% watched"
+  },
+  "scan": {
+    "cancelled": "Scan cancelled.",
+    "done": "{title}: scanned {count, plural, one {# video} other {# videos}}.",
+    "paused": "Read {count} so far. The scan continues when the YouTube tab is on screen.",
+    "progress": "Scanning… {count} so far",
+    "retry-dom": "Could not read the page data, so the scan starts again by scrolling…",
+    "running": "Scanning the list…"
+  },
+  "selection": {
+    "clear": "Clear selection",
+    "count": "{count} selected",
+    "hint": "{shift} click selects a range · {all} selects all · {esc} clears",
+    "label": "Selection",
+    "remove": "Remove selected",
+    "remove-unavailable": "Videos cannot be removed from this playlist. Only your own playlists and Watch later allow removal.",
+    "select-all": "Select all"
+  },
+  "settings": {
+    "api-key-desc": "Used only to look up categories, publish dates, and view counts. The key is kept in the extension storage of this Chrome profile, and saving it asks for access to www.googleapis.com. Save it empty to remove the key and the access.",
+    "api-key-label": "YouTube Data API key (optional)",
+    "bounds-desc": "Separate with commas. 5, 20, 60 gives under 5 min, 5–20 min, 20–60 min, and 60 min and over.",
+    "bounds-label": "Length range bounds (minutes)",
+    "delay-hint": "After each removal, the extension waits a random time in this range. It cannot be shorter than 1 second.",
+    "delay-max-label": "Max pause (seconds)",
+    "delay-min-label": "Min pause (seconds)",
+    "error-api-key": "The API key format is not valid.",
+    "error-bounds-count": "Enter up to {max} bounds.",
+    "error-bounds-empty": "Enter at least one bound.",
+    "error-bounds-range": "Each bound must be a whole number of minutes from 1 to {max}.",
+    "error-delay-max": "The maximum pause must be from {min} to {max} seconds.",
+    "error-delay-min": "The minimum pause must be from {min} to {max} seconds.",
+    "error-delay-order": "The maximum pause cannot be shorter than the minimum.",
+    "error-test-count": "The test mode count must be a whole number from 1 to {max}.",
+    "key-not-saved": "The API key was not saved, because access to www.googleapis.com was not allowed.",
+    "saved": "Settings saved.",
+    "test-count-label": "Default count for test mode"
+  },
+  "sort": {
+    "category": "Category",
+    "channel": "Channel name",
+    "duration": "Length",
+    "position": "Date added",
+    "published": "Publish date",
+    "views": "View count"
+  },
+  "source": {
+    "add": "Add a playlist…",
+    "description": "{count, plural, one {# video} other {# videos}} · scanned {time}",
+    "forget": "Remove this list from history",
+    "forgotten": "Removed {title} from history.",
+    "not-scanned": "Not scanned yet",
+    "switch-label": "Switch list. Current list: {title}",
+    "watch-later": "Watch later"
+  },
+  "status": {
+    "by-scrolling": "Read by scrolling",
+    "cancelling": "Cancelling…",
+    "scanned": "Scanned {time}",
+    "shown": "{count} shown",
+    "total": "{count, plural, one {# video} other {# videos}} in all"
+  },
+  "stop": {
+    "left-page": "Stopped because the tab left the playlist page.",
+    "repeated": "Stopped after {count} failures in a row. YouTube may have changed its page.",
+    "wrong-row": "Stopped because a video other than the target may have been removed. Scan the list again to check."
+  },
+  "watch": {
+    "all": "Any watch status",
+    "partial": "Partly watched",
+    "unwatched": "Not watched",
+    "watched": "Watched"
+  }
+}

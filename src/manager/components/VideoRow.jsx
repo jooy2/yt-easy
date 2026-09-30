@@ -1,6 +1,7 @@
 import { Checkbox, Chip, IconButton, Tooltip, VisuallyHidden } from 'neba';
 import { memo } from 'react';
 
+import { t } from '../../i18n/runtime.js';
 import { formatDuration } from '../lib/format.js';
 import { toThumbnailUrl } from '../lib/snapshot.js';
 
@@ -24,7 +25,7 @@ export const VideoRow = memo(function VideoRow({
   onOpen,
   onOpenNewTab,
 }) {
-  const title = item.title || '(제목 없음)';
+  const title = item.title || t('common.untitled');
 
   // Handled in the capture phase so a click on the checkbox also sees the
   // Shift key, and so the checkbox does not toggle a second time.
@@ -55,7 +56,7 @@ export const VideoRow = memo(function VideoRow({
       onClickCapture={handleClickCapture}
       onMouseDown={handleMouseDown}
     >
-      <Checkbox checked={selected} onCheckedChange={() => onSelect(item.videoId, { range: false })} aria-label={`선택: ${title}`} />
+      <Checkbox checked={selected} onCheckedChange={() => onSelect(item.videoId, { range: false })} aria-label={t('row.select', { title })} />
       <div className="video-thumb">
         <img src={toThumbnailUrl(item.videoId)} alt="" width="96" height="54" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
         {item.watchedPercent > 0 && (
@@ -67,32 +68,32 @@ export const VideoRow = memo(function VideoRow({
       <div className="video-text">
         <p className="video-title" title={item.title}>{title}</p>
         <div className="video-meta">
-          <span className="video-channel">{item.channelName || '채널 정보 없음'}</span>
-          <span className="video-number">{item.durationText || formatDuration(item.durationSeconds) || '길이 정보 없음'}</span>
+          <span className="video-channel">{item.channelName || t('common.no-channel')}</span>
+          <span className="video-number">{item.durationText || formatDuration(item.durationSeconds) || t('duration.unknown')}</span>
           <span className="video-number">#{item.position}</span>
           {extra && <span className="video-number">{extra}</span>}
-          {item.watchedPercent > 0 && <VisuallyHidden>{item.watchedPercent}% 시청</VisuallyHidden>}
-          {categoryName && <Chip size="xs" variant="outline" title={`YouTube 카테고리: ${categoryName}`}>{categoryName}</Chip>}
-          {failure && <Chip size="xs" color="danger" variant="outline" title={failure}>삭제 실패</Chip>}
+          {item.watchedPercent > 0 && <VisuallyHidden>{t('row.watched', { percent: item.watchedPercent })}</VisuallyHidden>}
+          {categoryName && <Chip className="video-category" size="xs" variant="outline" title={t('category.badge-title', { name: categoryName })}>{categoryName}</Chip>}
+          {failure && <Chip size="xs" color="danger" variant="outline" title={failure}>{t('row.failed')}</Chip>}
         </div>
       </div>
       <div className="video-actions">
-        <Tooltip content="현재 탭에서 열기">
+        <Tooltip content={t('row.open-current')}>
           <IconButton
             size="sm"
             variant="text"
             icon={<PlayIcon />}
-            label={`현재 탭에서 열기: ${title}`}
+            label={t('row.open-current-label', { title })}
             onClick={() => onOpen(item.videoId)}
             disabled={openDisabled}
           />
         </Tooltip>
-        <Tooltip content="새 탭으로 열기">
+        <Tooltip content={t('row.open-new')}>
           <IconButton
             size="sm"
             variant="text"
             icon={<ExternalIcon />}
-            label={`새 탭으로 열기: ${title}`}
+            label={t('row.open-new-label', { title })}
             onClick={() => onOpenNewTab(item.videoId)}
           />
         </Tooltip>

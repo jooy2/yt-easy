@@ -1,6 +1,6 @@
 // Synthetic page data shaped like the playlist data YouTube serves. The IDs,
 // titles, and channels are invented.
-export const REMOVE_LABEL = '나중에 볼 동영상에서 삭제';
+export const REMOVE_LABEL = 'Remove from Watch later';
 
 const removeCommand = (videoId) => ({
   innertubeCommand: {

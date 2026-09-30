@@ -1,3 +1,5 @@
+import { t } from '../../i18n/runtime.js';
+
 export const DEFAULT_SETTINGS = Object.freeze({
   durationBounds: Object.freeze([5, 20, 60]),
   removeDelayMin: 1,
@@ -27,17 +29,17 @@ export const parseBounds = (text) => {
   const parts = String(text ?? '').split(/[\s,]+/).filter(Boolean);
 
   if (parts.length === 0) {
-    return { error: '구간 경계를 하나 이상 입력해 주세요.' };
+    return { error: t('settings.error-bounds-empty') };
   }
 
   if (parts.length > SETTINGS_LIMITS.boundsMax) {
-    return { error: `구간 경계는 ${SETTINGS_LIMITS.boundsMax}개까지 입력할 수 있습니다.` };
+    return { error: t('settings.error-bounds-count', { max: SETTINGS_LIMITS.boundsMax }) };
   }
 
   const values = parts.map(Number);
 
   if (values.some((value) => !Number.isInteger(value) || !isNumberInRange(value, 1, SETTINGS_LIMITS.boundMinutesMax))) {
-    return { error: `구간 경계는 1부터 ${SETTINGS_LIMITS.boundMinutesMax} 사이의 정수(분)여야 합니다.` };
+    return { error: t('settings.error-bounds-range', { max: SETTINGS_LIMITS.boundMinutesMax }) };
   }
 
   return { value: cleanBounds(values) };
@@ -82,21 +84,21 @@ export const validateSettingsForm = ({ boundsText, delayMin, delayMax, testModeC
   }
 
   if (!isNumberInRange(min, SETTINGS_LIMITS.delayMin, SETTINGS_LIMITS.delayMax)) {
-    errors.delayMin = `최소 간격은 ${SETTINGS_LIMITS.delayMin}초에서 ${SETTINGS_LIMITS.delayMax}초 사이여야 합니다.`;
+    errors.delayMin = t('settings.error-delay-min', { min: SETTINGS_LIMITS.delayMin, max: SETTINGS_LIMITS.delayMax });
   }
 
   if (!isNumberInRange(max, SETTINGS_LIMITS.delayMin, SETTINGS_LIMITS.delayMax)) {
-    errors.delayMax = `최대 간격은 ${SETTINGS_LIMITS.delayMin}초에서 ${SETTINGS_LIMITS.delayMax}초 사이여야 합니다.`;
+    errors.delayMax = t('settings.error-delay-max', { min: SETTINGS_LIMITS.delayMin, max: SETTINGS_LIMITS.delayMax });
   } else if (!errors.delayMin && max < min) {
-    errors.delayMax = '최대 간격은 최소 간격보다 짧을 수 없습니다.';
+    errors.delayMax = t('settings.error-delay-order');
   }
 
   if (!Number.isInteger(count) || !isNumberInRange(count, 1, SETTINGS_LIMITS.testModeMax)) {
-    errors.testModeCount = `테스트 모드 개수는 1부터 ${SETTINGS_LIMITS.testModeMax} 사이의 정수여야 합니다.`;
+    errors.testModeCount = t('settings.error-test-count', { max: SETTINGS_LIMITS.testModeMax });
   }
 
   if (key && !API_KEY_PATTERN.test(key)) {
-    errors.apiKey = 'API 키 형식이 올바르지 않습니다.';
+    errors.apiKey = t('settings.error-api-key');
   }
 
   if (Object.keys(errors).length > 0) {

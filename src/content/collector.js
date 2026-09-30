@@ -11,6 +11,7 @@
 (() => {
   const ns = (globalThis.ytEasy ??= {});
   const { PAGE_DATA, SELECTORS, WATCH_LATER_LIST_ID, toPlaylistPath, util } = ns;
+  const { t } = ns.i18n;
 
   const MAX_PAGES = 200;
   const PAGE_DELAY_MIN = 800;
@@ -485,7 +486,7 @@
       const retryable = !response || response.status === 429 || response.status >= 500;
 
       if (!retryable || attempt >= RETRY_DELAYS.length) {
-        throw new CollectError(`목록의 다음 부분을 받지 못했습니다 (HTTP ${response?.status ?? '오류'}).`);
+        throw new CollectError(response ? t('collect.next-http', { status: String(response.status) }) : t('collect.next-failed'));
       }
 
       await util.sleep(RETRY_DELAYS[attempt], signal);
@@ -518,7 +519,7 @@
     const response = await fetch(new URL(toPlaylistPath(listId), location.origin), { credentials: 'same-origin', signal });
 
     if (!response.ok) {
-      throw new CollectError(`재생목록 페이지를 불러오지 못했습니다 (HTTP ${response.status}).`);
+      throw new CollectError(t('collect.page-http', { status: String(response.status) }));
     }
 
     const html = await response.text();
@@ -527,13 +528,13 @@
     // Watch later belongs to an account. A public playlist can be read
     // signed out, and a private one answers with YouTube's own message below.
     if (config.LOGGED_IN === false && listId === WATCH_LATER_LIST_ID) {
-      throw new CollectError('YouTube에 로그인되어 있지 않습니다. 로그인한 뒤 다시 시도해 주세요.', { code: 'signed-out' });
+      throw new CollectError(t('collect.signed-out'), { code: 'signed-out' });
     }
 
     const data = findAssignedObject(html, PAGE_DATA.initialDataMarkers);
 
     if (!data || !config.INNERTUBE_CONTEXT) {
-      throw new CollectError('페이지에서 목록 데이터를 찾지 못했습니다.');
+      throw new CollectError(t('collect.no-data'));
     }
 
     const store = createItemStore();
@@ -547,7 +548,7 @@
 
     while (page.token) {
       if (pages >= MAX_PAGES) {
-        throw new CollectError('목록이 예상보다 깁니다. 스캔을 멈췄습니다.');
+        throw new CollectError(t('collect.too-long'));
       }
 
       await util.sleep(util.randomBetween(PAGE_DELAY_MIN, PAGE_DELAY_MAX), signal);
@@ -560,7 +561,7 @@
       // failed request (for example, one YouTube answered as signed out), not
       // the end of the list. Stopping here would return a silently short list.
       if (store.add(page.items) === 0) {
-        throw new CollectError('목록의 다음 부분이 비어 있습니다. 로그인 상태를 확인해 주세요.');
+        throw new CollectError(t('collect.next-empty'));
       }
 
       removeLabel ??= page.removeLabel;
@@ -571,7 +572,7 @@
     if (store.size === 0) {
       // YouTube's own words, such as "this playlist does not exist", say
       // more than a guess would.
-      throw new CollectError(info.alert || '목록에서 영상을 찾지 못했습니다. 재생목록이 비어 있거나, 비공개이거나, 주소가 잘못됐을 수 있습니다.', { code: 'empty' });
+      throw new CollectError(info.alert || t('collect.empty'), { code: 'empty' });
     }
 
     return { items: store.values(), removeLabel, method: 'data', listId, title: info.title };
@@ -623,7 +624,7 @@
     const { page } = ns;
 
     if (!page.isListPage(listId) || !page.getPlaylistRoot()) {
-      throw new CollectError('재생목록 페이지에서만 스크롤 방식으로 스캔할 수 있습니다.', { code: 'needs-page' });
+      throw new CollectError(t('collect.needs-page'), { code: 'needs-page' });
     }
 
     const onPause = () => onProgress?.({ count: page.getItemElements().length, paused: true });
@@ -638,7 +639,7 @@
       }
 
       if (state === 'stalled') {
-        throw new CollectError('목록을 끝까지 불러오지 못했습니다. 탭을 새로고침한 뒤 다시 시도해 주세요.');
+        throw new CollectError(t('collect.incomplete'));
       }
 
       await util.sleep(util.randomBetween(PAGE_DELAY_MIN, PAGE_DELAY_MAX), signal);
@@ -670,7 +671,7 @@
       }
 
       // Network and parse errors arrive with English browser messages.
-      const message = error instanceof CollectError ? error.message : '네트워크 오류로 목록을 받지 못했습니다.';
+      const message = error instanceof CollectError ? error.message : t('collect.network');
 
       // The manager brings the tab to the front and asks again with 'dom'.
       throw new CollectError(message, { code: 'needs-dom' });

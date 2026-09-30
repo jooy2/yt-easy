@@ -1,0 +1,286 @@
+{
+  "bridge": {
+    "connect-failed": "YouTube 탭에 연결하지 못했습니다. 재생목록 탭을 새로고침한 뒤 다시 시도해 주세요.",
+    "disconnected": "YouTube 탭과의 연결이 끊어졌습니다. 탭이 닫혔거나 새로고침됐을 수 있습니다.",
+    "tab-busy": "YouTube 탭에서 이미 다른 작업이 진행 중입니다.",
+    "tab-not-loaded": "YouTube 탭이 로드되지 않았습니다."
+  },
+  "category": {
+    "all": "모든 영상 종류",
+    "badge-title": "YouTube 카테고리: {name}",
+    "fallback": "카테고리 {id}",
+    "not-music": "음악 제외",
+    "unknown": "종류 미확인"
+  },
+  "collect": {
+    "empty": "목록에서 영상을 찾지 못했습니다. 재생목록이 비어 있거나, 비공개이거나, 주소가 잘못됐을 수 있습니다.",
+    "incomplete": "목록을 끝까지 불러오지 못했습니다. 탭을 새로고침한 뒤 다시 시도해 주세요.",
+    "needs-page": "재생목록 페이지에서만 스크롤 방식으로 스캔할 수 있습니다.",
+    "network": "네트워크 오류로 목록을 받지 못했습니다.",
+    "next-empty": "목록의 다음 부분이 비어 있습니다. 로그인 상태를 확인해 주세요.",
+    "next-failed": "목록의 다음 부분을 받지 못했습니다.",
+    "next-http": "목록의 다음 부분을 받지 못했습니다 (HTTP {status}).",
+    "no-data": "페이지에서 목록 데이터를 찾지 못했습니다.",
+    "page-http": "재생목록 페이지를 불러오지 못했습니다 (HTTP {status}).",
+    "signed-out": "YouTube에 로그인되어 있지 않습니다. 로그인한 뒤 다시 시도해 주세요.",
+    "too-long": "목록이 예상보다 깁니다. 스캔을 멈췄습니다."
+  },
+  "common": {
+    "cancel": "취소",
+    "close": "닫기",
+    "no-channel": "채널 정보 없음",
+    "preparing-tab": "YouTube 탭을 준비하는 중…",
+    "save": "저장",
+    "scan": "스캔 시작",
+    "settings": "설정",
+    "untitled": "(제목 없음)"
+  },
+  "content": {
+    "error-busy": "이미 다른 작업이 진행 중입니다.",
+    "error-list-id": "재생목록 ID가 올바르지 않습니다.",
+    "error-no-targets": "삭제할 영상이 없습니다.",
+    "error-remove": "삭제 중 오류가 발생해 중단했습니다. 목록을 다시 스캔해 결과를 확인해 주세요.",
+    "error-scan": "목록을 스캔하는 중 오류가 발생했습니다.",
+    "error-wrong-page": "이 탭이 선택한 재생목록의 페이지가 아닙니다.",
+    "outcome-cancelled": "취소했습니다. 성공 {succeeded} · 실패 {failed}",
+    "outcome-checked": "확인을 마쳤습니다. 정상 {succeeded} · 실패 {failed}",
+    "outcome-removed": "삭제를 마쳤습니다. 성공 {succeeded} · 실패 {failed}",
+    "overlay-label": "yt-easy 작업 진행 상황",
+    "overlay-note": "진행 중에는 이 탭을 화면에 띄워 두고, 페이지를 조작하지 마세요.",
+    "overlay-paused": "일시 정지: 이 탭이 화면에 보이면 이어서 진행합니다 ({done}/{total})",
+    "overlay-preparing": "준비 중…",
+    "overlay-progress": "{done}/{total} 처리 · 성공 {succeeded} · 실패 {failed}",
+    "stopped-error": "오류로 중단했습니다.",
+    "title-dry": "yt-easy · 삭제 메뉴 확인 (드라이런)",
+    "title-remove": "yt-easy · {title}에서 삭제 중",
+    "title-remove-playlist": "yt-easy · 재생목록에서 삭제 중"
+  },
+  "duration": {
+    "over": "{min}분 이상",
+    "range": "{min}–{max}분",
+    "under": "{max}분 미만",
+    "unknown": "길이 정보 없음"
+  },
+  "empty": {
+    "empty": "목록이 비어 있습니다",
+    "filtered": "조건에 맞는 영상이 없습니다",
+    "lead": "YouTube에 로그인한 상태에서 목록 전체를 읽어 옵니다. 영상이 수천 개면 1–2분 걸립니다. 다른 재생목록은 맨 위의 목록 이름을 눌러 고를 수 있습니다.",
+    "step-pick": "채널명순·길이순으로 나누거나 검색해서 영상을 고릅니다.",
+    "step-remove": "선택 항목 삭제로 한 번에 지웁니다. 원하면 지우기 전에 백업 파일을 저장할 수 있습니다.",
+    "step-scan": "스캔 시작을 누릅니다.",
+    "title": "{title} 목록을 스캔해 보세요"
+  },
+  "export": {
+    "done": "{count}개를 {format} 파일로 내보냈습니다.",
+    "save-failed": "{file} 파일을 저장하지 못했습니다.",
+    "save-failed-detail": "{file} 파일을 저장하지 못했습니다. {detail}",
+    "save-timeout": "{file} 파일 저장이 끝나지 않았습니다.",
+    "saving": "파일을 저장하는 중…"
+  },
+  "failure": {
+    "error": "예상하지 못한 오류가 발생했습니다.",
+    "list-stalled": "목록을 더 불러오지 못했습니다.",
+    "no-menu-button": "메뉴 버튼을 찾지 못했습니다.",
+    "no-remove-entry": "메뉴에서 삭제 항목을 찾지 못했습니다.",
+    "not-found": "목록에서 찾지 못했습니다.",
+    "unconfirmed": "삭제가 확인되지 않았습니다."
+  },
+  "filter": {
+    "ascending": "오름차순",
+    "ascending-action": "오름차순. 눌러서 내림차순으로 바꾸기",
+    "category-label": "영상 종류",
+    "descending": "내림차순",
+    "descending-action": "내림차순. 눌러서 오름차순으로 바꾸기",
+    "duration-all": "모든 길이",
+    "duration-label": "길이",
+    "info-fetch": "영상 정보 가져오기",
+    "info-refresh": "조회수 새로고침",
+    "info-tip-fetch": "YouTube Data API로 영상 종류, 게시일, 조회수를 가져옵니다",
+    "info-tip-no-key": "설정에 API 키를 넣으면 쓸 수 있습니다",
+    "info-tip-refresh": "모든 영상의 조회수를 새로 가져옵니다",
+    "panel-label": "검색과 필터",
+    "search-label": "제목 또는 채널 검색",
+    "search-placeholder": "제목, 채널 검색",
+    "sort-label": "정렬과 분류",
+    "watch-label": "시청 여부"
+  },
+  "format": {
+    "hours": "{hours}시간",
+    "hours-minutes": "{hours}시간 {minutes}분",
+    "minutes": "{minutes}분",
+    "seconds": "{seconds}초",
+    "views": "조회수 {views}회"
+  },
+  "header": {
+    "export": "내보내기",
+    "export-csv": "CSV 파일로 저장",
+    "export-json": "JSON 파일로 저장",
+    "filters-active": "필터 적용 중",
+    "filters-collapse": "검색과 필터 접기",
+    "filters-expand": "검색과 필터 펼치기",
+    "open-tab": "새 탭에서 열기"
+  },
+  "info": {
+    "error-blocked": "이 API 키로는 YouTube Data API를 쓸 수 없도록 제한되어 있습니다.",
+    "error-disabled": "이 키의 프로젝트에서 YouTube Data API v3가 사용 설정되어 있지 않습니다.",
+    "error-http": "YouTube Data API 요청이 실패했습니다 (HTTP {status}).",
+    "error-key": "API 키가 올바르지 않습니다.",
+    "error-quota": "오늘 쓸 수 있는 API 할당량을 모두 썼습니다. 내일 다시 시도해 주세요.",
+    "fetched": "영상 정보를 가져왔습니다.",
+    "fetching": "영상 정보를 가져오는 중… {done} / {total}",
+    "permission-needed": "www.googleapis.com 접근 권한을 허용해야 영상 정보를 가져올 수 있습니다.",
+    "refreshed": "조회수를 새로 가져왔습니다.",
+    "refreshing": "조회수를 새로 가져오는 중… {done} / {total}"
+  },
+  "list": {
+    "aria-label": "{title} 영상 목록",
+    "group-all": "전체",
+    "meta": "{count}개 · {duration}",
+    "resize-handle": "그룹 목록 너비 조절",
+    "select-all": "{title}의 영상 모두 선택",
+    "whole": "전체 목록"
+  },
+  "manifest": {
+    "action-title": "나중에 볼 동영상·재생목록 관리",
+    "description": "YouTube '나중에 볼 동영상'과 재생목록을 분류하고, 여러 개를 골라 한 번에 삭제합니다."
+  },
+  "note": {
+    "info-coverage": "영상 정보 {found} / {total}개 확인.",
+    "info-missing": "[영상 정보 가져오기]를 누르면 나머지를 가져옵니다.",
+    "info-no-key": "영상 종류, 게시일, 조회수는 YouTube Data API 키가 있어야 볼 수 있습니다. 설정에서 키를 넣어 주세요.",
+    "info-views-since": "조회수는 {time} 이후 기준입니다."
+  },
+  "playlist": {
+    "error-empty": "재생목록 주소나 ID를 입력해 주세요.",
+    "error-host": "YouTube 재생목록 주소만 쓸 수 있습니다.",
+    "error-invalid": "재생목록 주소나 ID를 알아볼 수 없습니다.",
+    "error-no-id": "주소에 재생목록 ID(list=…)가 없습니다.",
+    "input-desc": "YouTube에서 재생목록을 열고 주소창의 주소를 붙여 넣으세요. 내 재생목록이면 영상을 삭제할 수도 있습니다.",
+    "input-label": "재생목록 주소 또는 ID",
+    "title": "재생목록 스캔"
+  },
+  "rail": {
+    "by-count": "많은 순",
+    "by-count-title": "영상이 많은 것부터",
+    "by-name": "이름순",
+    "category": "영상 종류",
+    "channel": "채널",
+    "duration": "길이 구간",
+    "order-label": "{label} 순서"
+  },
+  "remove": {
+    "backing-up": "삭제 대상을 백업 파일로 저장하는 중…",
+    "backup": "삭제 전에 대상 목록을 백업 파일로 저장",
+    "backup-desc": "JSON과 CSV 파일을 다운로드 폴더의 {folder} 폴더에 저장하고, 두 파일이 모두 저장된 뒤에 삭제를 시작합니다.",
+    "dry-run": "드라이런: 삭제 메뉴를 찾기만 하고 누르지 않음",
+    "hint": "진행하는 동안 재생목록 탭이 앞으로 나옵니다. 끝날 때까지 그 탭을 화면에 띄워 두세요.",
+    "more": "외 {count}개",
+    "paused": "일시 정지: 재생목록 탭이 화면에 보이면 이어서 진행합니다.",
+    "preparing": "삭제 준비 중… {done} / {total}",
+    "preparing-dry": "확인 준비 중… {done} / {total}",
+    "preview-label": "삭제할 영상",
+    "progress": "삭제 중… {done} / {total} · {title}",
+    "progress-dry": "확인 중… {done} / {total} · {title}",
+    "start": "삭제 시작",
+    "start-dry": "확인 시작",
+    "summary": "선택한 {count}개를 {title}에서 삭제합니다. 목록 순서대로 한 건씩 처리합니다.",
+    "test-count": "처리할 개수",
+    "test-count-error": "1부터 {max} 사이의 정수를 입력해 주세요.",
+    "test-mode": "테스트 모드: 앞에서부터 몇 개만 처리",
+    "title": "선택 항목 삭제"
+  },
+  "result": {
+    "cancelled": "작업을 취소했습니다.",
+    "dry-ok": "모든 항목에서 삭제 메뉴를 찾았습니다. 드라이런을 끄고 실제로 삭제할 수 있습니다.",
+    "failed": "실패 {count}개",
+    "failed-heading": "실패한 항목",
+    "ok": "정상 {count}개",
+    "removed": "삭제 {count}개",
+    "select-failed": "실패 항목만 선택",
+    "skipped": "처리하지 않음 {count}개",
+    "title": "삭제 결과",
+    "title-dry": "드라이런 결과"
+  },
+  "row": {
+    "failed": "삭제 실패",
+    "open-current": "현재 탭에서 열기",
+    "open-current-label": "현재 탭에서 열기: {title}",
+    "open-error": "영상을 열지 못했습니다.",
+    "open-new": "새 탭으로 열기",
+    "open-new-label": "새 탭으로 열기: {title}",
+    "select": "선택: {title}",
+    "watched": "{percent}% 시청"
+  },
+  "scan": {
+    "cancelled": "스캔을 취소했습니다.",
+    "done": "{title}: {count}개를 스캔했습니다.",
+    "paused": "{count}개까지 읽었습니다. YouTube 탭이 화면에 보이면 이어서 진행합니다.",
+    "progress": "{count}개 스캔 중…",
+    "retry-dom": "페이지 데이터로 읽지 못해 스크롤 방식으로 다시 스캔합니다…",
+    "running": "목록을 스캔하는 중…"
+  },
+  "selection": {
+    "clear": "선택 해제",
+    "count": "선택 {count}개",
+    "hint": "{shift} 클릭 범위 선택 · {all} 모두 선택 · {esc} 해제",
+    "label": "선택",
+    "remove": "선택 항목 삭제",
+    "remove-unavailable": "이 재생목록에서는 삭제할 수 없습니다. 내 재생목록과 나중에 볼 동영상만 삭제할 수 있습니다.",
+    "select-all": "전체 선택"
+  },
+  "settings": {
+    "api-key-desc": "영상 종류, 게시일, 조회수를 가져올 때만 씁니다. 키는 이 Chrome 프로필의 확장 프로그램 저장소에 저장되고, 저장할 때 www.googleapis.com 접근 권한을 요청합니다. 비워 두고 저장하면 키와 권한을 지웁니다.",
+    "api-key-label": "YouTube Data API 키 (선택)",
+    "bounds-desc": "쉼표로 구분합니다. 5, 20, 60이면 5분 미만, 5–20분, 20–60분, 60분 이상으로 나눕니다.",
+    "bounds-label": "재생시간 구간 경계 (분)",
+    "delay-hint": "한 건을 삭제할 때마다 이 범위에서 무작위로 기다립니다. 1초보다 짧게는 설정할 수 없습니다.",
+    "delay-max-label": "최대 (초)",
+    "delay-min-label": "삭제 간격 최소 (초)",
+    "error-api-key": "API 키 형식이 올바르지 않습니다.",
+    "error-bounds-count": "구간 경계는 {max}개까지 입력할 수 있습니다.",
+    "error-bounds-empty": "구간 경계를 하나 이상 입력해 주세요.",
+    "error-bounds-range": "구간 경계는 1부터 {max} 사이의 정수(분)여야 합니다.",
+    "error-delay-max": "최대 간격은 {min}초에서 {max}초 사이여야 합니다.",
+    "error-delay-min": "최소 간격은 {min}초에서 {max}초 사이여야 합니다.",
+    "error-delay-order": "최대 간격은 최소 간격보다 짧을 수 없습니다.",
+    "error-test-count": "테스트 모드 개수는 1부터 {max} 사이의 정수여야 합니다.",
+    "key-not-saved": "www.googleapis.com 접근 권한을 허용하지 않아 API 키를 저장하지 않았습니다.",
+    "saved": "설정을 저장했습니다.",
+    "test-count-label": "테스트 모드 기본 개수"
+  },
+  "sort": {
+    "category": "영상 종류순",
+    "channel": "채널명순",
+    "duration": "길이순",
+    "position": "추가된 날짜순",
+    "published": "게시일순",
+    "views": "조회수순"
+  },
+  "source": {
+    "add": "재생목록 추가…",
+    "description": "{count}개 · {time} 스캔",
+    "forget": "이 목록을 기록에서 지우기",
+    "forgotten": "{title} 목록을 기록에서 지웠습니다.",
+    "not-scanned": "아직 스캔하지 않음",
+    "switch-label": "목록 바꾸기. 지금 목록: {title}",
+    "watch-later": "나중에 볼 동영상"
+  },
+  "status": {
+    "by-scrolling": "스크롤 방식",
+    "cancelling": "취소하는 중…",
+    "scanned": "{time} 스캔",
+    "shown": "표시 {count}개",
+    "total": "전체 {count}개"
+  },
+  "stop": {
+    "left-page": "재생목록 페이지를 벗어나 중단했습니다.",
+    "repeated": "연속 {count}번 실패해 중단했습니다. YouTube 화면 구조가 바뀌었을 수 있습니다.",
+    "wrong-row": "대상이 아닌 영상이 삭제됐을 수 있어 중단했습니다. 목록을 다시 스캔해 확인해 주세요."
+  },
+  "watch": {
+    "all": "시청 여부 전체",
+    "partial": "보다 만 영상",
+    "unwatched": "안 본 영상",
+    "watched": "다 본 영상"
+  }
+}

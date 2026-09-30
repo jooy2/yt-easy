@@ -4,26 +4,28 @@
 (() => {
   const ns = (globalThis.ytEasy ??= {});
   const { SELECTORS, REMOVE_MENU_LABELS, WATCH_LATER_LIST_ID, util, page } = ns;
+  const { t } = ns.i18n;
 
   const MENU_OPEN_TIMEOUT = 4000;
   const MENU_CLOSE_TIMEOUT = 1500;
   const REMOVAL_TIMEOUT = 8000;
   const MAX_CONSECUTIVE_FAILURES = 3;
 
+  // The message key of the reason shown for each failure code.
   const FAILURE_REASONS = {
-    'not-found': '목록에서 찾지 못했습니다.',
-    'list-stalled': '목록을 더 불러오지 못했습니다.',
-    'no-menu-button': '메뉴 버튼을 찾지 못했습니다.',
-    'no-remove-entry': '메뉴에서 삭제 항목을 찾지 못했습니다.',
-    unconfirmed: '삭제가 확인되지 않았습니다.',
-    error: '예상하지 못한 오류가 발생했습니다.',
+    'not-found': 'failure.not-found',
+    'list-stalled': 'failure.list-stalled',
+    'no-menu-button': 'failure.no-menu-button',
+    'no-remove-entry': 'failure.no-remove-entry',
+    unconfirmed: 'failure.unconfirmed',
+    error: 'failure.error',
   };
 
   // Stops the whole job: the row count dropped while the target stayed, so a
   // click may have landed on another video.
   class WrongRowError extends Error {}
 
-  const fail = (code) => ({ ok: false, code, reason: FAILURE_REASONS[code] });
+  const fail = (code) => ({ ok: false, code, reason: t(FAILURE_REASONS[code]) });
 
   const normalizeLabel = (text) => String(text).normalize('NFC').replace(/\s+/g, ' ').trim().toLowerCase();
 
@@ -142,7 +144,7 @@
     }
 
     if (page.getItemElements().length < rowsBefore) {
-      throw new WrongRowError('대상이 아닌 영상이 삭제됐을 수 있어 중단했습니다. 목록을 다시 스캔해 확인해 주세요.');
+      throw new WrongRowError(t('stop.wrong-row'));
     }
 
     return fail('unconfirmed');
@@ -166,7 +168,7 @@
     try {
       for (const [index, target] of targets.entries()) {
         if (!page.isListPage(listId)) {
-          stopReason = '재생목록 페이지를 벗어나 중단했습니다.';
+          stopReason = t('stop.left-page');
           break;
         }
 
@@ -196,7 +198,7 @@
         consecutiveFailures = result.ok || result.code === 'not-found' ? 0 : consecutiveFailures + 1;
 
         if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-          stopReason = `연속 ${MAX_CONSECUTIVE_FAILURES}번 실패해 중단했습니다. YouTube 화면 구조가 바뀌었을 수 있습니다.`;
+          stopReason = t('stop.repeated', { count: MAX_CONSECUTIVE_FAILURES });
           break;
         }
 

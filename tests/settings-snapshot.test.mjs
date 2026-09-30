@@ -85,11 +85,11 @@ describe('snapshot', () => {
   it('records the list it belongs to, with Watch later as the default', () => {
     assert.deepEqual(
       (({ listId, title }) => [listId, title])(createSnapshot({ items: [], collectedAt: 1 })),
-      ['WL', '나중에 볼 동영상'],
+      ['WL', 'Watch later'],
     );
     assert.deepEqual(
-      (({ listId, title }) => [listId, title])(createSnapshot({ listId: 'PLabc123', title: ' 여행 ', items: [], collectedAt: 1 })),
-      ['PLabc123', '여행'],
+      (({ listId, title }) => [listId, title])(createSnapshot({ listId: 'PLabc123', title: ' Travel ', items: [], collectedAt: 1 })),
+      ['PLabc123', 'Travel'],
     );
     assert.equal(createSnapshot({ listId: 'bad id!', items: [], collectedAt: 1 }).listId, 'WL');
   });

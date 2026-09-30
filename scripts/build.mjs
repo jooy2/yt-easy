@@ -6,8 +6,10 @@
 //
 // The manager page is bundled with esbuild. The service worker and the
 // content scripts are plain scripts that Chrome loads as they are, so they
-// are copied without changes, and so is the manifest.
-import { cpSync, existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+// are copied without changes, and so is the manifest. The one exception is
+// `src/content/i18n.js`, which esbuild builds from `src/i18n/` so the content
+// scripts read the same messages as the manager.
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 import * as esbuild from 'esbuild';
@@ -19,6 +21,8 @@ const IS_WATCH = FLAGS.has('--watch');
 const IS_DEV = IS_WATCH || FLAGS.has('--dev');
 
 const MANAGER_ENTRY = 'src/manager/main.jsx';
+const CONTENT_I18N_ENTRY = 'src/i18n/content.js';
+const MESSAGES_DIR = 'src/i18n/messages';
 const STATIC_ENTRIES = [
   'manifest.json',
   'icons',
@@ -78,6 +82,26 @@ const writeNotices = (metafile) => {
   );
 };
 
+// Chrome reads the extension's description and toolbar title from
+// `_locales`, in its own format, so the `manifest` group of each message file
+// is written there: `manifest.action-title` becomes `manifest_action_title`,
+// which the manifest reads as `__MSG_manifest_action_title__`.
+const writeManifestLocales = () => {
+  for (const file of readdirSync(path.join(ROOT, MESSAGES_DIR))) {
+    const locale = path.basename(file, '.json');
+    const { manifest } = JSON.parse(readFileSync(path.join(ROOT, MESSAGES_DIR, file), 'utf8'));
+    const messages = Object.fromEntries(Object.entries(manifest).map(([key, message]) => [
+      `manifest_${key.replaceAll('-', '_')}`,
+      // A dollar sign starts a placeholder in Chrome's format.
+      { message: message.replaceAll('$', '$$$$') },
+    ]));
+    const folder = path.join(OUT, '_locales', locale);
+
+    mkdirSync(folder, { recursive: true });
+    writeFileSync(path.join(folder, 'messages.json'), `${JSON.stringify(messages, null, 2)}\n`);
+  }
+};
+
 const afterBuildPlugin = {
   name: 'after-build',
   setup: (build) => {
@@ -87,28 +111,40 @@ const afterBuildPlugin = {
       }
 
       copyStatic();
+      writeManifestLocales();
       writeNotices(result.metafile);
     });
   },
 };
 
-const options = {
-  entryPoints: { 'src/manager/app': path.join(ROOT, MANAGER_ENTRY) },
+const sharedOptions = {
   outdir: OUT,
   absWorkingDir: ROOT,
   bundle: true,
-  format: 'esm',
   platform: 'browser',
   target: ['chrome116'],
-  jsx: 'automatic',
   minify: !IS_DEV,
   sourcemap: IS_DEV ? 'linked' : false,
   // License comments are collected into THIRD_PARTY_NOTICES.txt instead.
   legalComments: 'none',
+  logLevel: 'info',
+};
+
+const managerOptions = {
+  ...sharedOptions,
+  entryPoints: { 'src/manager/app': path.join(ROOT, MANAGER_ENTRY) },
+  format: 'esm',
+  jsx: 'automatic',
   define: { 'process.env.NODE_ENV': JSON.stringify(IS_DEV ? 'development' : 'production') },
   metafile: true,
-  logLevel: 'info',
   plugins: [afterBuildPlugin],
+};
+
+// A classic script, like the content scripts it runs before.
+const contentI18nOptions = {
+  ...sharedOptions,
+  entryPoints: { 'src/content/i18n': path.join(ROOT, CONTENT_I18N_ENTRY) },
+  format: 'iife',
 };
 
 if (existsSync(OUT)) {
@@ -116,9 +152,9 @@ if (existsSync(OUT)) {
 }
 
 if (IS_WATCH) {
-  const context = await esbuild.context(options);
+  const contexts = await Promise.all([managerOptions, contentI18nOptions].map((options) => esbuild.context(options)));
 
-  await context.watch();
+  await Promise.all(contexts.map((context) => context.watch()));
 } else {
-  await esbuild.build(options);
+  await Promise.all([managerOptions, contentI18nOptions].map((options) => esbuild.build(options)));
 }

@@ -1,5 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 
+import { t } from '../../i18n/runtime.js';
+
 // One long-running job at a time: scanning, removing, exporting, or looking
 // up categories. `task` is null when nothing runs.
 export const useTask = () => {
@@ -26,7 +28,7 @@ export const useTask = () => {
 
   const cancel = useCallback(() => {
     controllerRef.current?.abort();
-    setTask((current) => (current ? { ...current, cancelling: true, label: '취소하는 중…' } : current));
+    setTask((current) => (current ? { ...current, cancelling: true, label: t('status.cancelling') } : current));
   }, []);
 
   return { task, start, update, end, cancel };

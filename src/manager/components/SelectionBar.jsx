@@ -1,6 +1,6 @@
 import { Button, Shortcut, Tooltip } from 'neba';
 
-import { formatCount } from '../lib/format.js';
+import { t, tParts } from '../../i18n/runtime.js';
 
 import { TrashIcon } from './icons.jsx';
 
@@ -17,21 +17,25 @@ export function SelectionBar({ selectedCount, totalCount, busy, canRemove, onSel
       disabled={busy || selectedCount === 0 || !canRemove}
       focusableWhenDisabled={!canRemove}
     >
-      선택 항목 삭제
+      {t('selection.remove')}
     </Button>
   );
 
   return (
-    <section className="selection-bar" aria-label="선택">
-      <p className="selection-count">선택 {formatCount(selectedCount)}개</p>
+    <section className="selection-bar" aria-label={t('selection.label')}>
+      <p className="selection-count">{t('selection.count', { count: selectedCount })}</p>
       <p className="selection-hint">
-        <Shortcut size="xs" keys="Shift" /> 클릭 범위 선택 · <Shortcut size="xs" keys="Mod+A" /> 모두 선택 · <Shortcut size="xs" keys="Esc" /> 해제
+        {tParts('selection.hint', {
+          shift: <Shortcut key="shift" size="xs" keys="Shift" />,
+          all: <Shortcut key="all" size="xs" keys="Mod+A" />,
+          esc: <Shortcut key="esc" size="xs" keys="Esc" />,
+        })}
       </p>
       <div className="selection-actions">
-        <Button size="xs" variant="outline" onClick={onSelectAll} disabled={totalCount === 0}>전체 선택</Button>
-        <Button size="xs" variant="outline" onClick={onClear} disabled={selectedCount === 0}>선택 해제</Button>
+        <Button size="xs" variant="outline" onClick={onSelectAll} disabled={totalCount === 0}>{t('selection.select-all')}</Button>
+        <Button size="xs" variant="outline" onClick={onClear} disabled={selectedCount === 0}>{t('selection.clear')}</Button>
         {canRemove ? removeButton : (
-          <Tooltip content="이 재생목록에서는 삭제할 수 없습니다. 내 재생목록과 나중에 볼 동영상만 삭제할 수 있습니다.">
+          <Tooltip content={t('selection.remove-unavailable')}>
             {removeButton}
           </Tooltip>
         )}

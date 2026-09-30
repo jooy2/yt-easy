@@ -1,3 +1,5 @@
+import { t } from '../../i18n/runtime.js';
+
 import { toThumbnailUrl } from './snapshot.js';
 import { WATCH_LATER_ID, toPlaylistUrl } from './sources.js';
 import { readCategoryId, readCategoryName } from './view-model.js';
@@ -48,8 +50,8 @@ export const escapeCsvCell = (value) => {
   return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 };
 
-// UTF-8 with a byte order mark, so that spreadsheet apps read Korean titles
-// correctly, and CRLF line endings as RFC 4180 describes.
+// UTF-8 with a byte order mark, so that spreadsheet apps read titles in any
+// language correctly, and CRLF line endings as RFC 4180 describes.
 // `info` and `names` are what the Data API told; see `view-model.js`.
 export const buildCsv = (items, { info = new Map(), names = new Map() } = {}) => {
   const header = CSV_COLUMNS.map(([name]) => name);
@@ -116,7 +118,7 @@ export const downloadText = ({ filename, text, type }) => new Promise((resolve, 
     if (state === 'complete') {
       settle();
     } else if (state === 'interrupted') {
-      settle(new Error(`${filename} 파일을 저장하지 못했습니다.`));
+      settle(new Error(t('export.save-failed', { file: filename })));
     }
   };
 
@@ -126,7 +128,7 @@ export const downloadText = ({ filename, text, type }) => new Promise((resolve, 
     }
   };
 
-  const timer = setTimeout(() => settle(new Error(`${filename} 파일 저장이 끝나지 않았습니다.`)), DOWNLOAD_TIMEOUT);
+  const timer = setTimeout(() => settle(new Error(t('export.save-timeout', { file: filename }))), DOWNLOAD_TIMEOUT);
 
   chrome.downloads.onChanged.addListener(onChanged);
   chrome.downloads.download({ url, filename, conflictAction: 'uniquify', saveAs: false })
@@ -138,5 +140,5 @@ export const downloadText = ({ filename, text, type }) => new Promise((resolve, 
 
       checkState(item?.state);
     })
-    .catch((error) => settle(new Error(`${filename} 파일을 저장하지 못했습니다. ${error.message}`)));
+    .catch((error) => settle(new Error(t('export.save-failed-detail', { file: filename, detail: error.message }))));
 });

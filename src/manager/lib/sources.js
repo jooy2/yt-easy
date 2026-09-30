@@ -1,12 +1,18 @@
 // The lists the manager can scan: Watch later, and any playlist the user
 // names by its address or ID.
+import { t } from '../../i18n/runtime.js';
+
 export const WATCH_LATER_ID = 'WL';
-export const WATCH_LATER_TITLE = '나중에 볼 동영상';
+export const WATCH_LATER_TITLE = t('source.watch-later');
 
 const LIST_ID_PATTERN = /^[\w-]{2,64}$/;
 const YOUTUBE_HOST_PATTERN = /(^|\.)youtube\.com$|^youtu\.be$/;
 
 export const isWatchLater = (listId) => listId === WATCH_LATER_ID;
+
+// Watch later goes by its name in the manager's language. The title stored
+// with it is the one the page showed, in the language of the YouTube account.
+export const readSourceTitle = (listId, title) => (isWatchLater(listId) ? WATCH_LATER_TITLE : title || listId);
 
 export const isListId = (value) => typeof value === 'string' && LIST_ID_PATTERN.test(value);
 
@@ -18,7 +24,7 @@ export const parsePlaylistInput = (text) => {
   const value = String(text ?? '').trim();
 
   if (!value) {
-    return { error: '재생목록 주소나 ID를 입력해 주세요.' };
+    return { error: t('playlist.error-empty') };
   }
 
   if (isListId(value)) {
@@ -30,17 +36,17 @@ export const parsePlaylistInput = (text) => {
   try {
     url = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`);
   } catch {
-    return { error: '재생목록 주소나 ID를 알아볼 수 없습니다.' };
+    return { error: t('playlist.error-invalid') };
   }
 
   if (!YOUTUBE_HOST_PATTERN.test(url.hostname)) {
-    return { error: 'YouTube 재생목록 주소만 쓸 수 있습니다.' };
+    return { error: t('playlist.error-host') };
   }
 
   const listId = url.searchParams.get('list');
 
   if (!isListId(listId)) {
-    return { error: '주소에 재생목록 ID(list=…)가 없습니다.' };
+    return { error: t('playlist.error-no-id') };
   }
 
   return { listId };

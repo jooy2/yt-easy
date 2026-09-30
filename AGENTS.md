@@ -14,9 +14,14 @@ The YouTube Data API returns an empty list for Watch later, so the extension wor
 
 ```text
 manifest.json          Permissions, content scripts, side panel
-scripts/build.mjs      Builds dist/: bundles the manager, copies everything else
+scripts/build.mjs      Builds dist/: bundles the manager and src/content/i18n.js, writes _locales, copies everything else
 icons/                 logo.png is the source; the icon PNGs are resized from it
 src/background.js      Opens the side panel from the toolbar icon
+src/i18n/              Messages and the function that formats them
+  messages/              en.json is the base; every other locale has the same keys
+  message-format.js      {name} values and {count, plural, …} branches
+  runtime.js             Picks the locale from Chrome's UI language; exports t and tParts
+  content.js             Built into src/content/i18n.js, the first content script
 src/content/           Content scripts on www.youtube.com (classic scripts)
   selectors.js           Everything that depends on YouTube's markup and data
   util.js                Timing and parsing helpers
@@ -40,7 +45,8 @@ dist/                  Build output, loaded into Chrome (not committed)
 - The manager finds or opens the tab of the list (`tab-bridge.js`), pings its content script, and runs one job over a port named `yt-easy-job`. Commands are `collect` and `remove`, each with the list ID; the content script answers with `progress`, then `done`, `error`, or `cancelled`.
 - Each scanned list is stored on its own, keyed by list ID (`src/manager/lib/snapshot.js`, `pruneSnapshots` keeps the total within limits), and the manager shows one at a time.
 - Closing the manager closes the port, and the content script cancels the job. Nothing runs unattended.
-- The content scripts share one namespace, `globalThis.ytEasy`, and load in the order listed in `manifest.json`. A file may only use what an earlier file defined, unless it reads it lazily inside a function.
+- The content scripts share one namespace, `globalThis.ytEasy`, and load in the order listed in `manifest.json`. A file may only use what an earlier file defined, unless it reads it lazily inside a function. `i18n.js` comes first and provides `ytEasy.i18n.t`; it exists only in the build, and the test helper builds it the same way.
+- The manager and the content scripts read their copy through `t('group.key', values)` from the same message files, in the language of Chrome, with English for any language that has no file.
 - Only the manager writes to `chrome.storage.local`. Everything the content script returns is checked in `src/manager/lib/snapshot.js` before it is stored or shown.
 
 ## Rules
@@ -53,7 +59,7 @@ These are not style preferences. A change that breaks one of them does not get m
 1. **Remove through the page's own menu.** Deletion is UI automation on the playlist page by design, and is offered only where the menu has a remove entry: Watch later and the user's own playlists. Verify each removal by checking that the row is gone, and stop the job when the page does not behave as expected.
 1. **Keep permissions minimal.** A new permission needs a reason. Hosts that only some users need are `optional_host_permissions`, requested when the feature is turned on.
 1. **Offer a backup before removing.** The removal dialog has a backup switch, off by default. When it is on, the removal starts only after the JSON and CSV backups are saved.
-1. **The UI is Korean.** Everything a user sees is written in Korean. Code, comments, and documents are in English.
+1. **Put every string a user sees in the message files.** English in `src/i18n/messages/en.json` is the base; add a key there and to every other locale in the same change, and write the Korean in `ko.json` as a translation, not a copy of the English. Keys are one group deep and kebab-case, counts use ICU `plural`, and sentences are never assembled from fragments. `tests/i18n.test.mjs` fails on a missing, unused, or out-of-sync key. Code, comments, and documents are in English.
 1. **Build the manager from neba.** Use [neba](https://neba.cdget.com) components before writing a control by hand, and style custom parts with neba's CSS tokens (`--neba-*`) so light and dark mode keep working. Logic that does not need React belongs in `src/manager/lib/`, where the tests can reach it.
 
 ## Checking a change
@@ -68,7 +74,7 @@ npm test
 
 The collector tests load the content scripts into a `vm` context with synthetic page data shaped like YouTube's. When YouTube changes its data, update the fixtures in `tests/helpers/fixtures.mjs` together with the parser.
 
-Behavior on the real page cannot be covered by these tests. After changing `selectors.js`, `page.js`, `collector.js`, or `remover.js`, load the extension, collect the list, and run a removal with **드라이런** turned on before removing anything for real.
+Behavior on the real page cannot be covered by these tests. After changing `selectors.js`, `page.js`, `collector.js`, or `remover.js`, load the extension, collect the list, and run a removal with **Dry run** turned on before removing anything for real.
 
 ## Commit conventions
 

@@ -54,7 +54,7 @@ describe('duration buckets', () => {
   const buckets = createBuckets([5, 20, 60]);
 
   it('builds labelled ranges from the bounds', () => {
-    assert.deepEqual(buckets.map((bucket) => bucket.label), ['5분 미만', '5–20분', '20–60분', '60분 이상', '길이 정보 없음']);
+    assert.deepEqual(buckets.map((bucket) => bucket.label), ['Under 5 min', '5–20 min', '20–60 min', '60 min and over', 'Unknown length']);
   });
 
   it('puts a bound into the range that starts at it', () => {
@@ -73,8 +73,8 @@ describe('sortItems', () => {
     assert.deepEqual(positions(sortItems(ITEMS, 'duration', 'desc')), [1, 4, 5, 2, 3]);
   });
 
-  it('sorts by channel name, Korean names first, and breaks ties by list order', () => {
-    assert.deepEqual(positions(sortItems(ITEMS, 'channel', 'asc')), [1, 3, 4, 2, 5]);
+  it('sorts by channel name, Latin names before Hangul in English, and breaks ties by list order', () => {
+    assert.deepEqual(positions(sortItems(ITEMS, 'channel', 'asc')), [4, 2, 5, 1, 3]);
   });
 
   it('reverses list order', () => {
@@ -126,35 +126,35 @@ describe('buildView', () => {
 
   it('groups by category name, with unknown last, when sorting by category', () => {
     const info = new Map([[ITEMS[0].videoId, { c: '10' }], [ITEMS[1].videoId, { c: '27' }], [ITEMS[3].videoId, { c: '27' }]]);
-    const names = new Map([['10', '음악'], ['27', '교육']]);
+    const names = new Map([['10', 'Music'], ['27', 'Education']]);
     const byName = buildView(baseInput({ info, names, sortBy: 'category' })).groups;
     const byCount = buildView(baseInput({ info, names, sortBy: 'category', groupOrder: 'count' })).groups;
 
-    assert.deepEqual(byName.map((group) => [group.label, positions(group.items)]), [['교육', [2, 4]], ['음악', [1]], ['종류 미확인', [3, 5]]]);
-    assert.deepEqual(byCount.map((group) => group.label), ['교육', '음악', '종류 미확인']);
+    assert.deepEqual(byName.map((group) => [group.label, positions(group.items)]), [['Education', [2, 4]], ['Music', [1]], ['Unknown category', [3, 5]]]);
+    assert.deepEqual(byCount.map((group) => group.label), ['Education', 'Music', 'Unknown category']);
   });
 
   it('lists the categories found, by name, for the filter', () => {
     const info = new Map([[ITEMS[0].videoId, { c: '10' }], [ITEMS[1].videoId, { c: '20' }]]);
 
-    assert.deepEqual(listCategories(ITEMS, info, new Map([['10', '음악']])), [
-      { categoryId: '10', name: '음악' },
-      { categoryId: '20', name: '카테고리 20' },
+    assert.deepEqual(listCategories(ITEMS, info, new Map([['10', 'Music']])), [
+      { categoryId: '20', name: 'Category 20' },
+      { categoryId: '10', name: 'Music' },
     ]);
   });
 
   it('lists channels by name when sorting by channel, following the direction', () => {
     const { groups } = buildView(baseInput({ sortBy: 'channel', sortDir: 'desc' }));
 
-    assert.deepEqual(groups.map((group) => group.label), ['Zeta', 'Alpha', '가나다 채널']);
-    assert.deepEqual(positions(groups[0].items), [2, 5]);
+    assert.deepEqual(groups.map((group) => group.label), ['가나다 채널', 'Zeta', 'Alpha']);
+    assert.deepEqual(positions(groups[1].items), [2, 5]);
   });
 
   it('lists the channels with the most videos first when asked', () => {
     const { groups } = buildView(baseInput({ sortBy: 'channel', groupOrder: 'count' }));
 
-    assert.deepEqual(groups.map((group) => [group.label, group.count]), [['가나다 채널', 2], ['Zeta', 2], ['Alpha', 1]]);
-    assert.equal(groups[0].totalSeconds, 3900);
+    assert.deepEqual(groups.map((group) => [group.label, group.count]), [['Zeta', 2], ['가나다 채널', 2], ['Alpha', 1]]);
+    assert.equal(groups[0].totalSeconds, 390);
   });
 
   it('splits by length range when sorting by length, and sorts inside each range', () => {
@@ -162,18 +162,18 @@ describe('buildView', () => {
     const { groups } = buildView(baseInput({ items, searchTexts: new Map(), sortBy: 'duration' }));
 
     assert.deepEqual(groups.map((group) => [group.label, positions(group.items)]), [
-      ['5분 미만', [2, 6]],
-      ['5–20분', [5]],
-      ['20–60분', [4]],
-      ['60분 이상', [1]],
-      ['길이 정보 없음', [3]],
+      ['Under 5 min', [2, 6]],
+      ['5–20 min', [5]],
+      ['20–60 min', [4]],
+      ['60 min and over', [1]],
+      ['Unknown length', [3]],
     ]);
   });
 
   it('reverses length ranges but keeps unknown last when sorting by length descending', () => {
     const { groups } = buildView(baseInput({ sortBy: 'duration', sortDir: 'desc' }));
 
-    assert.deepEqual(groups.map((group) => group.label), ['60분 이상', '20–60분', '5–20분', '5분 미만', '길이 정보 없음']);
+    assert.deepEqual(groups.map((group) => group.label), ['60 min and over', '20–60 min', '5–20 min', 'Under 5 min', 'Unknown length']);
   });
 
   it('returns no groups when sorting by list order', () => {

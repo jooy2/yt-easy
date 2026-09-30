@@ -1,5 +1,7 @@
 // Finds or opens the tab of a playlist (Watch later is the playlist `WL`)
 // and runs jobs in its content script.
+import { t } from '../../i18n/runtime.js';
+
 import { toPlaylistUrl } from './sources.js';
 
 const JOB_PORT_NAME = 'yt-easy-job';
@@ -44,7 +46,7 @@ const waitForTabComplete = (tabId) => new Promise((resolve, reject) => {
   };
   const timer = setTimeout(() => {
     cleanup();
-    reject(new Error('YouTube 탭이 로드되지 않았습니다.'));
+    reject(new Error(t('bridge.tab-not-loaded')));
   }, TAB_LOAD_TIMEOUT);
 
   chrome.tabs.onUpdated.addListener(onUpdated);
@@ -111,11 +113,11 @@ export const prepareListTab = async ({ listId, activate }) => {
   }
 
   if (!status) {
-    throw new Error('YouTube 탭에 연결하지 못했습니다. 재생목록 탭을 새로고침한 뒤 다시 시도해 주세요.');
+    throw new Error(t('bridge.connect-failed'));
   }
 
   if (status.busy) {
-    throw new Error('YouTube 탭에서 이미 다른 작업이 진행 중입니다.');
+    throw new Error(t('bridge.tab-busy'));
   }
 
   return { tab, status };
@@ -167,7 +169,7 @@ export const runJob = ({ tabId, command, signal, onProgress }) => new Promise((r
     if (!settled) {
       settled = true;
       signal?.removeEventListener('abort', onAbort);
-      reject(new Error('YouTube 탭과의 연결이 끊어졌습니다. 탭이 닫혔거나 새로고침됐을 수 있습니다.'));
+      reject(new Error(t('bridge.disconnected')));
     }
   });
 

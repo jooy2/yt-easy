@@ -4,6 +4,7 @@
 (() => {
   const ns = (globalThis.ytEasy ??= {});
   const { collector, remover, overlay, page, util } = ns;
+  const { t } = ns.i18n;
 
   const JOB_PORT_NAME = 'yt-easy-job';
   const MAX_TARGETS = 5000;
@@ -60,7 +61,7 @@
     const failed = results.length - succeeded;
 
     if (cancelled) {
-      return `취소했습니다. 성공 ${succeeded} · 실패 ${failed}`;
+      return t('content.outcome-cancelled', { succeeded, failed });
     }
 
     if (stopReason) {
@@ -68,15 +69,23 @@
     }
 
     return dryRun
-      ? `확인을 마쳤습니다. 정상 ${succeeded} · 실패 ${failed}`
-      : `삭제를 마쳤습니다. 성공 ${succeeded} · 실패 ${failed}`;
+      ? t('content.outcome-checked', { succeeded, failed })
+      : t('content.outcome-removed', { succeeded, failed });
+  };
+
+  const describeTitle = ({ dryRun, listTitle }) => {
+    if (dryRun) {
+      return t('content.title-dry');
+    }
+
+    return listTitle ? t('content.title-remove', { title: listTitle }) : t('content.title-remove-playlist');
   };
 
   const runCollect = async ({ message, post, signal }) => {
     const listId = readListId(message.listId);
 
     if (!listId) {
-      post({ type: 'error', message: '재생목록 ID가 올바르지 않습니다.' });
+      post({ type: 'error', message: t('content.error-list-id') });
       return;
     }
 
@@ -102,7 +111,7 @@
       post({
         type: 'error',
         code: error.code ?? 'failed',
-        message: error.name === 'CollectError' ? error.message : '목록을 스캔하는 중 오류가 발생했습니다.',
+        message: error.name === 'CollectError' ? error.message : t('content.error-scan'),
       });
     }
   };
@@ -111,12 +120,12 @@
     const { targets, options } = readRemoveCommand(message);
 
     if (!options.listId || !page.isListPage(options.listId)) {
-      post({ type: 'error', message: '이 탭이 선택한 재생목록의 페이지가 아닙니다.' });
+      post({ type: 'error', message: t('content.error-wrong-page') });
       return;
     }
 
     if (targets.length === 0) {
-      post({ type: 'error', message: '삭제할 영상이 없습니다.' });
+      post({ type: 'error', message: t('content.error-no-targets') });
       return;
     }
 
@@ -124,7 +133,7 @@
     let failed = 0;
 
     overlay.show({
-      title: options.dryRun ? 'yt-easy · 삭제 메뉴 확인 (드라이런)' : `yt-easy · ${options.listTitle || '재생목록'}에서 삭제 중`,
+      title: describeTitle(options),
       onCancel: () => controller.abort(),
     });
 
@@ -158,8 +167,8 @@
       post({ type: 'done', result: outcome });
     } catch (error) {
       console.error('yt-easy: removal failed.', error);
-      overlay.finish('오류로 중단했습니다.');
-      post({ type: 'error', message: '삭제 중 오류가 발생해 중단했습니다. 목록을 다시 스캔해 결과를 확인해 주세요.' });
+      overlay.finish(t('content.stopped-error'));
+      post({ type: 'error', message: t('content.error-remove') });
     }
   };
 
@@ -198,7 +207,7 @@
       }
 
       if (activeJob) {
-        post({ type: 'error', message: '이미 다른 작업이 진행 중입니다.' });
+        post({ type: 'error', message: t('content.error-busy') });
         return;
       }
 

@@ -1,6 +1,7 @@
 import { Alert, Button, Dialog, NumberField, TextField } from 'neba';
 import { useEffect, useState } from 'react';
 
+import { locale, t } from '../../i18n/runtime.js';
 import { SETTINGS_LIMITS, formatBounds, validateSettingsForm } from '../lib/settings.js';
 
 const toForm = (settings) => ({
@@ -63,14 +64,14 @@ export function SettingsDialog({ open, settings, onClose, onSave }) {
     <Dialog
       open={open}
       onOpenChange={(next) => !next && onClose()}
-      title="설정"
+      title={t('common.settings')}
       showClose
-      locale="ko"
+      locale={locale}
       width="min(460px, calc(100vw - 24px))"
       actions={(
         <>
-          <Button variant="outline" onClick={onClose}>취소</Button>
-          <Button variant="solid" color="primary" onClick={handleSave} loading={saving}>저장</Button>
+          <Button variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
+          <Button variant="solid" color="primary" onClick={handleSave} loading={saving}>{t('common.save')}</Button>
         </>
       )}
     >
@@ -83,8 +84,8 @@ export function SettingsDialog({ open, settings, onClose, onSave }) {
         }}
       >
         <TextField
-          label="재생시간 구간 경계 (분)"
-          description="쉼표로 구분합니다. 5, 20, 60이면 5분 미만, 5–20분, 20–60분, 60분 이상으로 나눕니다."
+          label={t('settings.bounds-label')}
+          description={t('settings.bounds-desc')}
           inputMode="numeric"
           autoComplete="off"
           value={form.boundsText}
@@ -95,7 +96,7 @@ export function SettingsDialog({ open, settings, onClose, onSave }) {
         />
         <div className="field-pair">
           <NumberField
-            label="삭제 간격 최소 (초)"
+            label={t('settings.delay-min-label')}
             min={SETTINGS_LIMITS.delayMin}
             max={SETTINGS_LIMITS.delayMax}
             step={0.1}
@@ -106,7 +107,7 @@ export function SettingsDialog({ open, settings, onClose, onSave }) {
             fullWidth
           />
           <NumberField
-            label="최대 (초)"
+            label={t('settings.delay-max-label')}
             min={SETTINGS_LIMITS.delayMin}
             max={SETTINGS_LIMITS.delayMax}
             step={0.1}
@@ -117,9 +118,9 @@ export function SettingsDialog({ open, settings, onClose, onSave }) {
             fullWidth
           />
         </div>
-        <p className="hint">한 건을 삭제할 때마다 이 범위에서 무작위로 기다립니다. 1초보다 짧게는 설정할 수 없습니다.</p>
+        <p className="hint">{t('settings.delay-hint')}</p>
         <NumberField
-          label="테스트 모드 기본 개수"
+          label={t('settings.test-count-label')}
           min={1}
           max={SETTINGS_LIMITS.testModeMax}
           step={1}
@@ -131,8 +132,8 @@ export function SettingsDialog({ open, settings, onClose, onSave }) {
         />
         <TextField
           type="password"
-          label="YouTube Data API 키 (선택)"
-          description="영상 종류, 게시일, 조회수를 가져올 때만 씁니다. 키는 이 Chrome 프로필의 확장 프로그램 저장소에 저장되고, 저장할 때 www.googleapis.com 접근 권한을 요청합니다. 비워 두고 저장하면 키와 권한을 지웁니다."
+          label={t('settings.api-key-label')}
+          description={t('settings.api-key-desc')}
           autoComplete="off"
           spellCheck={false}
           value={form.apiKey}
@@ -141,7 +142,7 @@ export function SettingsDialog({ open, settings, onClose, onSave }) {
           invalid={Boolean(errors.apiKey)}
           fullWidth
         />
-        {message && <Alert color="danger">{message}</Alert>}
+        {message && <Alert color="danger" locale={locale}>{message}</Alert>}
         <button type="submit" hidden aria-hidden="true" tabIndex={-1} />
       </form>
     </Dialog>

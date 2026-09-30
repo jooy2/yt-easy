@@ -1,20 +1,20 @@
 import { Button, Dialog, ScrollArea } from 'neba';
 
-import { formatCount } from '../lib/format.js';
+import { locale, t } from '../../i18n/runtime.js';
 
 const describe = ({ outcome, targets, dryRun }) => {
   const failed = outcome.results.filter((result) => !result.ok);
   const succeeded = outcome.results.length - failed.length;
   const skipped = targets.length - outcome.results.length;
-  const counts = [dryRun ? `정상 ${formatCount(succeeded)}개` : `삭제 ${formatCount(succeeded)}개`, `실패 ${formatCount(failed.length)}개`];
+  const counts = [t(dryRun ? 'result.ok' : 'result.removed', { count: succeeded }), t('result.failed', { count: failed.length })];
   const lines = [];
 
   if (skipped > 0) {
-    counts.push(`처리하지 않음 ${formatCount(skipped)}개`);
+    counts.push(t('result.skipped', { count: skipped }));
   }
 
   if (outcome.cancelled) {
-    lines.push('작업을 취소했습니다.');
+    lines.push(t('result.cancelled'));
   }
 
   if (outcome.stopReason) {
@@ -24,7 +24,7 @@ const describe = ({ outcome, targets, dryRun }) => {
   lines.push(`${counts.join(' · ')}.`);
 
   if (dryRun && failed.length === 0 && skipped === 0) {
-    lines.push('모든 항목에서 삭제 메뉴를 찾았습니다. 드라이런을 끄고 실제로 삭제할 수 있습니다.');
+    lines.push(t('result.dry-ok'));
   }
 
   return { text: lines.join(' '), failed };
@@ -42,16 +42,16 @@ export function ResultDialog({ result, onClose, onSelectFailed }) {
     <Dialog
       open
       onOpenChange={(next) => !next && onClose()}
-      title={result.dryRun ? '드라이런 결과' : '삭제 결과'}
+      title={t(result.dryRun ? 'result.title-dry' : 'result.title')}
       showClose
-      locale="ko"
+      locale={locale}
       width="min(480px, calc(100vw - 24px))"
       actions={(
         <>
           {failed.length > 0 && (
-            <Button variant="outline" onClick={() => onSelectFailed(failed.map((entry) => entry.videoId))}>실패 항목만 선택</Button>
+            <Button variant="outline" onClick={() => onSelectFailed(failed.map((entry) => entry.videoId))}>{t('result.select-failed')}</Button>
           )}
-          <Button variant="solid" color="primary" onClick={onClose}>닫기</Button>
+          <Button variant="solid" color="primary" onClick={onClose}>{t('common.close')}</Button>
         </>
       )}
     >
@@ -59,8 +59,8 @@ export function ResultDialog({ result, onClose, onSelectFailed }) {
         <p>{text}</p>
         {failed.length > 0 && (
           <>
-            <h3 className="subheading">실패한 항목</h3>
-            <ScrollArea maxHeight={200} className="preview-box" label="실패한 항목">
+            <h3 className="subheading">{t('result.failed-heading')}</h3>
+            <ScrollArea maxHeight={200} className="preview-box" label={t('result.failed-heading')}>
               <ul className="preview-list">
                 {failed.map((entry) => (
                   <li key={entry.videoId}>

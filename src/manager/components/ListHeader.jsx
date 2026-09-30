@@ -1,6 +1,7 @@
 import { Checkbox } from 'neba';
 
-import { formatCount, formatTotalDuration } from '../lib/format.js';
+import { t } from '../../i18n/runtime.js';
+import { formatTotalDuration } from '../lib/format.js';
 
 // The heading of the list pane: what is shown, and a checkbox that selects
 // or clears every video in it.
@@ -12,10 +13,10 @@ export function ListHeader({ title, count, totalSeconds, coverage, onToggleAll }
         indeterminate={coverage === 'some'}
         onCheckedChange={(checked) => onToggleAll(checked)}
         disabled={count === 0}
-        aria-label={`${title}의 영상 모두 선택`}
+        aria-label={t('list.select-all', { title })}
       />
       <h2 className="list-title">{title}</h2>
-      <p className="list-meta">{formatCount(count)}개 · {formatTotalDuration(totalSeconds)}</p>
+      <p className="list-meta">{t('list.meta', { count, duration: formatTotalDuration(totalSeconds) })}</p>
     </div>
   );
 }

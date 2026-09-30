@@ -398,6 +398,13 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* A long category name, such as "Science & Technology", ends in an
+   ellipsis in a narrow row instead of running under the row's buttons. */
+.video-category {
+  flex-shrink: 1;
+  min-width: 4em;
+}
+
 .empty-state {
   height: 100%;
   box-sizing: border-box;
@@ -471,7 +478,8 @@ code {
 }
 
 /* A narrow list pane, such as beside the group rail in the side panel,
-   gives the titles more room by shrinking the thumbnails. */
+   gives the titles more room by shrinking the thumbnails and leaving out the
+   category badge, which has no room left there. */
 @container (max-width: 340px) {
   .video-row {
     gap: 8px;
@@ -481,6 +489,10 @@ code {
   .video-thumb {
     width: 64px;
     height: 36px;
+  }
+
+  .video-category {
+    display: none;
   }
 }
 

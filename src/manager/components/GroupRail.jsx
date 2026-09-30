@@ -1,13 +1,14 @@
 import { Segment, SegmentedButton, Tab, Tabs } from 'neba';
 
+import { t } from '../../i18n/runtime.js';
 import { formatCount } from '../lib/format.js';
 
 export const ALL_GROUP_KEY = 'all';
 
 const RAIL_LABELS = {
-  channel: '채널',
-  duration: '길이 구간',
-  category: '영상 종류',
+  channel: 'rail.channel',
+  duration: 'rail.duration',
+  category: 'rail.category',
 };
 
 // Channels, length ranges, or categories as vertical tabs. Choosing one shows
@@ -15,7 +16,7 @@ const RAIL_LABELS = {
 // move between groups, as in any tab list. Channels and categories can be
 // ordered by name or by how many videos each has.
 export function GroupRail({ grouping, groups, totalCount, activeKey, onSelect, groupOrder, onGroupOrderChange }) {
-  const label = RAIL_LABELS[grouping];
+  const label = t(RAIL_LABELS[grouping]);
 
   return (
     <div className="group-rail-pane">
@@ -26,10 +27,10 @@ export function GroupRail({ grouping, groups, totalCount, activeKey, onSelect, g
           fullWidth
           value={groupOrder}
           onValueChange={(value) => value && onGroupOrderChange(value)}
-          aria-label={`${label} 순서`}
+          aria-label={t('rail.order-label', { label })}
         >
-          <Segment value="name">이름순</Segment>
-          <Segment value="count" title="영상이 많은 것부터">많은 순</Segment>
+          <Segment value="name">{t('rail.by-name')}</Segment>
+          <Segment value="count" title={t('rail.by-count-title')}>{t('rail.by-count')}</Segment>
         </SegmentedButton>
       )}
       <Tabs
@@ -43,7 +44,7 @@ export function GroupRail({ grouping, groups, totalCount, activeKey, onSelect, g
         aria-label={label}
       >
         <Tab value={ALL_GROUP_KEY} endIcon={<span className="rail-count">{formatCount(totalCount)}</span>}>
-          <span className="rail-label">전체</span>
+          <span className="rail-label">{t('list.group-all')}</span>
         </Tab>
         {groups.map((group) => (
           <Tab
