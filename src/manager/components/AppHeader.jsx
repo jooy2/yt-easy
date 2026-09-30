@@ -9,7 +9,10 @@ export function AppHeader({ isTabView, busy, hasItems, filtersOpen, filtersActiv
 
   return (
     <header className="app-header">
-      <h1 className="app-title">나중에 볼 동영상</h1>
+      <div className="app-brand">
+        <img className="app-logo" src="../../icons/icon-48.png" alt="" width="20" height="20" />
+        <h1 className="app-title">나중에 볼 동영상</h1>
+      </div>
       <div className="app-header-actions">
         <Button variant="solid" color="primary" startIcon={<ScanIcon />} onClick={onScan} disabled={busy}>
           스캔 시작

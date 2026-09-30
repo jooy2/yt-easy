@@ -32,8 +32,8 @@ const copyStatic = () => {
   for (const entry of STATIC_ENTRIES) {
     cpSync(path.join(ROOT, entry), path.join(OUT, entry), {
       recursive: true,
-      // The SVG is only the source the PNG icons are drawn from.
-      filter: (source) => !source.endsWith('.svg'),
+      // The large logo is only the source the icons are resized from.
+      filter: (source) => !source.endsWith('logo.png'),
     });
   }
 };

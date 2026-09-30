@@ -15,7 +15,7 @@ The YouTube Data API returns an empty list for Watch later, so the extension wor
 ```text
 manifest.json          Permissions, content scripts, side panel
 scripts/build.mjs      Builds dist/: bundles the manager, copies everything else
-icons/                 icon.svg is the source; the PNGs are rendered from it
+icons/                 logo.png is the source; the icon PNGs are resized from it
 src/background.js      Opens the side panel from the toolbar icon
 src/content/           Content scripts on www.youtube.com (classic scripts)
   selectors.js           Everything that depends on YouTube's markup and data

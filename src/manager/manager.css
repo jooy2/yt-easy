@@ -44,12 +44,25 @@ body {
   padding: 10px 12px;
 }
 
-.app-title {
+.app-brand {
+  display: flex;
   flex: 1 1 auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.app-logo {
+  flex: none;
+}
+
+.app-title {
   margin: 0;
+  overflow: hidden;
   font-size: 15px;
   font-weight: 700;
   white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .app-header-actions {

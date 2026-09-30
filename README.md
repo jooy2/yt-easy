@@ -1,4 +1,4 @@
-<img src="icons/icon-128.png" alt="yt-easy" width="112" height="112">
+<img src=".github/resources/yt-easy-logo.webp" alt="yt-easy" width="112" height="112">
 
 # yt-easy
 
