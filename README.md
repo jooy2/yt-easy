@@ -71,6 +71,12 @@ The stored list does not follow changes you make on YouTube. Scan again after yo
 - The search box matches every word you type against titles and channel names.
 - The filter button at the top folds the search box and the options away, so the list gets more room. A dot on the button shows that a search or a filter still narrows the list.
 
+### Open a video
+
+Each row ends with two buttons. The first, **현재 탭에서 열기**, loads the video in the tab the side panel sits beside when that tab is on YouTube. When it shows another site, or when the manager is open in its own tab, the video opens in a new tab instead, so no other page is replaced. The button is disabled while a scan or a removal runs, because that tab may be the Watch later tab the job works in. The second button, **새 탭으로 열기**, always opens a new tab.
+
+Clicking anywhere else on a row selects it, so opening a video never changes the selection.
+
 ### Remove videos
 
 1. Select videos with their checkboxes, or with the checkbox at the top of the list, which selects every video the list shows: the chosen group, narrowed by the search and filters. **전체 선택** selects the whole Watch later list.

@@ -281,21 +281,23 @@ body {
 
 .video-text {
   display: grid;
+  flex: 1 1 auto;
   gap: 3px;
   min-width: 0;
 }
 
 .video-title {
+  margin: 0;
   overflow: hidden;
-  color: inherit;
   font-weight: 500;
-  text-decoration: none;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-.video-title:hover {
-  text-decoration: underline;
+.video-actions {
+  display: flex;
+  flex: none;
+  gap: 2px;
 }
 
 .video-meta {

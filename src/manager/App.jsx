@@ -18,6 +18,7 @@ import { useTask } from './hooks/useTask.js';
 import { fetchCategories, removeApiPermission, requestApiPermission } from './lib/categories.js';
 import { buildCsv, buildFileName, buildJson, downloadText } from './lib/export.js';
 import { formatCount, formatDateTime, formatFileStamp } from './lib/format.js';
+import { openInCurrentTab, openInNewTab } from './lib/open-video.js';
 import { addAll, readCoverage, removeAll, toggleOne } from './lib/selection.js';
 import { createSnapshot, removeFromSnapshot } from './lib/snapshot.js';
 import * as store from './lib/store.js';
@@ -396,6 +397,14 @@ export function App() {
 
   const handleToggle = useCallback((videoId) => setSelected((current) => toggleOne(current, videoId)), []);
 
+  const handleOpen = useCallback((videoId) => {
+    openInCurrentTab(videoId).catch(() => setMessage('영상을 열지 못했습니다.'));
+  }, []);
+
+  const handleOpenNewTab = useCallback((videoId) => {
+    openInNewTab(videoId).catch(() => setMessage('영상을 열지 못했습니다.'));
+  }, []);
+
   const handleToggleShown = (checked) => {
     setSelected((current) => (checked ? addAll(current, shownIds) : removeAll(current, shownIds)));
   };
@@ -411,7 +420,12 @@ export function App() {
         selected={selected.has(row.item.videoId)}
         failure={failures.get(row.item.videoId)}
         isMusic={categoryId === MUSIC_CATEGORY_ID}
+        // Loading a video into the current tab could replace the Watch later
+        // tab a running job works in.
+        openDisabled={busy}
         onToggle={handleToggle}
+        onOpen={handleOpen}
+        onOpenNewTab={handleOpenNewTab}
       />
     );
   };
