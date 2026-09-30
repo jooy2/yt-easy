@@ -1,39 +1,49 @@
 // Turns the stored list into what the list view shows: filtered, sorted, and
 // optionally grouped. Everything here is a pure function of its input.
+//
+// `info` maps video IDs to what the Data API told about them: { c: category
+// ID, p: publish time, v: view count, t: when it was looked up }. `names`
+// maps category IDs to their names.
 export const MUSIC_CATEGORY_ID = '10';
 export const UNKNOWN_BUCKET_KEY = 'unknown';
+
+// Special values of the category filter. Any other value is a category ID.
+export const CATEGORY_FILTER_ALL = 'all';
+export const CATEGORY_FILTER_NOT_MUSIC = 'other';
+export const CATEGORY_FILTER_UNKNOWN = 'unknown';
 
 // A video counts as watched from this share of its length. YouTube keeps the
 // red bar short of full when the end credits were skipped.
 export const WATCHED_PERCENT = 90;
 
+// Sorts that need what only the Data API knows.
+export const INFO_SORTS = Object.freeze(['published', 'views', 'category']);
+
 export const VIEW_OPTIONS = Object.freeze({
-  sortBy: ['position', 'channel', 'duration'],
-  channelOrder: ['name', 'count'],
+  sortBy: ['position', 'published', 'views', 'channel', 'duration', 'category'],
+  groupOrder: ['name', 'count'],
   sortDir: ['asc', 'desc'],
-  categoryFilter: ['all', 'music', 'other'],
   watchFilter: ['all', 'unwatched', 'partial', 'watched'],
 });
 
 export const DEFAULT_VIEW_PREFS = Object.freeze({
   sortBy: 'position',
   sortDir: 'asc',
-  channelOrder: 'name',
+  groupOrder: 'name',
   durationFilter: 'all',
-  categoryFilter: 'all',
+  categoryFilter: CATEGORY_FILTER_ALL,
   watchFilter: 'all',
   filtersOpen: true,
 });
 
-// Sorting by channel name or by length also splits the list into channels or
-// length ranges, which the manager lists beside the videos.
-export const readGrouping = (sortBy) => {
-  if (sortBy === 'channel') {
-    return 'channel';
-  }
+const CATEGORY_ID_PATTERN = /^\d{1,4}$/;
 
-  if (sortBy === 'duration') {
-    return 'duration';
+// Sorting by channel name, length, or category also splits the list into
+// channels, length ranges, or categories, which the manager lists beside the
+// videos.
+export const readGrouping = (sortBy) => {
+  if (sortBy === 'channel' || sortBy === 'duration' || sortBy === 'category') {
+    return sortBy;
   }
 
   return 'none';
@@ -43,13 +53,28 @@ const collator = new Intl.Collator('ko', { sensitivity: 'base', numeric: true })
 
 const normalizeText = (text) => String(text ?? '').normalize('NFKC').toLocaleLowerCase('ko');
 
+const readCategoryFilter = (value) => {
+  // Before other categories could be chosen, music was 'music'.
+  if (value === 'music') {
+    return MUSIC_CATEGORY_ID;
+  }
+
+  if ([CATEGORY_FILTER_ALL, CATEGORY_FILTER_NOT_MUSIC, CATEGORY_FILTER_UNKNOWN].includes(value) || CATEGORY_ID_PATTERN.test(value ?? '')) {
+    return value;
+  }
+
+  return CATEGORY_FILTER_ALL;
+};
+
 export const normalizeViewPrefs = (stored) => {
   const input = stored && typeof stored === 'object' ? stored : {};
+  // The group order used to apply to channels only, as `channelOrder`.
+  const source = { groupOrder: input.channelOrder, ...input };
   const prefs = { ...DEFAULT_VIEW_PREFS };
 
   for (const [key, allowed] of Object.entries(VIEW_OPTIONS)) {
-    if (allowed.includes(input[key])) {
-      prefs[key] = input[key];
+    if (allowed.includes(source[key])) {
+      prefs[key] = source[key];
     }
   }
 
@@ -62,6 +87,8 @@ export const normalizeViewPrefs = (stored) => {
   if (typeof input.filtersOpen === 'boolean') {
     prefs.filtersOpen = input.filtersOpen;
   }
+
+  prefs.categoryFilter = readCategoryFilter(input.categoryFilter);
 
   return prefs;
 };
@@ -98,22 +125,38 @@ export const findBucket = (buckets, seconds) => {
 
 export const buildSearchText = (item) => normalizeText(`${item.title}\n${item.channelName}`);
 
+// '' until the Data API has looked the video up, and for a video it has no
+// record of.
+export const readCategoryId = (item, info) => info.get(item.videoId)?.c ?? '';
+
+export const readCategoryName = (categoryId, names) => {
+  if (!categoryId) {
+    return '종류 미확인';
+  }
+
+  return names.get(categoryId) ?? `카테고리 ${categoryId}`;
+};
+
 // Only the Data API knows a video's category, so a video it has not looked
 // up counts as not music.
-export const isMusicVideo = (item, categories) => categories.get(item.videoId) === MUSIC_CATEGORY_ID;
+export const isMusicVideo = (item, info) => readCategoryId(item, info) === MUSIC_CATEGORY_ID;
 
-// 'music' keeps only music, 'other' keeps everything that is not known to be
-// music.
-export const matchesCategory = (filter, item, categories) => {
-  if (filter === 'music') {
-    return isMusicVideo(item, categories);
+// 'all' keeps everything, 'other' everything not known to be music,
+// 'unknown' the videos without a category, and a category ID that category.
+export const matchesCategory = (filter, item, info) => {
+  if (filter === CATEGORY_FILTER_ALL) {
+    return true;
   }
 
-  if (filter === 'other') {
-    return !isMusicVideo(item, categories);
+  if (filter === CATEGORY_FILTER_NOT_MUSIC) {
+    return !isMusicVideo(item, info);
   }
 
-  return true;
+  if (filter === CATEGORY_FILTER_UNKNOWN) {
+    return !readCategoryId(item, info);
+  }
+
+  return readCategoryId(item, info) === filter;
 };
 
 // `percent` is null for a video without a red bar.
@@ -135,7 +178,16 @@ export const matchesWatch = (filter, percent) => {
   return true;
 };
 
-export const filterItems = ({ items, searchTexts, query, durationFilter, categoryFilter, watchFilter = 'all', categories, buckets }) => {
+export const filterItems = ({
+  items,
+  searchTexts,
+  query,
+  durationFilter,
+  categoryFilter = CATEGORY_FILTER_ALL,
+  watchFilter = 'all',
+  info = new Map(),
+  buckets,
+}) => {
   const terms = normalizeText(query).split(/\s+/).filter(Boolean);
   const bucket = durationFilter === 'all' ? null : buckets.find((entry) => entry.key === durationFilter);
 
@@ -156,42 +208,69 @@ export const filterItems = ({ items, searchTexts, query, durationFilter, categor
       return false;
     }
 
-    return matchesCategory(categoryFilter, item, categories);
+    return matchesCategory(categoryFilter, item, info);
   });
 };
 
-// Sorts a copy. Ties, and videos without a length, keep list order, and
-// videos without a length always go last.
-export const sortItems = (items, sortBy, sortDir) => {
+// Compares two values that may be missing: missing ones always go last,
+// whichever the direction.
+const compareMissingLast = (a, b, direction) => {
+  const aMissing = a == null || a === '';
+  const bMissing = b == null || b === '';
+
+  if (aMissing || bMissing) {
+    return aMissing === bMissing ? 0 : (aMissing ? 1 : -1);
+  }
+
+  const difference = typeof a === 'string' ? collator.compare(a, b) : a - b;
+
+  return difference * direction;
+};
+
+// Sorts a copy. Ties keep list order, and videos without the sorted value,
+// such as an unknown length or a video the Data API has not looked up, go
+// last.
+export const sortItems = (items, sortBy, sortDir, { info = new Map(), names = new Map() } = {}) => {
   const direction = sortDir === 'desc' ? -1 : 1;
+  const readers = {
+    duration: (item) => item.durationSeconds,
+    channel: (item) => item.channelName,
+    published: (item) => info.get(item.videoId)?.p,
+    views: (item) => info.get(item.videoId)?.v,
+    category: (item) => {
+      const categoryId = readCategoryId(item, info);
+
+      return categoryId ? readCategoryName(categoryId, names) : null;
+    },
+  };
+  const read = readers[sortBy];
 
   return [...items].sort((a, b) => {
-    if (sortBy === 'duration') {
-      const aMissing = a.durationSeconds == null;
-      const bMissing = b.durationSeconds == null;
-
-      if (aMissing !== bMissing) {
-        return aMissing ? 1 : -1;
-      }
-
-      const difference = aMissing ? 0 : a.durationSeconds - b.durationSeconds;
-
-      return difference !== 0 ? difference * direction : a.position - b.position;
+    if (!read) {
+      return (a.position - b.position) * direction;
     }
 
-    if (sortBy === 'channel') {
-      const difference = collator.compare(a.channelName, b.channelName);
-
-      return difference !== 0 ? difference * direction : a.position - b.position;
-    }
-
-    return (a.position - b.position) * direction;
+    return compareMissingLast(read(a), read(b), direction) || a.position - b.position;
   });
 };
 
-// Channels in name order, following the sort direction, or with the most
-// videos first.
-const groupByChannel = ({ items, sortDir, channelOrder }) => {
+// Groups in name order, following the sort direction, or with the most
+// videos first. The group of videos without a value stays last.
+const orderGroups = ({ list, sortDir, groupOrder, lastKey }) => {
+  const direction = sortDir === 'desc' ? -1 : 1;
+  const last = list.filter((group) => group.key === lastKey);
+  const rest = list.filter((group) => group.key !== lastKey);
+
+  if (groupOrder === 'count') {
+    rest.sort((a, b) => b.items.length - a.items.length || collator.compare(a.label, b.label));
+  } else {
+    rest.sort((a, b) => collator.compare(a.label, b.label) * direction);
+  }
+
+  return [...rest, ...last];
+};
+
+const groupByChannel = ({ items, sortDir, groupOrder }) => {
   const groups = new Map();
 
   for (const item of items) {
@@ -204,14 +283,24 @@ const groupByChannel = ({ items, sortDir, channelOrder }) => {
     groups.get(key).items.push(item);
   }
 
-  const list = [...groups.values()];
-  const direction = sortDir === 'desc' ? -1 : 1;
+  return orderGroups({ list: [...groups.values()], sortDir, groupOrder, lastKey: 'channel:unknown' });
+};
 
-  if (channelOrder === 'count') {
-    return list.sort((a, b) => b.items.length - a.items.length || collator.compare(a.label, b.label));
+const groupByCategory = ({ items, sortDir, groupOrder, info, names }) => {
+  const groups = new Map();
+
+  for (const item of items) {
+    const categoryId = readCategoryId(item, info);
+    const key = categoryId || UNKNOWN_BUCKET_KEY;
+
+    if (!groups.has(key)) {
+      groups.set(key, { key: `category:${key}`, label: readCategoryName(categoryId, names), items: [] });
+    }
+
+    groups.get(key).items.push(item);
   }
 
-  return list.sort((a, b) => collator.compare(a.label, b.label) * direction);
+  return orderGroups({ list: [...groups.values()], sortDir, groupOrder, lastKey: `category:${UNKNOWN_BUCKET_KEY}` });
 };
 
 // Length ranges in order, reversed for a descending sort. Videos without a
@@ -234,15 +323,19 @@ const groupByDuration = ({ items, sortDir, buckets }) => {
   return list;
 };
 
-export const groupItems = ({ items, sortBy, sortDir, channelOrder, buckets }) => {
+export const groupItems = ({ items, sortBy, sortDir, groupOrder, buckets, info = new Map(), names = new Map() }) => {
   const grouping = readGrouping(sortBy);
 
   if (grouping === 'channel') {
-    return groupByChannel({ items, sortDir, channelOrder });
+    return groupByChannel({ items, sortDir, groupOrder });
   }
 
   if (grouping === 'duration') {
     return groupByDuration({ items, sortDir, buckets });
+  }
+
+  if (grouping === 'category') {
+    return groupByCategory({ items, sortDir, groupOrder, info, names });
   }
 
   return [];
@@ -255,12 +348,29 @@ const describeGroup = (group) => ({
   totalSeconds: group.items.reduce((sum, item) => sum + (item.durationSeconds ?? 0), 0),
 });
 
-// `items` is the filtered and sorted list. `groups` splits it by channel or
-// length when the sort calls for it, each group keeping the same order, and
-// is empty otherwise.
+// `items` is the filtered and sorted list. `groups` splits it by channel,
+// length, or category when the sort calls for it, each group keeping the
+// same order, and is empty otherwise.
 export const buildView = (input) => {
-  const items = sortItems(filterItems(input), input.sortBy, input.sortDir);
+  const items = sortItems(filterItems(input), input.sortBy, input.sortDir, input);
   const groups = groupItems({ ...input, items }).map(describeGroup);
 
   return { items, groups };
+};
+
+// The categories present in `items`, by name, for the category filter.
+export const listCategories = (items, info, names) => {
+  const ids = new Set();
+
+  for (const item of items) {
+    const categoryId = readCategoryId(item, info);
+
+    if (categoryId) {
+      ids.add(categoryId);
+    }
+  }
+
+  return [...ids]
+    .map((categoryId) => ({ categoryId, name: readCategoryName(categoryId, names) }))
+    .sort((a, b) => collator.compare(a.name, b.name));
 };

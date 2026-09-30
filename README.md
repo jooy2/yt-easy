@@ -21,7 +21,7 @@ The YouTube Data API has returned an empty list for Watch later since 2016, so a
 - Can save the videos about to be removed as JSON and CSV before anything is removed.
 - Offers a test mode that handles only the first few videos, and a dry run that finds the remove menu without clicking it.
 - Exports the whole list as JSON or CSV.
-- Tells music videos apart by their YouTube category, if you supply a YouTube Data API key.
+- Shows each video's category, publish date, and view count, and sorts, groups, and filters by them, if you supply a YouTube Data API key.
 
 The interface is in Korean.
 
@@ -76,7 +76,8 @@ To add a playlist, choose **재생목록 추가…** and paste the address of th
 
 ### Find what you want
 
-- **정렬** sorts by list order (**추가순**), channel name (**채널명순**), or length (**길이순**), and the button next to it switches between ascending and descending. Sorting by channel name or by length also lists the channels or the length ranges as tabs down the left side. Choosing one shows only its videos on the right, and **전체** shows all of them. Above the channel tabs, **이름순** and **많은 순** order the channels by name or by number of videos. Drag the line between the tabs and the list to resize them, and use the arrow keys to move between groups.
+- **정렬** sorts by **추가된 날짜순**, which is the order of the list on YouTube, by publish date (**게시일순**), view count (**조회수순**), channel name (**채널명순**), length (**길이순**), or category (**영상 종류순**). The button next to it switches between ascending and descending. The publish date, the view count, and the category come from the YouTube Data API, so those three sorts need an API key; see below.
+- Sorting by channel name, length, or category also lists the channels, the length ranges, or the categories as tabs down the left side. Choosing one shows only its videos on the right, and **전체** shows all of them. Above the channel and category tabs, **이름순** and **많은 순** order them by name or by number of videos. Drag the line between the tabs and the list to resize them, and use the arrow keys to move between groups.
 - **길이** shows a single length range. Change the ranges in **설정**.
 - **시청 여부** narrows the list by how much of each video you have watched: **안 본 영상**, **보다 만 영상** (under 90%), or **다 본 영상** (90% or more). The amount comes from the red bar YouTube draws under a thumbnail, and the rows show the same bar. It follows your YouTube watch history, so with the history paused or turned off, every video counts as not watched.
 - The search box matches every word you type against titles and channel names.
@@ -103,17 +104,22 @@ Videos are removed in list order, one at a time. The job stops on its own when t
 
 ### Export
 
-**내보내기** at the top saves the whole list as a JSON or a CSV file in the `yt-easy` folder of your Downloads folder. The CSV is UTF-8 with a byte order mark, so spreadsheet apps show Korean titles correctly.
+**내보내기** at the top saves the whole list as a JSON or a CSV file in the `yt-easy` folder of your Downloads folder, including the category, publish date, and view count of each video that has been looked up. The CSV is UTF-8 with a byte order mark, so spreadsheet apps show Korean titles correctly.
 
-### Tell music videos apart (optional)
+### Categories, publish dates, and view counts (optional)
 
-**영상 종류** shows only music (**음악만**) or everything else (**음악 제외**). The page does not show a video's category, so this filter uses the YouTube Data API and stays disabled until you add an API key:
+The page does not show a video's category or its exact publish date and view count, so these come from the YouTube Data API and need an API key you create:
 
-1. In the [Google Cloud console](https://console.cloud.google.com/), create a project, enable **YouTube Data API v3**, and create an API key. Restrict the key to that API.
+1. In the [Google Cloud console](https://console.cloud.google.com/), create a project, enable **YouTube Data API v3**, and create an API key. Under the key's restrictions, allow only YouTube Data API v3, and leave the application restriction at none: the extension sends no referrer, so a website restriction would reject it.
 1. Paste the key into **설정** > **YouTube Data API 키** and save. Chrome then asks for access to `www.googleapis.com`; the extension does not request it before this point.
-1. Click **카테고리 확인** next to **영상 종류**. The manager looks up 50 videos per request and remembers the results, so the next lookup only covers new videos. Looking up 5,000 videos takes 100 requests, which uses 100 units of the default daily quota of 10,000.
+1. Click **영상 정보 가져오기** in the filter row. The manager looks up 50 videos per request and remembers the results, so the next lookup only covers new videos. Looking up 5,000 videos takes 100 requests, which uses 100 units of the default daily quota of 10,000. The category names come from one more request.
 
-Videos in category 10 (Music) get a **음악** badge. A video that has not been looked up yet counts as not music.
+With the information in place:
+
+- **영상 종류** filters by any category found in the list, such as **음악** or **게임**, and also offers **음악 제외** and **종류 미확인**.
+- **게시일순**, **조회수순**, and **영상 종류순** become available under **정렬**. The rows show the date or the view count while the list is sorted by it, and the category of each video as a badge.
+- A view count is the count at the moment it was looked up. Once every video has been looked up, the button reads **조회수 새로고침** and looks all of them up again.
+- A video that has not been looked up yet, or that the API has no record of, goes last in these sorts and counts as **종류 미확인**.
 
 ## Settings
 
@@ -122,7 +128,7 @@ Videos in category 10 (Music) get a **음악** badge. A video that has not been 
 | 재생시간 구간 경계 (분) | `5, 20, 60` | Up to 8 bounds; `5, 20, 60` gives under 5, 5–20, 20–60, and 60 minutes and over |
 | 삭제 간격 (초)          | 1 to 2      | A random pause in this range after each video, at least 1 second                |
 | 테스트 모드 기본 개수   | 3           | How many videos test mode handles, from 1 to 50                                 |
-| YouTube Data API 키     | empty       | Used only for the music category lookup                                         |
+| YouTube Data API 키     | empty       | Used only to look up categories, publish dates, and view counts                 |
 
 ## Permissions
 
@@ -138,7 +144,7 @@ Videos in category 10 (Music) get a **음악** badge. A video that has not been 
 
 - Everything the extension keeps stays in your Chrome profile. It has no server of its own.
 - Requests to YouTube are the ones a playlist page itself makes for the list you chose to scan, sent from the YouTube tab. How much of a video you watched is part of that list; the extension does not read your watch history.
-- With an API key, the IDs of the videos in your list are sent to the YouTube Data API to look up their categories, and nothing else is.
+- With an API key, the IDs of the videos in your list are sent to the YouTube Data API to look up their categories, publish dates, and view counts, and nothing else is.
 - The API key is stored in plain text in the extension's storage, like any other setting. [SECURITY.md](SECURITY.md) has the details.
 
 ## Troubleshooting

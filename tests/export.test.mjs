@@ -31,12 +31,13 @@ describe('CSV', () => {
   });
 
   it('writes a BOM, a header, and one row per video', () => {
-    const csv = buildCsv([ITEM], new Map([[ITEM.videoId, '10']]));
+    const info = new Map([[ITEM.videoId, { c: '10', p: Date.UTC(2019, 2, 4), v: 680000, t: Date.UTC(2026, 8, 30) }]]);
+    const csv = buildCsv([ITEM], { info, names: new Map([['10', '음악']]) });
     const lines = csv.split('\r\n');
 
     assert.ok(csv.startsWith('﻿'));
-    assert.equal(lines[0], '﻿position,video_id,title,channel_name,channel_id,duration_seconds,duration,category_id,watched_percent,url,thumbnail');
-    assert.equal(lines[1], `1,abcdefghijk,"Title, with ""quotes""",채널,UCchannel,245,4:05,10,45,https://www.youtube.com/watch?v=abcdefghijk,https://i.ytimg.com/vi/abcdefghijk/mqdefault.jpg`);
+    assert.equal(lines[0], '﻿position,video_id,title,channel_name,channel_id,duration_seconds,duration,category_id,category_name,published_at,view_count,info_looked_up_at,watched_percent,url,thumbnail');
+    assert.equal(lines[1], `1,abcdefghijk,"Title, with ""quotes""",채널,UCchannel,245,4:05,10,음악,2019-03-04T00:00:00.000Z,680000,2026-09-30T00:00:00.000Z,45,https://www.youtube.com/watch?v=abcdefghijk,https://i.ytimg.com/vi/abcdefghijk/mqdefault.jpg`);
     assert.equal(lines[2], '');
   });
 });
@@ -52,6 +53,7 @@ describe('JSON', () => {
     assert.equal(json.count, 1);
     assert.equal(json.items[0].url, 'https://www.youtube.com/watch?v=abcdefghijk');
     assert.equal(json.items[0].categoryId, null);
+    assert.equal(json.items[0].viewCount, null);
     assert.equal(json.items[0].watchedPercent, 45);
     assert.equal(json.items[0].thumbnail, 'https://i.ytimg.com/vi/abcdefghijk/mqdefault.jpg');
   });

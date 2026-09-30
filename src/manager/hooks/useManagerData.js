@@ -6,8 +6,30 @@ import { WATCH_LATER_ID, isListId, isWatchLater } from '../lib/sources.js';
 import * as store from '../lib/store.js';
 import { normalizeViewPrefs } from '../lib/view-model.js';
 
-const readCategories = (stored) => new Map(Object.entries(stored && typeof stored === 'object' ? stored : {})
-  .filter(([videoId, categoryId]) => isVideoId(videoId) && typeof categoryId === 'string' && categoryId.length <= 4));
+const CATEGORY_ID_PATTERN = /^\d{1,4}$/;
+
+const readEntries = (stored) => Object.entries(stored && typeof stored === 'object' ? stored : {});
+
+const toNumberOrNull = (value) => (Number.isSafeInteger(value) && value >= 0 ? value : null);
+
+// What the Data API told about each video; see `src/manager/lib/video-info.js`.
+const readVideoInfo = (stored) => new Map(readEntries(stored)
+  .filter(([videoId, entry]) => isVideoId(videoId) && entry && typeof entry === 'object')
+  .map(([videoId, entry]) => [videoId, {
+    c: CATEGORY_ID_PATTERN.test(entry.c ?? '') ? entry.c : '',
+    p: toNumberOrNull(entry.p),
+    v: toNumberOrNull(entry.v),
+    t: toNumberOrNull(entry.t) ?? 0,
+  }]));
+
+// Earlier versions kept only the category. Those entries keep it but count
+// as not looked up (`t` is 0), so the next lookup adds the date and views.
+const readLegacyCategories = (stored) => new Map(readEntries(stored)
+  .filter(([videoId, categoryId]) => isVideoId(videoId) && typeof categoryId === 'string' && (categoryId === '' || CATEGORY_ID_PATTERN.test(categoryId)))
+  .map(([videoId, categoryId]) => [videoId, { c: categoryId, p: null, v: null, t: 0 }]));
+
+const readCategoryNames = (stored) => new Map(readEntries(stored)
+  .filter(([categoryId, name]) => CATEGORY_ID_PATTERN.test(categoryId) && typeof name === 'string' && name.length <= 100));
 
 const readSnapshots = (stored) => {
   const lists = stored?.lists && typeof stored.lists === 'object' ? stored.lists : {};
@@ -44,7 +66,8 @@ export const useManagerData = () => {
   const [activeListId, setActiveListIdState] = useState(WATCH_LATER_ID);
   const [settings, setSettings] = useState(() => normalizeSettings(null));
   const [prefs, setPrefs] = useState(() => normalizeViewPrefs(null));
-  const [categories, setCategories] = useState(() => new Map());
+  const [videoInfo, setVideoInfo] = useState(() => new Map());
+  const [categoryNames, setCategoryNames] = useState(() => new Map());
   const snapshotsRef = useRef(snapshots);
 
   useEffect(() => {
@@ -55,7 +78,13 @@ export const useManagerData = () => {
       const pending = readPendingRemovals(data.pendingRemovals);
       const legacy = readSnapshot(data.snapshot);
       let lists = readSnapshots(data.snapshots);
+      let info = readVideoInfo(data.videoInfo);
       let changed = false;
+
+      if (data.videoInfo === undefined && data.categories !== undefined) {
+        info = readLegacyCategories(data.categories);
+        await store.saveVideoInfo(info);
+      }
 
       if (legacy && !lists[legacy.listId]) {
         lists = { ...lists, [legacy.listId]: legacy };
@@ -72,8 +101,8 @@ export const useManagerData = () => {
         await store.saveSnapshots(lists);
       }
 
-      if (data.snapshot !== undefined) {
-        await store.removeLegacySnapshot();
+      if (data.snapshot !== undefined || data.categories !== undefined) {
+        await store.removeLegacyData();
       }
 
       if (data.pendingRemovals !== undefined) {
@@ -93,7 +122,8 @@ export const useManagerData = () => {
       setActiveListIdState(listId);
       setSettings(normalizeSettings(data.settings));
       setPrefs(normalizeViewPrefs(data.viewPrefs));
-      setCategories(readCategories(data.categories));
+      setVideoInfo(info);
+      setCategoryNames(readCategoryNames(data.categoryNames));
       setReady(true);
     };
 
@@ -121,8 +151,12 @@ export const useManagerData = () => {
         setSettings(normalizeSettings(changes.settings.newValue));
       }
 
-      if (changes.categories) {
-        setCategories(readCategories(changes.categories.newValue));
+      if (changes.videoInfo) {
+        setVideoInfo(readVideoInfo(changes.videoInfo.newValue));
+      }
+
+      if (changes.categoryNames) {
+        setCategoryNames(readCategoryNames(changes.categoryNames.newValue));
       }
     };
 
@@ -169,9 +203,14 @@ export const useManagerData = () => {
     await store.saveSettings(next);
   }, []);
 
-  const saveCategories = useCallback(async (next) => {
-    setCategories(next);
-    await store.saveCategories(next);
+  const saveVideoInfo = useCallback(async (next) => {
+    setVideoInfo(next);
+    await store.saveVideoInfo(next);
+  }, []);
+
+  const saveCategoryNames = useCallback(async (next) => {
+    setCategoryNames(next);
+    await store.saveCategoryNames(next);
   }, []);
 
   const updatePrefs = useCallback((patch) => {
@@ -188,10 +227,12 @@ export const useManagerData = () => {
     forgetSnapshot,
     settings,
     prefs,
-    categories,
+    videoInfo,
+    categoryNames,
     saveSettings,
-    saveCategories,
-    setCategories,
+    saveVideoInfo,
+    setVideoInfo,
+    saveCategoryNames,
     updatePrefs,
   };
 };

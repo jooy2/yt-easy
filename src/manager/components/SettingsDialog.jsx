@@ -132,7 +132,7 @@ export function SettingsDialog({ open, settings, onClose, onSave }) {
         <TextField
           type="password"
           label="YouTube Data API 키 (선택)"
-          description="음악 카테고리를 조회할 때만 씁니다. 키는 이 Chrome 프로필의 확장 프로그램 저장소에 저장되고, 저장할 때 www.googleapis.com 접근 권한을 요청합니다. 비워 두고 저장하면 키와 권한을 지웁니다."
+          description="영상 종류, 게시일, 조회수를 가져올 때만 씁니다. 키는 이 Chrome 프로필의 확장 프로그램 저장소에 저장되고, 저장할 때 www.googleapis.com 접근 권한을 요청합니다. 비워 두고 저장하면 키와 권한을 지웁니다."
           autoComplete="off"
           spellCheck={false}
           value={form.apiKey}

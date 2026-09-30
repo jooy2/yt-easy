@@ -4,7 +4,8 @@ const KEYS = Object.freeze({
   snapshots: 'snapshots',
   activeListId: 'activeListId',
   settings: 'settings',
-  categories: 'categories',
+  videoInfo: 'videoInfo',
+  categoryNames: 'categoryNames',
   pendingRemovals: 'pendingRemovals',
   viewPrefs: 'viewPrefs',
 });
@@ -15,12 +16,13 @@ export const INSTANCE_ID = crypto.randomUUID();
 
 export const STORAGE_KEYS = KEYS;
 
-// Where version 1 kept its only list, Watch later.
-const LEGACY_SNAPSHOT_KEY = 'snapshot';
+// Where earlier versions kept their only list, Watch later, and the category
+// of each video before publish dates and view counts were kept too.
+const LEGACY_KEYS = Object.freeze({ snapshot: 'snapshot', categories: 'categories' });
 
-export const loadAll = () => chrome.storage.local.get([...Object.values(KEYS), LEGACY_SNAPSHOT_KEY]);
+export const loadAll = () => chrome.storage.local.get([...Object.values(KEYS), ...Object.values(LEGACY_KEYS)]);
 
-export const removeLegacySnapshot = () => chrome.storage.local.remove(LEGACY_SNAPSHOT_KEY);
+export const removeLegacyData = () => chrome.storage.local.remove(Object.values(LEGACY_KEYS));
 
 // Every scanned list, keyed by list ID, written in one piece.
 export const saveSnapshots = (snapshots) => chrome.storage.local.set({
@@ -33,9 +35,9 @@ export const saveSettings = (settings) => chrome.storage.local.set({ [KEYS.setti
 
 export const saveViewPrefs = (prefs) => chrome.storage.local.set({ [KEYS.viewPrefs]: prefs });
 
-export const saveCategories = (categories) => chrome.storage.local.set({
-  [KEYS.categories]: Object.fromEntries(categories),
-});
+export const saveVideoInfo = (info) => chrome.storage.local.set({ [KEYS.videoInfo]: Object.fromEntries(info) });
+
+export const saveCategoryNames = (names) => chrome.storage.local.set({ [KEYS.categoryNames]: Object.fromEntries(names) });
 
 // Videos removed during a job that has not finished yet. If the manager
 // closes mid-job, the next start applies them to the stored list.

@@ -4,24 +4,32 @@ import { formatCount } from '../lib/format.js';
 
 export const ALL_GROUP_KEY = 'all';
 
-// Channels or length ranges as vertical tabs. Choosing one shows only its
-// videos beside the rail. The rail is one tab stop; the arrow keys move
-// between groups, as in any tab list. Channels can be ordered by name or by
-// how many videos each has.
-export function GroupRail({ grouping, groups, totalCount, activeKey, onSelect, channelOrder, onChannelOrderChange }) {
+const RAIL_LABELS = {
+  channel: '채널',
+  duration: '길이 구간',
+  category: '영상 종류',
+};
+
+// Channels, length ranges, or categories as vertical tabs. Choosing one shows
+// only its videos beside the rail. The rail is one tab stop; the arrow keys
+// move between groups, as in any tab list. Channels and categories can be
+// ordered by name or by how many videos each has.
+export function GroupRail({ grouping, groups, totalCount, activeKey, onSelect, groupOrder, onGroupOrderChange }) {
+  const label = RAIL_LABELS[grouping];
+
   return (
     <div className="group-rail-pane">
-      {grouping === 'channel' && (
+      {grouping !== 'duration' && (
         <SegmentedButton
           className="rail-order"
           size="xs"
           fullWidth
-          value={channelOrder}
-          onValueChange={(value) => value && onChannelOrderChange(value)}
-          aria-label="채널 순서"
+          value={groupOrder}
+          onValueChange={(value) => value && onGroupOrderChange(value)}
+          aria-label={`${label} 순서`}
         >
           <Segment value="name">이름순</Segment>
-          <Segment value="count" title="영상이 많은 채널부터">많은 순</Segment>
+          <Segment value="count" title="영상이 많은 것부터">많은 순</Segment>
         </SegmentedButton>
       )}
       <Tabs
@@ -32,7 +40,7 @@ export function GroupRail({ grouping, groups, totalCount, activeKey, onSelect, c
         activateOnFocus
         value={activeKey}
         onValueChange={(value) => onSelect(value ?? ALL_GROUP_KEY)}
-        aria-label={grouping === 'channel' ? '채널' : '길이 구간'}
+        aria-label={label}
       >
         <Tab value={ALL_GROUP_KEY} endIcon={<span className="rail-count">{formatCount(totalCount)}</span>}>
           <span className="rail-label">전체</span>

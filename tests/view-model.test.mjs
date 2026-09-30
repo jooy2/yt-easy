@@ -8,6 +8,8 @@ import {
   findBucket,
   matchesCategory,
   isMusicVideo,
+  listCategories,
+  sortItems as sortWithInfo,
   normalizeViewPrefs,
   sortItems,
 } from '../src/manager/lib/view-model.js';
@@ -38,7 +40,8 @@ const baseInput = (overrides = {}) => ({
   query: '',
   durationFilter: 'all',
   categoryFilter: 'all',
-  categories: new Map(),
+  info: new Map(),
+  names: new Map(),
   buckets: createBuckets([5, 20, 60]),
   sortBy: 'position',
   sortDir: 'asc',
@@ -100,11 +103,44 @@ describe('buildView', () => {
     assert.deepEqual(positions(buildView(input('all')).items), [1, 2, 3, 4, 5]);
   });
 
-  it('filters by music category', () => {
-    const categories = new Map([[ITEMS[0].videoId, '10'], [ITEMS[1].videoId, '27'], [ITEMS[2].videoId, '']]);
+  it('filters by any category, by not music, and by unknown', () => {
+    const info = new Map([[ITEMS[0].videoId, { c: '10' }], [ITEMS[1].videoId, { c: '27' }], [ITEMS[2].videoId, { c: '' }], [ITEMS[3].videoId, { c: '27' }]]);
 
-    assert.deepEqual(positions(buildView(baseInput({ categories, categoryFilter: 'music' })).items), [1]);
-    assert.deepEqual(positions(buildView(baseInput({ categories, categoryFilter: 'other' })).items), [2, 3, 4, 5]);
+    assert.deepEqual(positions(buildView(baseInput({ info, categoryFilter: '10' })).items), [1]);
+    assert.deepEqual(positions(buildView(baseInput({ info, categoryFilter: '27' })).items), [2, 4]);
+    assert.deepEqual(positions(buildView(baseInput({ info, categoryFilter: 'other' })).items), [2, 3, 4, 5]);
+    assert.deepEqual(positions(buildView(baseInput({ info, categoryFilter: 'unknown' })).items), [3, 5]);
+  });
+
+  it('sorts by publish date and by views, with videos not looked up last', () => {
+    const info = new Map([
+      [ITEMS[0].videoId, { c: '10', p: 300, v: 5 }],
+      [ITEMS[1].videoId, { c: '27', p: 100, v: 900 }],
+      [ITEMS[3].videoId, { c: '27', p: 200, v: null }],
+    ]);
+
+    assert.deepEqual(positions(sortWithInfo(ITEMS, 'published', 'asc', { info })), [2, 4, 1, 3, 5]);
+    assert.deepEqual(positions(sortWithInfo(ITEMS, 'published', 'desc', { info })), [1, 4, 2, 3, 5]);
+    assert.deepEqual(positions(sortWithInfo(ITEMS, 'views', 'desc', { info })), [2, 1, 3, 4, 5]);
+  });
+
+  it('groups by category name, with unknown last, when sorting by category', () => {
+    const info = new Map([[ITEMS[0].videoId, { c: '10' }], [ITEMS[1].videoId, { c: '27' }], [ITEMS[3].videoId, { c: '27' }]]);
+    const names = new Map([['10', '음악'], ['27', '교육']]);
+    const byName = buildView(baseInput({ info, names, sortBy: 'category' })).groups;
+    const byCount = buildView(baseInput({ info, names, sortBy: 'category', groupOrder: 'count' })).groups;
+
+    assert.deepEqual(byName.map((group) => [group.label, positions(group.items)]), [['교육', [2, 4]], ['음악', [1]], ['종류 미확인', [3, 5]]]);
+    assert.deepEqual(byCount.map((group) => group.label), ['교육', '음악', '종류 미확인']);
+  });
+
+  it('lists the categories found, by name, for the filter', () => {
+    const info = new Map([[ITEMS[0].videoId, { c: '10' }], [ITEMS[1].videoId, { c: '20' }]]);
+
+    assert.deepEqual(listCategories(ITEMS, info, new Map([['10', '음악']])), [
+      { categoryId: '10', name: '음악' },
+      { categoryId: '20', name: '카테고리 20' },
+    ]);
   });
 
   it('lists channels by name when sorting by channel, following the direction', () => {
@@ -115,7 +151,7 @@ describe('buildView', () => {
   });
 
   it('lists the channels with the most videos first when asked', () => {
-    const { groups } = buildView(baseInput({ sortBy: 'channel', channelOrder: 'count' }));
+    const { groups } = buildView(baseInput({ sortBy: 'channel', groupOrder: 'count' }));
 
     assert.deepEqual(groups.map((group) => [group.label, group.count]), [['가나다 채널', 2], ['Zeta', 2], ['Alpha', 1]]);
     assert.equal(groups[0].totalSeconds, 3900);
@@ -149,22 +185,29 @@ describe('isMusicVideo, matchesCategory, and normalizeViewPrefs', () => {
   it('counts only videos the API filed under Music as music', () => {
     const item = { videoId: 'aaaaaaaaaaa' };
 
-    assert.equal(isMusicVideo(item, new Map([['aaaaaaaaaaa', '10']])), true);
-    assert.equal(isMusicVideo(item, new Map([['aaaaaaaaaaa', '27']])), false);
-    assert.equal(isMusicVideo(item, new Map([['aaaaaaaaaaa', '']])), false);
+    assert.equal(isMusicVideo(item, new Map([['aaaaaaaaaaa', { c: '10' }]])), true);
+    assert.equal(isMusicVideo(item, new Map([['aaaaaaaaaaa', { c: '27' }]])), false);
+    assert.equal(isMusicVideo(item, new Map([['aaaaaaaaaaa', { c: '' }]])), false);
     assert.equal(isMusicVideo(item, new Map()), false);
     assert.equal(matchesCategory('all', item, new Map()), true);
   });
 
   it('replaces values that are not options', () => {
-    assert.deepEqual(normalizeViewPrefs({ groupBy: 'channel', sortBy: 'nope', sortDir: 'desc', channelOrder: 'count', durationFilter: 'lt-5', filtersOpen: 'no' }), {
+    assert.deepEqual(normalizeViewPrefs({ groupBy: 'channel', sortBy: 'nope', sortDir: 'desc', channelOrder: 'count', durationFilter: 'lt-5', categoryFilter: 'drop table', filtersOpen: 'no' }), {
       sortBy: 'position',
       sortDir: 'desc',
-      channelOrder: 'count',
+      groupOrder: 'count',
       durationFilter: 'lt-5',
       categoryFilter: 'all',
       watchFilter: 'all',
       filtersOpen: true,
     });
+  });
+
+  it('keeps category IDs and reads the old music filter as category 10', () => {
+    assert.equal(normalizeViewPrefs({ categoryFilter: '20' }).categoryFilter, '20');
+    assert.equal(normalizeViewPrefs({ categoryFilter: 'music' }).categoryFilter, '10');
+    assert.equal(normalizeViewPrefs({ categoryFilter: 'unknown' }).categoryFilter, 'unknown');
+    assert.equal(normalizeViewPrefs({ sortBy: 'views' }).sortBy, 'views');
   });
 });

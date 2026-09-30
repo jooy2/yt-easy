@@ -16,16 +16,25 @@ import { VideoRow } from './components/VideoRow.jsx';
 import { VirtualList } from './components/VirtualList.jsx';
 import { useManagerData } from './hooks/useManagerData.js';
 import { useTask } from './hooks/useTask.js';
-import { fetchCategories, removeApiPermission, requestApiPermission } from './lib/categories.js';
 import { buildCsv, buildFileName, buildJson, downloadText } from './lib/export.js';
-import { formatCount, formatDateTime, formatFileStamp } from './lib/format.js';
+import { formatCount, formatDate, formatDateTime, formatFileStamp, formatViews } from './lib/format.js';
 import { openInCurrentTab, openInNewTab } from './lib/open-video.js';
 import { addAll, readCoverage, removeAll, selectRange, toggleOne } from './lib/selection.js';
 import { createSnapshot, removeFromSnapshot } from './lib/snapshot.js';
 import { WATCH_LATER_ID, WATCH_LATER_TITLE, isWatchLater, toFileSlug } from './lib/sources.js';
 import * as store from './lib/store.js';
 import { prepareListTab, runJob } from './lib/tab-bridge.js';
-import { buildSearchText, buildView, createBuckets, isMusicVideo, readGrouping } from './lib/view-model.js';
+import { fetchCategoryNames, fetchVideoInfo, removeApiPermission, requestApiPermission } from './lib/video-info.js';
+import {
+  INFO_SORTS,
+  buildSearchText,
+  buildView,
+  createBuckets,
+  listCategories,
+  readCategoryId,
+  readCategoryName,
+  readGrouping,
+} from './lib/view-model.js';
 
 const IS_TAB_VIEW = new URLSearchParams(location.search).get('view') === 'tab';
 const ITEM_ROW_HEIGHT = 72;
@@ -33,6 +42,8 @@ const PENDING_SAVE_INTERVAL = 10;
 const NO_ITEMS = [];
 
 const isAbortError = (error) => error?.name === 'AbortError';
+
+const isLookedUp = (info, videoId) => (info.get(videoId)?.t ?? 0) > 0;
 
 // Keys typed into a field, or inside a popup, belong to that control.
 const isOwnedByControl = (target) => Boolean(target?.closest?.(
@@ -47,7 +58,7 @@ const describeScanProgress = ({ count, paused }) => (paused
 
 export function App() {
   const data = useManagerData();
-  const { snapshot, snapshots, activeListId, settings, prefs, categories } = data;
+  const { snapshot, snapshots, activeListId, settings, prefs, videoInfo, categoryNames } = data;
   const { task, start, update, end, cancel } = useTask();
   const toast = useToast();
 
@@ -68,6 +79,8 @@ export function App() {
   const canRemove = isWatchLater(activeListId) || Boolean(snapshot?.removeLabel);
   const busy = task !== null;
   const hasApiKey = Boolean(settings.apiKey);
+  // Sorts that need the Data API fall back to list order without a key.
+  const sortBy = !hasApiKey && INFO_SORTS.includes(prefs.sortBy) ? 'position' : prefs.sortBy;
   const buckets = useMemo(() => createBuckets(settings.durationBounds), [settings.durationBounds]);
   const durationFilter = buckets.some((bucket) => bucket.key === prefs.durationFilter) ? prefs.durationFilter : 'all';
   const searchTexts = useMemo(() => new Map(items.map((item) => [item.videoId, buildSearchText(item)])), [items]);
@@ -79,12 +92,16 @@ export function App() {
     durationFilter,
     categoryFilter: hasApiKey ? prefs.categoryFilter : 'all',
     watchFilter: prefs.watchFilter,
-    categories,
+    info: videoInfo,
+    names: categoryNames,
     buckets,
-    channelOrder: prefs.channelOrder,
-    sortBy: prefs.sortBy,
+    groupOrder: prefs.groupOrder,
+    sortBy,
     sortDir: prefs.sortDir,
-  }), [items, searchTexts, deferredQuery, durationFilter, hasApiKey, prefs, categories, buckets]);
+  }), [items, searchTexts, deferredQuery, durationFilter, hasApiKey, prefs, sortBy, videoInfo, categoryNames, buckets]);
+
+  const missingInfoCount = useMemo(() => items.filter((item) => !isLookedUp(videoInfo, item.videoId)).length, [items, videoInfo]);
+  const categoryOptions = useMemo(() => listCategories(items, videoInfo, categoryNames), [items, videoInfo, categoryNames]);
 
   // With grouping, the list shows the group chosen in the rail. A group that
   // a filter emptied falls back to all videos.
@@ -101,7 +118,7 @@ export function App() {
   // A new grouping starts from all videos.
   useEffect(() => {
     setActiveGroup(ALL_GROUP_KEY);
-  }, [prefs.sortBy]);
+  }, [sortBy]);
 
   // Another list starts with nothing selected.
   useEffect(() => {
@@ -172,11 +189,11 @@ export function App() {
     return downloadText({
       filename: buildFileName({ prefix: `${toFileSlug(activeListId)}-${suffix}`, stamp, extension: format }),
       text: isJson
-        ? buildJson({ items: list, categories, kind, exportedAt: Date.now(), listId: activeListId, listTitle: sourceTitle })
-        : buildCsv(list, categories),
+        ? buildJson({ items: list, info: videoInfo, names: categoryNames, kind, exportedAt: Date.now(), listId: activeListId, listTitle: sourceTitle })
+        : buildCsv(list, { info: videoInfo, names: categoryNames }),
       type: isJson ? 'application/json' : 'text/csv',
     });
-  }, [categories, activeListId, sourceTitle]);
+  }, [videoInfo, categoryNames, activeListId, sourceTitle]);
 
   // -------------------------------------------------------------------------
   // Scanning
@@ -216,11 +233,11 @@ export function App() {
       await store.clearPendingRemovals();
       setFailures(new Map());
 
-      // Drop category entries of videos that are in none of the kept lists.
-      const kept = new Map([...categories].filter(([videoId]) => ids.has(videoId)));
+      // Drop video info of videos that are in none of the kept lists.
+      const kept = new Map([...videoInfo].filter(([videoId]) => ids.has(videoId)));
 
-      if (kept.size !== categories.size) {
-        await data.saveCategories(kept);
+      if (kept.size !== videoInfo.size) {
+        await data.saveVideoInfo(kept);
       }
 
       announce(`${next.title}: ${formatCount(next.items.length)}개를 스캔했습니다.`);
@@ -271,9 +288,11 @@ export function App() {
   };
 
   // -------------------------------------------------------------------------
-  // Categories
+  // Video info from the Data API
 
-  const handleFetchCategories = async () => {
+  // Looks up the videos not looked up yet. When every video already is, it
+  // looks all of them up again, which brings the view counts up to date.
+  const handleFetchInfo = async () => {
     if (!hasApiKey || items.length === 0) {
       return;
     }
@@ -283,44 +302,44 @@ export function App() {
     const granted = await requestApiPermission().catch(() => false);
 
     if (!granted) {
-      setMessage('www.googleapis.com 접근 권한을 허용해야 카테고리를 조회할 수 있습니다.');
+      setMessage('www.googleapis.com 접근 권한을 허용해야 영상 정보를 가져올 수 있습니다.');
       return;
     }
 
-    const missing = items.map((item) => item.videoId).filter((videoId) => !categories.has(videoId));
-
-    if (missing.length === 0) {
-      announce('모든 영상의 카테고리를 이미 확인했습니다.');
-      return;
-    }
-
-    const controller = start({ kind: 'categories', label: `카테고리 조회 중… 0 / ${formatCount(missing.length)}` });
-    const found = new Map(categories);
+    const refreshing = missingInfoCount === 0;
+    const targets = items.map((item) => item.videoId).filter((videoId) => refreshing || !isLookedUp(videoInfo, videoId));
+    const verb = refreshing ? '조회수를 새로 가져오는 중' : '영상 정보를 가져오는 중';
+    const controller = start({ kind: 'info', label: `${verb}… 0 / ${formatCount(targets.length)}` });
+    const found = new Map(videoInfo);
 
     setMessage('');
-    update({ value: 0, max: missing.length });
+    update({ value: 0, max: targets.length });
 
     try {
-      await fetchCategories({
+      if (categoryNames.size === 0) {
+        await data.saveCategoryNames(await fetchCategoryNames({ apiKey: settings.apiKey, signal: controller.signal }));
+      }
+
+      await fetchVideoInfo({
         apiKey: settings.apiKey,
-        videoIds: missing,
+        videoIds: targets,
         signal: controller.signal,
         onBatch: (entries, { done, total }) => {
-          for (const [videoId, categoryId] of entries) {
-            found.set(videoId, categoryId);
+          for (const [videoId, entry] of entries) {
+            found.set(videoId, entry);
           }
 
-          data.setCategories(new Map(found));
-          update({ label: `카테고리 조회 중… ${formatCount(done)} / ${formatCount(total)}`, value: done, max: total });
+          data.setVideoInfo(new Map(found));
+          update({ label: `${verb}… ${formatCount(done)} / ${formatCount(total)}`, value: done, max: total });
         },
       });
-      announce('카테고리를 조회했습니다.');
+      announce(refreshing ? '조회수를 새로 가져왔습니다.' : '영상 정보를 가져왔습니다.');
     } catch (error) {
       if (!isAbortError(error)) {
         setMessage(error.message);
       }
     } finally {
-      await data.saveCategories(found);
+      await data.saveVideoInfo(found);
       end();
     }
   };
@@ -516,6 +535,17 @@ export function App() {
   };
 
   const renderRow = (row, layout) => {
+    const entry = videoInfo.get(row.item.videoId);
+    const categoryId = readCategoryId(row.item, videoInfo);
+    let extra = null;
+
+    // The row shows the date or the views only while the list is sorted by it.
+    if (sortBy === 'published' && entry?.p) {
+      extra = formatDate(entry.p);
+    } else if (sortBy === 'views' && entry?.v != null) {
+      extra = formatViews(entry.v);
+    }
+
     return (
       <VideoRow
         key={row.key}
@@ -523,7 +553,8 @@ export function App() {
         {...layout}
         selected={selected.has(row.item.videoId)}
         failure={failures.get(row.item.videoId)}
-        isMusic={isMusicVideo(row.item, categories)}
+        categoryName={categoryId ? readCategoryName(categoryId, categoryNames) : null}
+        extra={extra}
         // Loading a video into the current tab could replace the playlist
         // tab a running job works in.
         openDisabled={busy}
@@ -557,20 +588,28 @@ export function App() {
     return parts.join(' · ');
   }, [snapshot, items.length, view.items.length]);
 
-  const categoryNote = useMemo(() => {
+  const infoNote = useMemo(() => {
     if (!hasApiKey) {
-      return '음악 필터는 YouTube Data API 키가 있어야 쓸 수 있습니다. 설정에서 키를 넣어 주세요.';
+      return '영상 종류, 게시일, 조회수는 YouTube Data API 키가 있어야 볼 수 있습니다. 설정에서 키를 넣어 주세요.';
     }
 
     if (items.length === 0) {
       return '';
     }
 
-    const known = items.filter((item) => categories.get(item.videoId)).length;
-    const rest = known < items.length ? ' 확인하지 않은 영상은 음악이 아닌 것으로 칩니다. [카테고리 확인]을 누르면 나머지를 확인합니다.' : '';
+    const times = items.map((item) => videoInfo.get(item.videoId)?.t ?? 0).filter((time) => time > 0);
+    const parts = [`영상 정보 ${formatCount(items.length - missingInfoCount)} / ${formatCount(items.length)}개 확인.`];
 
-    return `카테고리 확인 ${formatCount(known)} / ${formatCount(items.length)}개.${rest}`;
-  }, [hasApiKey, items, categories]);
+    if (times.length > 0) {
+      parts.push(`조회수는 ${formatDateTime(Math.min(...times))} 이후 기준입니다.`);
+    }
+
+    if (missingInfoCount > 0) {
+      parts.push('[영상 정보 가져오기]를 누르면 나머지를 가져옵니다.');
+    }
+
+    return parts.join(' ');
+  }, [hasApiKey, items, videoInfo, missingInfoCount]);
 
   let emptyReason = null;
 
@@ -582,7 +621,7 @@ export function App() {
     emptyReason = 'filtered';
   }
 
-  const grouping = readGrouping(prefs.sortBy);
+  const grouping = readGrouping(sortBy);
   const grouped = grouping !== 'none';
   const listTitle = activeGroupEntry?.label ?? (grouped ? '전체' : '전체 목록');
   const listPane = (
@@ -603,7 +642,7 @@ export function App() {
           rows={shownRows}
           getHeight={getRowHeight}
           renderRow={renderRow}
-          resetKey={`${deferredQuery}|${durationFilter}|${prefs.categoryFilter}|${prefs.watchFilter}|${prefs.sortBy}|${prefs.sortDir}|${prefs.channelOrder}|${activeGroup}`}
+          resetKey={`${deferredQuery}|${durationFilter}|${prefs.categoryFilter}|${prefs.watchFilter}|${sortBy}|${prefs.sortDir}|${prefs.groupOrder}|${activeGroup}`}
         />
       )}
     </div>
@@ -644,9 +683,13 @@ export function App() {
           onPrefsChange={data.updatePrefs}
           buckets={buckets}
           hasApiKey={hasApiKey}
-          canFetchCategories={hasApiKey && !busy && items.length > 0}
-          categoryNote={categoryNote}
-          onFetchCategories={handleFetchCategories}
+          sortBy={sortBy}
+          categoryOptions={categoryOptions}
+          categoryNames={categoryNames}
+          canFetchInfo={hasApiKey && !busy && items.length > 0}
+          infoRefresh={missingInfoCount === 0}
+          infoNote={infoNote}
+          onFetchInfo={handleFetchInfo}
         />
       )}
       <StatusBar summary={summary} task={task} onCancel={cancel} message={message} onDismissMessage={() => setMessage('')} />
@@ -670,8 +713,8 @@ export function App() {
             <Pane defaultSize="34%" minSize="110px" maxSize="60%">
               <GroupRail
                 grouping={grouping}
-                channelOrder={prefs.channelOrder}
-                onChannelOrderChange={(channelOrder) => data.updatePrefs({ channelOrder })}
+                groupOrder={prefs.groupOrder}
+                onGroupOrderChange={(groupOrder) => data.updatePrefs({ groupOrder })}
                 groups={view.groups}
                 totalCount={view.items.length}
                 activeKey={activeGroupEntry ? activeGroup : ALL_GROUP_KEY}
