@@ -2,16 +2,12 @@ import { Button, IconButton, Select, TextField, Tooltip } from 'neba';
 
 import { ArrowDownIcon, ArrowUpIcon, SearchIcon } from './icons.jsx';
 
-const GROUP_ITEMS = [
-  { value: 'none', label: '전체 목록' },
-  { value: 'channel', label: '채널별' },
-  { value: 'duration', label: '길이별' },
-];
-
+// Sorting by channel name or by length also lists the channels or the length
+// ranges beside the videos.
 const SORT_ITEMS = [
   { value: 'position', label: '추가순' },
-  { value: 'duration', label: '길이순' },
   { value: 'channel', label: '채널명순' },
+  { value: 'duration', label: '길이순' },
 ];
 
 const WATCH_ITEMS = [
@@ -47,9 +43,8 @@ export function FilterBar({ open, query, onQueryChange, prefs, durationFilter, o
           spellCheck={false}
           startIcon={<SearchIcon />}
         />
-        <Select aria-label="보기" items={GROUP_ITEMS} value={prefs.groupBy} onValueChange={(value) => onPrefsChange({ groupBy: value })} />
         <div className="filter-pair">
-          <Select aria-label="정렬 기준" items={SORT_ITEMS} value={prefs.sortBy} onValueChange={(value) => onPrefsChange({ sortBy: value })} />
+          <Select aria-label="정렬과 분류" items={SORT_ITEMS} value={prefs.sortBy} onValueChange={(value) => onPrefsChange({ sortBy: value })} />
           <Tooltip content={ascending ? '오름차순' : '내림차순'}>
             <IconButton
               variant="outline"

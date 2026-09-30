@@ -23,7 +23,7 @@ import { addAll, readCoverage, removeAll, selectRange, toggleOne } from './lib/s
 import { createSnapshot, removeFromSnapshot } from './lib/snapshot.js';
 import * as store from './lib/store.js';
 import { prepareWatchLaterTab, runJob } from './lib/tab-bridge.js';
-import { buildSearchText, buildView, createBuckets, isMusicVideo } from './lib/view-model.js';
+import { buildSearchText, buildView, createBuckets, isMusicVideo, readGrouping } from './lib/view-model.js';
 
 const IS_TAB_VIEW = new URLSearchParams(location.search).get('view') === 'tab';
 const ITEM_ROW_HEIGHT = 72;
@@ -75,7 +75,7 @@ export function App() {
     watchFilter: prefs.watchFilter,
     categories,
     buckets,
-    groupBy: prefs.groupBy,
+    channelOrder: prefs.channelOrder,
     sortBy: prefs.sortBy,
     sortDir: prefs.sortDir,
   }), [items, searchTexts, deferredQuery, durationFilter, hasApiKey, prefs, categories, buckets]);
@@ -95,7 +95,7 @@ export function App() {
   // A new grouping starts from all videos.
   useEffect(() => {
     setActiveGroup(ALL_GROUP_KEY);
-  }, [prefs.groupBy]);
+  }, [prefs.sortBy]);
 
   // Keep the selection and the failure marks to videos that still exist.
   useEffect(() => {
@@ -525,7 +525,8 @@ export function App() {
     emptyReason = 'filtered';
   }
 
-  const grouped = prefs.groupBy !== 'none';
+  const grouping = readGrouping(prefs.sortBy);
+  const grouped = grouping !== 'none';
   const listTitle = activeGroupEntry?.label ?? (grouped ? '전체' : '전체 목록');
   const listPane = (
     <div className="list-pane">
@@ -545,7 +546,7 @@ export function App() {
           rows={shownRows}
           getHeight={getRowHeight}
           renderRow={renderRow}
-          resetKey={`${deferredQuery}|${durationFilter}|${prefs.categoryFilter}|${prefs.watchFilter}|${prefs.groupBy}|${prefs.sortBy}|${prefs.sortDir}|${activeGroup}`}
+          resetKey={`${deferredQuery}|${durationFilter}|${prefs.categoryFilter}|${prefs.watchFilter}|${prefs.sortBy}|${prefs.sortDir}|${prefs.channelOrder}|${activeGroup}`}
         />
       )}
     </div>
@@ -602,7 +603,9 @@ export function App() {
           <Panes className="group-panes" resizable handleLabel="그룹 목록 너비 조절" locale="ko">
             <Pane defaultSize="34%" minSize={110} maxSize="60%">
               <GroupRail
-                groupBy={prefs.groupBy}
+                grouping={grouping}
+                channelOrder={prefs.channelOrder}
+                onChannelOrderChange={(channelOrder) => data.updatePrefs({ channelOrder })}
                 groups={view.groups}
                 totalCount={view.items.length}
                 activeKey={activeGroupEntry ? activeGroup : ALL_GROUP_KEY}

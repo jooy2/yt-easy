@@ -8,22 +8,36 @@ export const UNKNOWN_BUCKET_KEY = 'unknown';
 export const WATCHED_PERCENT = 90;
 
 export const VIEW_OPTIONS = Object.freeze({
-  groupBy: ['none', 'channel', 'duration'],
-  sortBy: ['position', 'duration', 'channel'],
+  sortBy: ['position', 'channel', 'duration'],
+  channelOrder: ['name', 'count'],
   sortDir: ['asc', 'desc'],
   categoryFilter: ['all', 'music', 'other'],
   watchFilter: ['all', 'unwatched', 'partial', 'watched'],
 });
 
 export const DEFAULT_VIEW_PREFS = Object.freeze({
-  groupBy: 'none',
   sortBy: 'position',
   sortDir: 'asc',
+  channelOrder: 'name',
   durationFilter: 'all',
   categoryFilter: 'all',
   watchFilter: 'all',
   filtersOpen: true,
 });
+
+// Sorting by channel name or by length also splits the list into channels or
+// length ranges, which the manager lists beside the videos.
+export const readGrouping = (sortBy) => {
+  if (sortBy === 'channel') {
+    return 'channel';
+  }
+
+  if (sortBy === 'duration') {
+    return 'duration';
+  }
+
+  return 'none';
+};
 
 const collator = new Intl.Collator('ko', { sensitivity: 'base', numeric: true });
 
@@ -175,7 +189,9 @@ export const sortItems = (items, sortBy, sortDir) => {
   });
 };
 
-const groupByChannel = ({ items, sortBy, sortDir }) => {
+// Channels in name order, following the sort direction, or with the most
+// videos first.
+const groupByChannel = ({ items, sortDir, channelOrder }) => {
   const groups = new Map();
 
   for (const item of items) {
@@ -191,16 +207,16 @@ const groupByChannel = ({ items, sortBy, sortDir }) => {
   const list = [...groups.values()];
   const direction = sortDir === 'desc' ? -1 : 1;
 
-  // Sorted by channel name: groups follow the name. Otherwise the channels
-  // with the most videos come first.
-  if (sortBy === 'channel') {
-    return list.sort((a, b) => collator.compare(a.label, b.label) * direction);
+  if (channelOrder === 'count') {
+    return list.sort((a, b) => b.items.length - a.items.length || collator.compare(a.label, b.label));
   }
 
-  return list.sort((a, b) => b.items.length - a.items.length || collator.compare(a.label, b.label));
+  return list.sort((a, b) => collator.compare(a.label, b.label) * direction);
 };
 
-const groupByDuration = ({ items, sortBy, sortDir, buckets }) => {
+// Length ranges in order, reversed for a descending sort. Videos without a
+// known length stay last either way.
+const groupByDuration = ({ items, sortDir, buckets }) => {
   const groups = new Map(buckets.map((bucket) => [bucket, { key: `duration:${bucket.key}`, label: bucket.label, items: [] }]));
 
   for (const item of items) {
@@ -209,7 +225,7 @@ const groupByDuration = ({ items, sortBy, sortDir, buckets }) => {
 
   const list = [...groups.values()].filter((group) => group.items.length > 0);
 
-  if (sortBy === 'duration' && sortDir === 'desc') {
+  if (sortDir === 'desc') {
     const unknown = list.filter((group) => group.key === `duration:${UNKNOWN_BUCKET_KEY}`);
 
     return [...list.filter((group) => !unknown.includes(group)).reverse(), ...unknown];
@@ -218,13 +234,15 @@ const groupByDuration = ({ items, sortBy, sortDir, buckets }) => {
   return list;
 };
 
-export const groupItems = ({ items, groupBy, sortBy, sortDir, buckets }) => {
-  if (groupBy === 'channel') {
-    return groupByChannel({ items, sortBy, sortDir });
+export const groupItems = ({ items, sortBy, sortDir, channelOrder, buckets }) => {
+  const grouping = readGrouping(sortBy);
+
+  if (grouping === 'channel') {
+    return groupByChannel({ items, sortDir, channelOrder });
   }
 
-  if (groupBy === 'duration') {
-    return groupByDuration({ items, sortBy, sortDir, buckets });
+  if (grouping === 'duration') {
+    return groupByDuration({ items, sortDir, buckets });
   }
 
   return [];
@@ -238,10 +256,11 @@ const describeGroup = (group) => ({
 });
 
 // `items` is the filtered and sorted list. `groups` splits it by channel or
-// length, each group keeping the same order, and is empty without grouping.
+// length when the sort calls for it, each group keeping the same order, and
+// is empty otherwise.
 export const buildView = (input) => {
   const items = sortItems(filterItems(input), input.sortBy, input.sortDir);
-  const groups = input.groupBy === 'none' ? [] : groupItems({ ...input, items }).map(describeGroup);
+  const groups = groupItems({ ...input, items }).map(describeGroup);
 
   return { items, groups };
 };

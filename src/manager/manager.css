@@ -240,10 +240,23 @@ body {
 
 /* neba sizes a vertical tab list to its longest tab. Here it fills the
    pane instead, so every tab, and the selection line, lines up. */
-.group-rail {
-  gap: 0;
+.group-rail-pane {
+  display: flex;
+  flex-direction: column;
   height: 100%;
   min-width: 0;
+}
+
+.rail-order {
+  flex: none;
+  margin: 6px 8px;
+}
+
+.group-rail {
+  flex: 1 1 auto;
+  gap: 0;
+  min-width: 0;
+  min-height: 0;
 }
 
 .group-rail > [role="tablist"] {
@@ -457,5 +470,13 @@ code {
   .video-thumb {
     width: 64px;
     height: 36px;
+  }
+}
+
+/* Beside the group rail in a side panel at its narrowest, the title needs
+   the room more than the thumbnail does. */
+@container (max-width: 260px) {
+  .video-thumb {
+    display: none;
   }
 }

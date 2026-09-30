@@ -66,8 +66,7 @@ The stored list does not follow changes you make on YouTube. Scan again after yo
 
 ### Find what you want
 
-- **보기** groups the list by channel or by length. The groups appear as tabs down the left side, with the channels that have the most videos first, and choosing one shows only its videos on the right. Drag the line between the two to resize them, and use the arrow keys to move between groups.
-- **정렬** sorts by list order (**추가순**), length, or channel name. The button next to it switches between ascending and descending.
+- **정렬** sorts by list order (**추가순**), channel name (**채널명순**), or length (**길이순**), and the button next to it switches between ascending and descending. Sorting by channel name or by length also lists the channels or the length ranges as tabs down the left side. Choosing one shows only its videos on the right, and **전체** shows all of them. Above the channel tabs, **이름순** and **많은 순** order the channels by name or by number of videos. Drag the line between the tabs and the list to resize them, and use the arrow keys to move between groups.
 - **길이** shows a single length range. Change the ranges in **설정**.
 - **시청 여부** narrows the list by how much of each video you have watched: **안 본 영상**, **보다 만 영상** (under 90%), or **다 본 영상** (90% or more). The amount comes from the red bar YouTube draws under a thumbnail, and the rows show the same bar. It follows your YouTube watch history, so with the history paused or turned off, every video counts as not watched.
 - The search box matches every word you type against titles and channel names.

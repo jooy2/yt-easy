@@ -40,7 +40,6 @@ const baseInput = (overrides = {}) => ({
   categoryFilter: 'all',
   categories: new Map(),
   buckets: createBuckets([5, 20, 60]),
-  groupBy: 'none',
   sortBy: 'position',
   sortDir: 'asc',
   ...overrides,
@@ -108,25 +107,26 @@ describe('buildView', () => {
     assert.deepEqual(positions(buildView(baseInput({ categories, categoryFilter: 'other' })).items), [2, 3, 4, 5]);
   });
 
-  it('groups by channel with the largest channels first', () => {
-    const { groups } = buildView(baseInput({ groupBy: 'channel' }));
+  it('lists channels by name when sorting by channel, following the direction', () => {
+    const { groups } = buildView(baseInput({ sortBy: 'channel', sortDir: 'desc' }));
+
+    assert.deepEqual(groups.map((group) => group.label), ['Zeta', 'Alpha', '가나다 채널']);
+    assert.deepEqual(positions(groups[0].items), [2, 5]);
+  });
+
+  it('lists the channels with the most videos first when asked', () => {
+    const { groups } = buildView(baseInput({ sortBy: 'channel', channelOrder: 'count' }));
 
     assert.deepEqual(groups.map((group) => [group.label, group.count]), [['가나다 채널', 2], ['Zeta', 2], ['Alpha', 1]]);
     assert.equal(groups[0].totalSeconds, 3900);
-    assert.deepEqual(positions(groups[1].items), [2, 5]);
   });
 
-  it('orders channel groups by name when sorting by channel', () => {
-    const { groups } = buildView(baseInput({ groupBy: 'channel', sortBy: 'channel', sortDir: 'desc' }));
-
-    assert.deepEqual(groups.map((group) => group.label), ['Zeta', 'Alpha', '가나다 채널']);
-  });
-
-  it('groups by duration in bucket order and leaves out empty buckets', () => {
-    const { groups } = buildView(baseInput({ groupBy: 'duration' }));
+  it('splits by length range when sorting by length, and sorts inside each range', () => {
+    const items = [...ITEMS, item(6, { durationSeconds: 200 })];
+    const { groups } = buildView(baseInput({ items, searchTexts: new Map(), sortBy: 'duration' }));
 
     assert.deepEqual(groups.map((group) => [group.label, positions(group.items)]), [
-      ['5분 미만', [2]],
+      ['5분 미만', [2, 6]],
       ['5–20분', [5]],
       ['20–60분', [4]],
       ['60분 이상', [1]],
@@ -134,13 +134,13 @@ describe('buildView', () => {
     ]);
   });
 
-  it('reverses duration groups but keeps unknown last when sorting by length descending', () => {
-    const { groups } = buildView(baseInput({ groupBy: 'duration', sortBy: 'duration', sortDir: 'desc' }));
+  it('reverses length ranges but keeps unknown last when sorting by length descending', () => {
+    const { groups } = buildView(baseInput({ sortBy: 'duration', sortDir: 'desc' }));
 
     assert.deepEqual(groups.map((group) => group.label), ['60분 이상', '20–60분', '5–20분', '5분 미만', '길이 정보 없음']);
   });
 
-  it('returns no groups without grouping', () => {
+  it('returns no groups when sorting by list order', () => {
     assert.deepEqual(buildView(baseInput()).groups, []);
   });
 });
@@ -157,10 +157,10 @@ describe('isMusicVideo, matchesCategory, and normalizeViewPrefs', () => {
   });
 
   it('replaces values that are not options', () => {
-    assert.deepEqual(normalizeViewPrefs({ groupBy: 'channel', sortBy: 'nope', sortDir: 'desc', durationFilter: 'lt-5', filtersOpen: 'no' }), {
-      groupBy: 'channel',
+    assert.deepEqual(normalizeViewPrefs({ groupBy: 'channel', sortBy: 'nope', sortDir: 'desc', channelOrder: 'count', durationFilter: 'lt-5', filtersOpen: 'no' }), {
       sortBy: 'position',
       sortDir: 'desc',
+      channelOrder: 'count',
       durationFilter: 'lt-5',
       categoryFilter: 'all',
       watchFilter: 'all',
