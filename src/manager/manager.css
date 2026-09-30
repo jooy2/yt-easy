@@ -255,8 +255,11 @@ body {
   min-width: 0;
 }
 
+/* neba's full width is 100%, which the margins would push past the pane.
+   Left at auto, the control stretches to the pane inside its margins. */
 .rail-order {
   flex: none;
+  width: auto;
   margin: 6px 8px;
 }
 
