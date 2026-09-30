@@ -21,7 +21,7 @@ The YouTube Data API has returned an empty list for Watch later since 2016, so a
 - Saves the videos about to be removed as JSON and CSV before anything is removed.
 - Offers a test mode that handles only the first few videos, and a dry run that finds the remove menu without clicking it.
 - Exports the whole list as JSON or CSV.
-- Tells music videos apart, if you supply a YouTube Data API key.
+- Tells music videos apart: estimated from the music note YouTube puts on the length badge, and confirmed by category if you supply a YouTube Data API key.
 
 The interface is in Korean.
 
@@ -96,15 +96,17 @@ Videos are removed in list order, one at a time. The job stops on its own when t
 
 **내보내기** at the top saves the whole list as a JSON or a CSV file in the `yt-easy` folder of your Downloads folder. The CSV is UTF-8 with a byte order mark, so spreadsheet apps show Korean titles correctly.
 
-### Tell music videos apart (optional)
+### Tell music videos apart
 
-YouTube does not show a video's category on the page, so this uses the YouTube Data API:
+**음악 여부** shows only music, or everything else. With no setup, the manager estimates it from the music note YouTube puts on the length badge of a music video. On public playlists checked while building this, the note was on 88 of 100 uploads of a music channel and on none of 100 uploads of a technology channel; the music channel's live streams and announcements did not carry it.
+
+The page does not show a video's category, so an exact answer needs the YouTube Data API:
 
 1. In the [Google Cloud console](https://console.cloud.google.com/), create a project, enable **YouTube Data API v3**, and create an API key. Restrict the key to that API.
 1. Paste the key into **설정** > **YouTube Data API 키** and save. Chrome then asks for access to `www.googleapis.com`; the extension does not request it before this point.
-1. Click **조회** next to **카테고리**. The manager looks up 50 videos per request and remembers the results, so the next lookup only covers new videos. Looking up 5,000 videos takes 100 requests, which uses 100 units of the default daily quota of 10,000.
+1. Click **카테고리 확인** next to **음악 여부**. The manager looks up 50 videos per request and remembers the results, so the next lookup only covers new videos. Looking up 5,000 videos takes 100 requests, which uses 100 units of the default daily quota of 10,000.
 
-Videos in category 10 (Music) get a **음악** badge, and the **카테고리** filter shows music only, everything else, or videos not looked up yet. Without a key, only this filter is disabled.
+A video the API has looked up counts as music when its category is 10 (Music), whatever its badge says. Hovering over the **음악** badge on a row shows whether it was confirmed or estimated.
 
 ## Settings
 

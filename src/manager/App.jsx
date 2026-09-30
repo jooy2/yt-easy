@@ -23,7 +23,7 @@ import { addAll, readCoverage, removeAll, selectRange, toggleOne } from './lib/s
 import { createSnapshot, removeFromSnapshot } from './lib/snapshot.js';
 import * as store from './lib/store.js';
 import { prepareWatchLaterTab, runJob } from './lib/tab-bridge.js';
-import { MUSIC_CATEGORY_ID, buildSearchText, buildView, createBuckets } from './lib/view-model.js';
+import { buildSearchText, buildView, createBuckets, readMusic } from './lib/view-model.js';
 
 const IS_TAB_VIEW = new URLSearchParams(location.search).get('view') === 'tab';
 const ITEM_ROW_HEIGHT = 72;
@@ -71,7 +71,7 @@ export function App() {
     searchTexts,
     query: deferredQuery,
     durationFilter,
-    categoryFilter: hasApiKey ? prefs.categoryFilter : 'all',
+    categoryFilter: prefs.categoryFilter,
     watchFilter: prefs.watchFilter,
     categories,
     buckets,
@@ -90,7 +90,7 @@ export function App() {
   const filtersActive = query.trim() !== ''
     || durationFilter !== 'all'
     || prefs.watchFilter !== 'all'
-    || (hasApiKey && prefs.categoryFilter !== 'all');
+    || prefs.categoryFilter !== 'all';
 
   // A new grouping starts from all videos.
   useEffect(() => {
@@ -459,7 +459,7 @@ export function App() {
   };
 
   const renderRow = (row, layout) => {
-    const categoryId = categories.get(row.item.videoId);
+    const music = readMusic(row.item, categories);
 
     return (
       <VideoRow
@@ -468,7 +468,8 @@ export function App() {
         {...layout}
         selected={selected.has(row.item.videoId)}
         failure={failures.get(row.item.videoId)}
-        isMusic={categoryId === MUSIC_CATEGORY_ID}
+        isMusic={music.isMusic}
+        musicSource={music.source}
         // Loading a video into the current tab could replace the Watch later
         // tab a running job works in.
         openDisabled={busy}
@@ -504,15 +505,15 @@ export function App() {
 
   const categoryNote = useMemo(() => {
     if (!hasApiKey) {
-      return '카테고리 필터를 쓰려면 설정에서 YouTube Data API 키를 넣어 주세요.';
+      return '음악 여부는 재생시간 배지의 음표 표시로 추정합니다. 설정에 YouTube Data API 키를 넣으면 카테고리로 정확히 확인합니다.';
     }
 
     if (items.length === 0) {
       return '';
     }
 
-    const known = items.filter((item) => categories.has(item.videoId)).length;
-    const rest = known < items.length ? ' [조회]를 누르면 나머지를 확인합니다.' : '';
+    const known = items.filter((item) => categories.get(item.videoId)).length;
+    const rest = known < items.length ? ' 나머지는 음표 표시로 추정하며, [카테고리 확인]으로 확인할 수 있습니다.' : '';
 
     return `카테고리 확인 ${formatCount(known)} / ${formatCount(items.length)}개.${rest}`;
   }, [hasApiKey, items, categories]);

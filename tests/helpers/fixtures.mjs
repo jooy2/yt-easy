@@ -21,6 +21,7 @@ export const lockup = ({
   contentType = 'LOCKUP_CONTENT_TYPE_VIDEO',
   watched = null,
   segmented = false,
+  music = false,
 }) => ({
   lockupViewModel: {
     contentId: videoId,
@@ -39,7 +40,12 @@ export const lockup = ({
               ...(watched == null
                 ? {}
                 : { progressBar: { thumbnailOverlayProgressBarViewModel: { startPercent: watched, enableSegmentView: segmented } } }),
-              badges: [{ thumbnailBadgeViewModel: { text: duration } }],
+              badges: [{
+                thumbnailBadgeViewModel: {
+                  text: duration,
+                  ...(music ? { icon: { sources: [{ clientResource: { imageName: 'MUSIC' } }] } } : {}),
+                },
+              }],
             },
           },
           {

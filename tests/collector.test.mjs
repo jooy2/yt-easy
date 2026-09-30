@@ -85,7 +85,14 @@ describe('collector.readBrowseData', () => {
       durationText: '1:02:03',
       thumbnail: `https://i.ytimg.com/vi/${videoId(1)}/hqdefault.jpg?size=large`,
       watchedPercent: null,
+      musicBadge: false,
     }]);
+  });
+
+  it('notices the music note on the length badge', () => {
+    const data = initialData([lockup({ videoId: videoId(1), music: true }), lockup({ videoId: videoId(2) })]);
+
+    assert.deepEqual(plain(collector.readBrowseData(data)).items.map((item) => item.musicBadge), [true, false]);
   });
 
   it('reads how much of a video was watched, but not a segment bar', () => {

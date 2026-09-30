@@ -82,6 +82,7 @@ describe('snapshot', () => {
     assert.equal(third.durationSeconds, null);
     assert.equal(first.watchedPercent, 45);
     assert.equal(second.watchedPercent, null);
+    assert.equal(first.musicBadge, null);
   });
 
   it('renumbers the list after a removal', () => {

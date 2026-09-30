@@ -17,6 +17,7 @@ export const VideoRow = memo(function VideoRow({
   selected,
   failure,
   isMusic,
+  musicSource,
   openDisabled,
   onSelect,
   onOpen,
@@ -69,7 +70,11 @@ export const VideoRow = memo(function VideoRow({
           <span className="video-number">{item.durationText || formatDuration(item.durationSeconds) || '길이 정보 없음'}</span>
           <span className="video-number">#{item.position}</span>
           {item.watchedPercent > 0 && <VisuallyHidden>{item.watchedPercent}% 시청</VisuallyHidden>}
-          {isMusic && <Chip size="xs" color="success" variant="outline">음악</Chip>}
+          {isMusic && (
+            <Chip size="xs" color="success" variant="outline" title={musicSource === 'api' ? 'YouTube 카테고리: 음악' : '음표 표시로 추정'}>
+              음악
+            </Chip>
+          )}
           {failure && <Chip size="xs" color="danger" variant="outline" title={failure}>삭제 실패</Chip>}
         </div>
       </div>

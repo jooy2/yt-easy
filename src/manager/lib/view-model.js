@@ -11,7 +11,7 @@ export const VIEW_OPTIONS = Object.freeze({
   groupBy: ['none', 'channel', 'duration'],
   sortBy: ['position', 'duration', 'channel'],
   sortDir: ['asc', 'desc'],
-  categoryFilter: ['all', 'music', 'other', 'unknown'],
+  categoryFilter: ['all', 'music', 'other'],
   watchFilter: ['all', 'unwatched', 'partial', 'watched'],
 });
 
@@ -84,17 +84,30 @@ export const findBucket = (buckets, seconds) => {
 
 export const buildSearchText = (item) => normalizeText(`${item.title}\n${item.channelName}`);
 
-export const matchesCategory = (filter, categoryId) => {
+// Whether a video is music, and how that is known: 'api' when the Data API
+// gave its category, 'badge' when estimated from the music note YouTube puts
+// on the length badge, or null when neither is available.
+export const readMusic = (item, categories) => {
+  const categoryId = categories.get(item.videoId);
+
+  if (categoryId) {
+    return { isMusic: categoryId === MUSIC_CATEGORY_ID, source: 'api' };
+  }
+
+  if (typeof item.musicBadge === 'boolean') {
+    return { isMusic: item.musicBadge, source: 'badge' };
+  }
+
+  return { isMusic: false, source: null };
+};
+
+export const matchesCategory = (filter, item, categories) => {
   if (filter === 'music') {
-    return categoryId === MUSIC_CATEGORY_ID;
+    return readMusic(item, categories).isMusic;
   }
 
   if (filter === 'other') {
-    return typeof categoryId === 'string' && categoryId !== '' && categoryId !== MUSIC_CATEGORY_ID;
-  }
-
-  if (filter === 'unknown') {
-    return !categoryId;
+    return !readMusic(item, categories).isMusic;
   }
 
   return true;
@@ -140,7 +153,7 @@ export const filterItems = ({ items, searchTexts, query, durationFilter, categor
       return false;
     }
 
-    return matchesCategory(categoryFilter, categories.get(item.videoId));
+    return matchesCategory(categoryFilter, item, categories);
   });
 };
 

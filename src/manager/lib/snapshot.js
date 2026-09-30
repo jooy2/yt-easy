@@ -38,6 +38,7 @@ export const sanitizeItem = (raw, position) => {
     durationText: clip(raw.durationText, 20),
     thumbnail: isThumbnailUrl(raw.thumbnail) ? raw.thumbnail : `https://i.ytimg.com/vi/${raw.videoId}/mqdefault.jpg`,
     watchedPercent: Number.isInteger(watched) && watched >= 0 && watched <= 100 ? watched : null,
+    musicBadge: typeof raw.musicBadge === 'boolean' ? raw.musicBadge : null,
   };
 };
 
