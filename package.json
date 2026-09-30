@@ -10,7 +10,9 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "watch": "node scripts/build.mjs --watch",
-    "test": "node --test"
+    "test": "node --test",
+    "screenshots": "npm run build && node scripts/screenshots/capture.mjs",
+    "screenshots:sample": "node scripts/screenshots/fetch-sample.mjs"
   },
   "engines": {
     "node": ">=22.12.0"

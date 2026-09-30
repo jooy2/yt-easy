@@ -10,6 +10,13 @@ The YouTube Data API has returned an empty list for Watch later since 2016, so a
 
 > yt-easy is a personal tool. It is not published on the Chrome Web Store, and it is not affiliated with or endorsed by YouTube or Google.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/resources/screenshots/channels-dark.webp">
+  <img src=".github/resources/screenshots/channels.webp" alt="The manager showing a Watch later list grouped by channel, with three videos of one channel selected" width="1024">
+</picture>
+
+The screenshots show a sample list made from public videos of Google's and YouTube's own channels.
+
 ## Features
 
 - Scans Watch later or any playlist by its address, including lists of several thousand videos, and keeps each scanned list so you can switch between them: video ID, title, channel name, channel ID, length, thumbnail, and position in the list.
@@ -70,6 +77,8 @@ The name of the list at the top of the manager opens a menu of the lists you hav
 
 To add a playlist, choose **Add a playlist…** and paste the address of the playlist page, such as `https://www.youtube.com/playlist?list=…`. A video address that carries `list=`, or the ID alone, works too. The manager scans it and shows it once the scan succeeds.
 
+![The list menu with Watch later, a scanned playlist, and the entry for adding a playlist](.github/resources/screenshots/playlists.webp)
+
 - Videos can be removed from your own playlists and from Watch later. For anyone else's playlist, scanning, filtering, and export work, and **Remove selected** stays disabled.
 - A public playlist can be scanned while signed out. A private one needs the account it belongs to.
 - **Remove this list from history** in the same menu drops a scanned playlist from the manager. It does not change anything on YouTube.
@@ -82,6 +91,8 @@ To add a playlist, choose **Add a playlist…** and paste the address of the pla
 - The watch status menu narrows the list by how much of each video you have watched: **Not watched**, **Partly watched** (under 90%), or **Watched** (90% or more). The amount comes from the red bar YouTube draws under a thumbnail, and the rows show the same bar. It follows your YouTube watch history, so with the history paused or turned off, every video counts as not watched.
 - The search box matches every word you type against titles and channel names.
 - The filter button at the top folds the search box and the options away, so the list gets more room. A dot on the button shows that a search or a filter still narrows the list.
+
+![Videos not watched yet, grouped by length range, with the 5 to 20 minute range chosen](.github/resources/screenshots/filters.webp)
 
 ### Open a video
 
@@ -97,6 +108,8 @@ Clicking anywhere else on a row selects it, so opening a video never changes the
 1. Click **Start removing**.
 
 To keep a copy of what you remove, turn on **Save the list as backup files before removing** in the dialog. The manager then saves the selected videos as `wl-delete-backup-<date>-<time>.json` and `.csv` in the `yt-easy` folder of your Downloads folder, and starts removing only after both files are saved. The switch is off each time the dialog opens.
+
+![The removal dialog for eight watched videos, with the backup switch turned on](.github/resources/screenshots/remove.webp)
 
 The list's tab then comes to the front and shows a progress card. Keep that tab on screen until the job finishes: Chrome pauses pages in background tabs, and the removal pauses with them. Do not scroll or click on the page while it runs. You can cancel from the manager or from the card, and closing the manager cancels the job too.
 
@@ -120,6 +133,8 @@ With the information in place:
 - **Publish date**, **View count**, and **Category** become available in the sort menu. The rows show the date or the view count while the list is sorted by it, and the category of each video as a badge.
 - A view count is the count at the moment it was looked up. Once every video has been looked up, the button reads **Refresh view counts** and looks all of them up again.
 - A video that has not been looked up yet, or that the API has no record of, goes last in these sorts and counts as **Unknown category**.
+
+![The list sorted by view count, with each video's view count and category](.github/resources/screenshots/views.webp)
 
 ## Settings
 
@@ -174,6 +189,14 @@ npm test
 `dist/THIRD_PARTY_NOTICES.txt` lists the packages bundled into the build, with their licenses.
 
 Every message the extension shows lives in `src/i18n/messages/`. `en.json` is the base, and `ko.json` carries the same keys in Korean. The manager and the content scripts pick the file that matches the language of Chrome, and fall back to English for any other language. The extension's description and toolbar title come from the `manifest` group, which the build writes to `_locales`.
+
+The screenshots in this README and the Chrome Web Store images, including the promo tiles drawn in `scripts/screenshots/promo.html`, are captured from the build, in a new headless Chrome profile that is signed in to nothing, with the sample lists in `scripts/screenshots/sample.json`. The command below builds the extension and writes them to `.github/resources/`. It needs Google Chrome; set `CHROME_PATH` if Chrome is not in its usual place.
+
+```bash
+npm run screenshots
+```
+
+`npm run screenshots:sample` rebuilds the sample lists from public videos of Google's and YouTube's own channels. It sends no cookies, so no account is involved.
 
 [AGENTS.md](AGENTS.md) describes the layout and the rules a change has to follow.
 

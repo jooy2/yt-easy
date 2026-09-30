@@ -15,7 +15,9 @@ The YouTube Data API returns an empty list for Watch later, so the extension wor
 ```text
 manifest.json          Permissions, content scripts, side panel
 scripts/build.mjs      Builds dist/: bundles the manager and src/content/i18n.js, writes _locales, copies everything else
+scripts/screenshots/   Captures the README screenshots and the Web Store images (sample.json, promo.html)
 icons/                 logo.png is the source; the icon PNGs are resized from it
+.github/resources/     Logo, README screenshots, and Web Store images
 src/background.js      Opens the side panel from the toolbar icon
 src/i18n/              Messages and the function that formats them
   messages/              en.json is the base; every other locale has the same keys
@@ -75,6 +77,8 @@ npm test
 The collector tests load the content scripts into a `vm` context with synthetic page data shaped like YouTube's. When YouTube changes its data, update the fixtures in `tests/helpers/fixtures.mjs` together with the parser.
 
 Behavior on the real page cannot be covered by these tests. After changing `selectors.js`, `page.js`, `collector.js`, or `remover.js`, load the extension, collect the list, and run a removal with **Dry run** turned on before removing anything for real.
+
+After a change to what the manager shows, run `npm run screenshots` so the README and Web Store images match the build.
 
 ## Commit conventions
 
