@@ -8,7 +8,7 @@
 
 The YouTube Data API has returned an empty list for Watch later since 2016, so a tool built on the API cannot read it. yt-easy works inside the browser you are signed in to instead: it reads the Watch later page the way the page reads itself, and removes videos by clicking through the same menu you would.
 
-> yt-easy is not on the Chrome Web Store yet. Until it is, install it from source as described below. It is not affiliated with or endorsed by YouTube or Google.
+> yt-easy is not on the Chrome Web Store yet. Until it is, install it from source as described below. yt-easy is an unofficial project, not affiliated with or endorsed by YouTube or Google; see [Disclaimer](#disclaimer).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset=".github/resources/screenshots/channels-dark.webp">
@@ -201,6 +201,15 @@ npm run screenshots
 `npm run screenshots:sample` rebuilds the sample lists from public videos of Google's and YouTube's own channels. It sends no cookies, so no account is involved.
 
 [AGENTS.md](AGENTS.md) describes the layout and the rules a change has to follow.
+
+## Disclaimer
+
+yt-easy is an independent, unofficial project. It is not affiliated with, endorsed by, or sponsored by YouTube or Google LLC, and neither company provides support for it. YouTube and Google are trademarks of Google LLC; this project uses the names only to say what the extension works with.
+
+- yt-easy works by reading YouTube's pages and clicking the same menus you would. YouTube can change its pages at any time, and a feature may stop working until the extension is updated.
+- Removing videos changes your lists on YouTube, and the extension cannot undo a removal. Try a dry run first, and turn on the backup switch in the removal dialog to keep a copy of what you remove.
+- You use yt-easy with your own YouTube account, and you are responsible for using it in line with the [YouTube Terms of Service](https://www.youtube.com/t/terms). The optional lookup of categories, publish dates, and view counts uses YouTube API Services with an API key you create, so the [YouTube API Services Terms of Service](https://developers.google.com/youtube/terms/api-services-terms-of-service) apply to it as well.
+- yt-easy is provided as is, without warranty of any kind, as the [MIT License](LICENSE) states.
 
 ## Contributing
 
