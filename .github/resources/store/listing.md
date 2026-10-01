@@ -85,12 +85,14 @@ yt-easy는 YouTube 및 Google과 제휴하거나 보증을 받은 제품이 아�
 
 ### Graphic assets
 
-| Field              | File                                              |
-| ------------------ | ------------------------------------------------- |
-| Store icon         | `icons/icon-128.png`                              |
-| Screenshots        | `01-channels.png` to `05-playlists.png`, in order |
-| Small promo tile   | `promo-small.png`                                 |
-| Marquee promo tile | `promo-marquee.png` (optional)                    |
+Paths are from the repository root. The store icon is the extension's own icon, so it lives in `icons/`, not in this folder.
+
+| Field              | File                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------- |
+| Store icon         | `icons/icon-128.png`                                                                              |
+| Screenshots        | `.github/resources/store/01-channels.png` to `.github/resources/store/05-playlists.png`, in order |
+| Small promo tile   | `.github/resources/store/promo-small.png`                                                         |
+| Marquee promo tile | `.github/resources/store/promo-marquee.png` (optional)                                            |
 
 The screenshots and promo images are regenerated with `npm run screenshots`.
 
@@ -158,3 +160,22 @@ https://github.com/jooy2/yt-easy/blob/main/PRIVACY.md
 ```
 
 The link works once `PRIVACY.md` is on the `main` branch of the public repository.
+
+## Distribution tab
+
+- Payments: free.
+- Visibility: public. Choose unlisted to share it by link before it shows in search.
+- Regions: all regions.
+
+## Test instructions tab
+
+The field takes at most 500 characters; this text is 488.
+
+```text
+Use any YouTube account with a few videos in Watch later.
+1. Sign in to YouTube and click the toolbar icon to open the side panel.
+2. Click "Start scan".
+3. Select videos, click "Remove selected", turn on "Dry run", and click "Start checking". It finds each remove entry without clicking it.
+Signed out, scan a public playlist with "Add a playlist…": https://www.youtube.com/playlist?list=PLjxrf2q8roU23XGwz3Km7sQZFTdB996iG
+Category and view count need a YouTube Data API key in Settings.
+```
