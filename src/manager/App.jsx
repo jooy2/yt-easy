@@ -10,6 +10,7 @@ import { FilterBar } from './components/FilterBar.jsx';
 import { ALL_GROUP_KEY, GroupRail } from './components/GroupRail.jsx';
 import { ListHeader } from './components/ListHeader.jsx';
 import { RemoveDialog } from './components/RemoveDialog.jsx';
+import { ResetDialog } from './components/ResetDialog.jsx';
 import { ResultDialog } from './components/ResultDialog.jsx';
 import { SelectionBar } from './components/SelectionBar.jsx';
 import { SettingsDialog } from './components/SettingsDialog.jsx';
@@ -298,6 +299,28 @@ export function App() {
   };
 
   const handleScan = () => scanList(activeListId);
+
+  // Back to the state of a new install. Without the settings, the API key
+  // goes too, and so does the access to the Data API that came with it.
+  const handleReset = async ({ keepSettings }) => {
+    setDialog(null);
+    setMessage('');
+
+    try {
+      if (!keepSettings && hasApiKey) {
+        await removeApiPermission().catch(() => false);
+      }
+
+      await data.resetAll({ keepSettings });
+      setQuery('');
+      setSelected(new Set());
+      setFailures(new Map());
+      setActiveGroup(ALL_GROUP_KEY);
+      announce(t('reset.done'));
+    } catch (error) {
+      setMessage(error.message);
+    }
+  };
 
   const handleForgetSource = async () => {
     if (isWatchLater(activeListId)) {
@@ -711,6 +734,7 @@ export function App() {
         filtersActive={filtersActive}
         onToggleFilters={() => data.updatePrefs({ filtersOpen: !prefs.filtersOpen })}
         onScan={handleScan}
+        onReset={() => setDialog('reset')}
         onExport={handleExport}
         onOpenSettings={() => setDialog('settings')}
         onOpenInTab={() => chrome.tabs.create({ url: chrome.runtime.getURL('src/manager/manager.html?view=tab') })}
@@ -785,6 +809,7 @@ export function App() {
         onClose={() => setDialog(null)}
         onConfirm={runRemoval}
       />
+      <ResetDialog open={dialog === 'reset'} onClose={() => setDialog(null)} onConfirm={handleReset} />
       <AddPlaylistDialog
         open={dialog === 'add-playlist'}
         onClose={() => setDialog(null)}

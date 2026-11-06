@@ -51,3 +51,8 @@ export const savePendingRemovals = (listId, videoIds) => chrome.storage.local.se
 });
 
 export const clearPendingRemovals = () => chrome.storage.local.remove(KEYS.pendingRemovals);
+
+// Removes everything the extension keeps, or everything but the settings.
+export const clearAll = ({ keepSettings }) => (keepSettings
+  ? chrome.storage.local.remove([...Object.values(KEYS), ...Object.values(LEGACY_KEYS)].filter((key) => key !== KEYS.settings))
+  : chrome.storage.local.clear());

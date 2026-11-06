@@ -118,7 +118,8 @@
     "filters-active": "필터 적용 중",
     "filters-collapse": "검색과 필터 접기",
     "filters-expand": "검색과 필터 펼치기",
-    "open-tab": "새 탭에서 열기"
+    "open-tab": "새 탭에서 열기",
+    "reset": "처음 설치한 상태로 초기화"
   },
   "info": {
     "error-blocked": "이 API 키로는 YouTube Data API를 쓸 수 없도록 제한되어 있습니다.",
@@ -188,6 +189,13 @@
     "test-count-error": "1부터 {max} 사이의 정수를 입력해 주세요.",
     "test-mode": "테스트 모드: 앞에서부터 몇 개만 처리",
     "title": "선택 항목 삭제"
+  },
+  "reset": {
+    "done": "초기화했습니다.",
+    "settings": "API 키를 포함한 설정도 초기화",
+    "start": "초기화",
+    "summary": "스캔한 목록, 가져온 영상 정보, 정렬과 필터 같은 보기 옵션을 모두 지우고 처음 설치했을 때로 되돌립니다. YouTube의 목록은 바뀌지 않습니다.",
+    "title": "yt-easy 초기화"
   },
   "result": {
     "cancelled": "작업을 취소했습니다.",

@@ -118,7 +118,8 @@
     "filters-active": "Filters applied",
     "filters-collapse": "Hide search and filters",
     "filters-expand": "Show search and filters",
-    "open-tab": "Open in a new tab"
+    "open-tab": "Open in a new tab",
+    "reset": "Reset to a new install"
   },
   "info": {
     "error-blocked": "This API key is restricted from using the YouTube Data API.",
@@ -188,6 +189,13 @@
     "test-count-error": "Enter a whole number from 1 to {max}.",
     "test-mode": "Test mode: handle only the first few",
     "title": "Remove selected videos"
+  },
+  "reset": {
+    "done": "Reset yt-easy.",
+    "settings": "Also reset the settings, including the API key",
+    "start": "Reset",
+    "summary": "Deletes every scanned list, the looked-up video info, and the view options such as sort and filters, as if the extension were newly installed. Your lists on YouTube do not change.",
+    "title": "Reset yt-easy"
   },
   "result": {
     "cancelled": "The job was cancelled.",

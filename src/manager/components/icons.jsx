@@ -39,6 +39,14 @@ export const ScanIcon = () => (
   </Svg>
 );
 
+// The scan arrow turned the other way: back to the start.
+export const ResetIcon = () => (
+  <Svg>
+    <path d="M4 12a8 8 0 1 0 2.34-5.66" />
+    <path d="M4 4v5h5" />
+  </Svg>
+);
+
 export const DownloadIcon = () => (
   <Svg>
     <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />

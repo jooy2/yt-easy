@@ -2,7 +2,7 @@ import { Badge, Button, IconButton, Menu, MenuItem, MenuRadioGroup, MenuRadioIte
 
 import { t } from '../../i18n/runtime.js';
 
-import { ChevronDownIcon, DownloadIcon, FilterIcon, ScanIcon, SettingsIcon, WindowIcon } from './icons.jsx';
+import { ChevronDownIcon, DownloadIcon, FilterIcon, ResetIcon, ScanIcon, SettingsIcon, WindowIcon } from './icons.jsx';
 
 // The list being managed, which opens a menu of the scanned lists, then
 // every action. The filter toggle carries a dot while filters are folded
@@ -22,6 +22,7 @@ export function AppHeader({
   filtersActive,
   onToggleFilters,
   onScan,
+  onReset,
   onExport,
   onOpenSettings,
   onOpenInTab,
@@ -63,6 +64,9 @@ export function AppHeader({
         <Button variant="solid" color="primary" startIcon={<ScanIcon />} onClick={onScan} disabled={busy}>
           {t('common.scan')}
         </Button>
+        <Tooltip content={t('header.reset')}>
+          <IconButton variant="text" icon={<ResetIcon />} label={t('header.reset')} onClick={onReset} disabled={busy} />
+        </Tooltip>
         <Menu
           disabled={busy || !hasItems}
           trigger={(

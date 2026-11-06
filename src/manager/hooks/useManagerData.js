@@ -227,6 +227,23 @@ export const useManagerData = () => {
     setPrefs((current) => ({ ...current, ...patch }));
   }, []);
 
+  // Back to the state of a new install: no lists, no video info, and the
+  // default view. The settings stay unless `keepSettings` is false.
+  const resetAll = useCallback(async ({ keepSettings }) => {
+    await store.clearAll({ keepSettings });
+    snapshotsRef.current = {};
+    setSnapshots({});
+    setActiveListIdState(WATCH_LATER_ID);
+    setPrefs(normalizeViewPrefs(null));
+    setVideoInfo(new Map());
+    setCategoryNames(new Map());
+    setCategoryNamesLocale(locale);
+
+    if (!keepSettings) {
+      setSettings(normalizeSettings(null));
+    }
+  }, []);
+
   return {
     ready,
     snapshots,
@@ -245,5 +262,6 @@ export const useManagerData = () => {
     setVideoInfo,
     saveCategoryNames,
     updatePrefs,
+    resetAll,
   };
 };
