@@ -81,6 +81,10 @@ Click **Start scan**, at the top of the manager or in the middle of the empty li
 
 The stored list does not follow changes you make on YouTube. Scan again after you change the list there.
 
+The status line under the filters shows how many videos the list holds and how many of them are shown, when it was scanned, and, with an API key, how many videos still have no video info. Rest the pointer on it to read the full times.
+
+The button next to **Start scan** resets the extension to a new install. It deletes every scanned list, the video info, and the view options, and the settings with the API key too when you turn that on. Nothing changes on YouTube.
+
 ### Scan a playlist
 
 The name of the list at the top of the manager opens a menu of the lists you have scanned, starting with Watch later. Choose one to show it again without a new scan.
@@ -100,6 +104,7 @@ To add a playlist, choose **Add a playlist…** and paste the address of the pla
 - The length menu shows a single length range. Change the ranges in **Settings**.
 - The watch status menu narrows the list by how much of each video you have watched: **Not watched**, **Partly watched** (under 90%), or **Watched** (90% or more). The amount comes from the red bar YouTube draws under a thumbnail, and the rows show the same bar. It follows your YouTube watch history, so with the history paused or turned off, every video counts as not watched.
 - The search box matches every word you type against titles and channel names.
+- The sort, the filters, and the row size are remembered the next time you open the manager. A filter that narrows the list is drawn in color, and **Clear filters** on the status line clears the search and every filter at once.
 - The filter button at the top folds the search box and the options away, so the list gets more room. A dot on the button shows that a search or a filter still narrows the list.
 - The button at the right end of the list heading sets the size of the rows. **Small** fits more videos on the screen, **Medium** is the default, and **Large** shows bigger thumbnails and two lines of each title.
 
