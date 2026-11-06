@@ -6,7 +6,7 @@ import { isVideoId, pruneSnapshots, readSnapshot, removeFromSnapshot } from '../
 import { WATCH_LATER_ID, isListId, isWatchLater } from '../lib/sources.js';
 import * as store from '../lib/store.js';
 import { readNamesLocale } from '../lib/video-info.js';
-import { normalizeViewPrefs } from '../lib/view-model.js';
+import { normalizeViewPrefs, readRememberedPrefs, toRememberedPrefs } from '../lib/view-model.js';
 
 const CATEGORY_ID_PATTERN = /^\d{1,4}$/;
 
@@ -72,6 +72,7 @@ export const useManagerData = () => {
   const [categoryNames, setCategoryNames] = useState(() => new Map());
   const [categoryNamesLocale, setCategoryNamesLocale] = useState(locale);
   const snapshotsRef = useRef(snapshots);
+  const savedPrefsRef = useRef('');
 
   useEffect(() => {
     let active = true;
@@ -124,7 +125,7 @@ export const useManagerData = () => {
       setSnapshots(lists);
       setActiveListIdState(listId);
       setSettings(normalizeSettings(data.settings));
-      setPrefs(normalizeViewPrefs(data.viewPrefs));
+      setPrefs(readRememberedPrefs(data.viewPrefs));
       setVideoInfo(info);
       setCategoryNames(readCategoryNames(data.categoryNames));
       setCategoryNamesLocale(readNamesLocale(data.categoryNamesLocale));
@@ -173,10 +174,19 @@ export const useManagerData = () => {
     return () => chrome.storage.onChanged.removeListener(onChanged);
   }, []);
 
-  // View preferences are remembered as they change.
+  // View options are remembered as they change, except the filters, so a
+  // change of filter alone writes nothing.
   useEffect(() => {
-    if (ready) {
-      store.saveViewPrefs(prefs).catch(() => {});
+    if (!ready) {
+      return;
+    }
+
+    const remembered = toRememberedPrefs(prefs);
+    const text = JSON.stringify(remembered);
+
+    if (text !== savedPrefsRef.current) {
+      savedPrefsRef.current = text;
+      store.saveViewPrefs(remembered).catch(() => {});
     }
   }, [prefs, ready]);
 

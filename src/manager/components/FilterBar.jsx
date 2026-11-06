@@ -33,8 +33,8 @@ const WATCH_ITEMS = [
 // Every category found in the list, between "all" and the two special
 // filters. A category chosen earlier stays in the menu even when the current
 // list has none of it.
-// A filter that narrows the list is drawn in the primary color, so a value
-// remembered from an earlier visit is hard to miss.
+// A filter that narrows the list is drawn in the primary color, so it is
+// hard to miss.
 const markActive = (active) => (active ? { control: 'filter-on' } : undefined);
 
 const buildCategoryItems = ({ categoryOptions, categoryFilter, categoryNames }) => {

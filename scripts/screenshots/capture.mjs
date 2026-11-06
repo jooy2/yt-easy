@@ -45,6 +45,16 @@ const SETTINGS = { durationBounds: [5, 20, 60], removeDelayMin: 1, removeDelayMa
 
 const byText = (selector, text) => `[...document.querySelectorAll(${JSON.stringify(selector)})].find((element) => element.textContent.includes(${JSON.stringify(text)}))`;
 
+// The filters are not stored between visits, so a scene chooses them the
+// way a person does.
+const chooseOption = async (page, label, option) => {
+  await page.click(`document.querySelector(${JSON.stringify(`[aria-label="${label}"]`)})`);
+  await sleep(300);
+  await page.click(byText('[role="option"]', option));
+};
+
+const chooseWatchFilter = (page, value) => chooseOption(page, t('filter.watch-label'), t(`watch.${value}`));
+
 const selectChannelRows = async (page) => {
   await page.click(byText('[role="tab"]', 'Chrome for Developers'));
   await page.clickRow(0);
@@ -69,14 +79,17 @@ const SCENES = [
   {
     readme: 'filters',
     store: '02-filters',
-    prefs: { sortBy: 'duration', watchFilter: 'unwatched' },
-    actions: (page) => page.click(byText('[role="tab"]', t('duration.range', { min: 5, max: 20 }))),
+    prefs: { sortBy: 'duration' },
+    actions: async (page) => {
+      await chooseWatchFilter(page, 'unwatched');
+      await page.click(byText('[role="tab"]', t('duration.range', { min: 5, max: 20 })));
+    },
   },
   {
     readme: 'remove',
     store: '03-remove',
-    prefs: { watchFilter: 'watched' },
     actions: async (page) => {
+      await chooseWatchFilter(page, 'watched');
       await page.click('document.querySelector(".list-header [role=checkbox]")');
       await page.click(byText('.selection-actions button', t('selection.remove')));
       await sleep(600);

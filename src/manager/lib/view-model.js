@@ -29,13 +29,20 @@ export const VIEW_OPTIONS = Object.freeze({
   rowSize: ['small', 'medium', 'large'],
 });
 
+// The filters narrow the list only during the visit they were set in, so
+// the list never opens narrowed by a choice made long ago. Every other view
+// option is remembered.
+export const DEFAULT_FILTERS = Object.freeze({
+  durationFilter: 'all',
+  categoryFilter: CATEGORY_FILTER_ALL,
+  watchFilter: 'all',
+});
+
 export const DEFAULT_VIEW_PREFS = Object.freeze({
   sortBy: 'position',
   sortDir: 'asc',
   groupOrder: 'name',
-  durationFilter: 'all',
-  categoryFilter: CATEGORY_FILTER_ALL,
-  watchFilter: 'all',
+  ...DEFAULT_FILTERS,
   filtersOpen: true,
   rowSize: 'medium',
 });
@@ -96,6 +103,12 @@ export const normalizeViewPrefs = (stored) => {
 
   return prefs;
 };
+
+// The view options a new visit starts with: the stored ones, without filters.
+export const readRememberedPrefs = (stored) => ({ ...normalizeViewPrefs(stored), ...DEFAULT_FILTERS });
+
+// What is stored between visits: everything but the filters.
+export const toRememberedPrefs = (prefs) => Object.fromEntries(Object.entries(prefs).filter(([key]) => !(key in DEFAULT_FILTERS)));
 
 // [5, 20, 60] -> under 5 min, 5-20 min, 20-60 min, 60 min and over, and a
 // last bucket for videos without a known length.

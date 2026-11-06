@@ -26,7 +26,7 @@ Everything yt-easy keeps is stored with `chrome.storage.local`, in your Chrome p
 - The scanned lists, as described above. Up to six lists with 20,000 videos in all are kept, and older lists make room for newer ones.
 - Your settings, including your YouTube Data API key if you enter one. The key is stored in plain text, like any other extension setting.
 - The category, publish date, and view count of each video, if you look them up with the YouTube Data API, and the names of the categories with the language they came in.
-- How you last sorted and filtered the list, and the size of its rows.
+- How you last sorted the list, and the size of its rows. The search and the filters are not kept.
 
 Export and backup files are saved only when you ask for them, to the `yt-easy` folder in your Downloads folder.
 

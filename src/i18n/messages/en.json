@@ -200,7 +200,7 @@
     "done": "Reset yt-easy.",
     "settings": "Also reset the settings, including the API key",
     "start": "Reset",
-    "summary": "Deletes every scanned list, the looked-up video info, and the view options such as sort and filters, as if the extension were newly installed. Your lists on YouTube do not change.",
+    "summary": "Deletes every scanned list, the looked-up video info, and the view options such as sort and row size, as if the extension were newly installed. Your lists on YouTube do not change.",
     "title": "Reset yt-easy"
   },
   "result": {

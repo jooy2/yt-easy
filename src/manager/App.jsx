@@ -36,6 +36,7 @@ import {
   requestApiPermission,
 } from './lib/video-info.js';
 import {
+  DEFAULT_FILTERS,
   INFO_SORTS,
   buildSearchText,
   buildView,
@@ -128,7 +129,7 @@ export function App() {
   // Clears the search and every filter, but keeps the sort.
   const clearFilters = useCallback(() => {
     setQuery('');
-    updatePrefs({ durationFilter: 'all', watchFilter: 'all', categoryFilter: 'all' });
+    updatePrefs(DEFAULT_FILTERS);
   }, [updatePrefs]);
 
   // A new grouping starts from all videos.

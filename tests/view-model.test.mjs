@@ -11,6 +11,8 @@ import {
   listCategories,
   sortItems as sortWithInfo,
   normalizeViewPrefs,
+  readRememberedPrefs,
+  toRememberedPrefs,
   sortItems,
 } from '../src/manager/lib/view-model.js';
 
@@ -181,7 +183,7 @@ describe('buildView', () => {
   });
 });
 
-describe('isMusicVideo, matchesCategory, and normalizeViewPrefs', () => {
+describe('isMusicVideo, matchesCategory, and the view options', () => {
   it('counts only videos the API filed under Music as music', () => {
     const item = { videoId: 'aaaaaaaaaaa' };
 
@@ -203,6 +205,16 @@ describe('isMusicVideo, matchesCategory, and normalizeViewPrefs', () => {
       filtersOpen: true,
       rowSize: 'medium',
     });
+  });
+
+  it('remembers every option but the filters between visits', () => {
+    const prefs = { ...normalizeViewPrefs(null), sortBy: 'channel', rowSize: 'large', watchFilter: 'watched', durationFilter: 'lt-5', categoryFilter: '10' };
+    const stored = toRememberedPrefs(prefs);
+
+    assert.deepEqual(Object.keys(stored).sort(), ['filtersOpen', 'groupOrder', 'rowSize', 'sortBy', 'sortDir']);
+    assert.deepEqual(readRememberedPrefs(stored), { ...prefs, watchFilter: 'all', durationFilter: 'all', categoryFilter: 'all' });
+    // Filters stored by an earlier version are not read back either.
+    assert.equal(readRememberedPrefs({ watchFilter: 'watched' }).watchFilter, 'all');
   });
 
   it('keeps category IDs and reads the old music filter as category 10', () => {
