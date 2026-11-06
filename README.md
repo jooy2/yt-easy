@@ -8,7 +8,7 @@
 
 The YouTube Data API has returned an empty list for Watch later since 2016, so a tool built on the API cannot read it. yt-easy works inside the browser you are signed in to instead: it reads the Watch later page the way the page reads itself, and removes videos by clicking through the same menu you would.
 
-> yt-easy is not on the Chrome Web Store yet. Until it is, install it from source as described below. yt-easy is an unofficial project, not affiliated with or endorsed by YouTube or Google; see [Disclaimer](#disclaimer).
+> yt-easy is an unofficial project, not affiliated with or endorsed by YouTube or Google; see [Disclaimer](#disclaimer).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset=".github/resources/screenshots/channels-dark.webp">
@@ -41,7 +41,13 @@ The interface is in English and Korean, and follows the language of Chrome.
 
 ## Install
 
-The extension is built from source before it is loaded. You need [Node.js](https://nodejs.org/) 22.12 or newer.
+Install yt-easy from the [Chrome Web Store](https://chromewebstore.google.com/detail/yt-easy/edoljgbfefckidklbddneoekcakdighb). It needs Chrome 116 or newer, and Chrome keeps it up to date.
+
+Then pin the extension from the puzzle icon in the toolbar, so that its icon stays at hand.
+
+### Build from source
+
+To try the code in this repository before it reaches the store, build it and load it unpacked. You need [Node.js](https://nodejs.org/) 22.12 or newer.
 
 1. Clone this repository and open a terminal in it.
 1. Install the dependencies and build the extension. The build writes the loadable extension to `dist/`.
@@ -57,9 +63,11 @@ The extension is built from source before it is loaded. You need [Node.js](https
 1. Open `chrome://extensions` in Chrome 116 or newer.
 1. Turn on **Developer mode** in the top-right corner.
 1. Click **Load unpacked** and select the `dist` folder inside the repository.
-1. Pin the extension from the puzzle icon in the toolbar, so that its icon stays at hand.
+1. Pin the extension from the puzzle icon in the toolbar.
 
-To update, pull the latest changes, run `npm install` and `npm run build` again, click the reload button on the extension's card in `chrome://extensions`, and reload any open YouTube tab.
+If the store version is installed too, turn it off on its card in `chrome://extensions` while you use the one built from source, so that only one copy works on YouTube.
+
+To update a build from source, pull the latest changes, run `npm install` and `npm run build` again, click the reload button on the extension's card in `chrome://extensions`, and reload any open YouTube tab.
 
 ## Usage
 
@@ -162,7 +170,7 @@ With the information in place:
 - With an API key, the IDs of the videos in your list are sent to the YouTube Data API to look up their categories, publish dates, and view counts, and nothing else is.
 - The API key is stored in plain text in the extension's storage, like any other setting. [SECURITY.md](SECURITY.md) has the details.
 
-[PRIVACY.md](PRIVACY.md) is the full privacy policy, and the one the Chrome Web Store listing links to.
+[PRIVACY.md](PRIVACY.md) is the full privacy policy, and the one the [Chrome Web Store listing](https://chromewebstore.google.com/detail/yt-easy/edoljgbfefckidklbddneoekcakdighb) links to.
 
 ## Troubleshooting
 

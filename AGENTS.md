@@ -4,7 +4,7 @@ Guidance for AI agents (and humans) working in this repository. Written in Engli
 
 ## What this repository is
 
-A Chrome extension (Manifest V3) for managing the signed-in account's YouTube "Watch later" list and playlists: collect a list, group and filter it, export it, and remove many videos at once. For now it is installed unpacked from `dist/`; a Chrome Web Store release is planned.
+A Chrome extension (Manifest V3) for managing the signed-in account's YouTube "Watch later" list and playlists: collect a list, group and filter it, export it, and remove many videos at once. It is published on the [Chrome Web Store](https://chromewebstore.google.com/detail/yt-easy/edoljgbfefckidklbddneoekcakdighb), and during development it is loaded unpacked from `dist/`.
 
 The YouTube Data API returns an empty list for Watch later, so the extension works in the signed-in browser instead: it reads playlist pages (Watch later is the playlist `WL`) and clicks through their menus the way a person would.
 

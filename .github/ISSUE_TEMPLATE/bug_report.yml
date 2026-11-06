@@ -49,5 +49,5 @@ body:
   - type: input
     attributes:
       label: yt-easy version
-      description: The `version` in `manifest.json`, or the commit you installed from.
+      description: The version on the extension's card in `chrome://extensions`, or the commit you built from.
       placeholder: '0.1.0'

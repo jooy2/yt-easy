@@ -2,6 +2,8 @@
 
 The text to enter in the Chrome Web Store Developer Dashboard, in the order of its tabs, next to the images in this folder. When a feature, a permission, or the handling of data changes, update this file, [PRIVACY.md](../../../PRIVACY.md), and the dashboard together.
 
+The published item is [yt-easy on the Chrome Web Store](https://chromewebstore.google.com/detail/yt-easy/edoljgbfefckidklbddneoekcakdighb), with the item ID `edoljgbfefckidklbddneoekcakdighb`.
+
 ## Store listing tab
 
 ### Summary
