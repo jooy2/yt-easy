@@ -65,7 +65,6 @@ export function FilterBar({
   categoryNames,
   canFetchInfo,
   infoRefresh,
-  infoNote,
   onFetchInfo,
 }) {
   const durationItems = [{ value: 'all', label: t('filter.duration-all') }, ...buckets.map((bucket) => ({ value: bucket.key, label: bucket.label }))];
@@ -120,7 +119,6 @@ export function FilterBar({
           </Tooltip>
         </div>
       </div>
-      {infoNote && <p className="hint">{infoNote}</p>}
     </section>
   );
 }

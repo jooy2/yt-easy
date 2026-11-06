@@ -271,9 +271,11 @@
   "status": {
     "by-scrolling": "스크롤 방식",
     "cancelling": "취소하는 중…",
+    "info-missing": "영상 정보 없음 {count}개",
     "scanned": "{time} 스캔",
-    "shown": "표시 {count}개",
-    "total": "전체 {count}개"
+    "shown-of": "{total}개 중 {shown}개 표시",
+    "total": "전체 {count}개",
+    "views-as-of": "조회수 {time} 기준"
   },
   "stop": {
     "left-page": "재생목록 페이지를 벗어나 중단했습니다.",

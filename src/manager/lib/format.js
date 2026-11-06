@@ -3,6 +3,8 @@ import { locale, t } from '../../i18n/runtime.js';
 const NUMBER_FORMAT = new Intl.NumberFormat(locale);
 const DATE_FORMAT = new Intl.DateTimeFormat(locale, { dateStyle: 'medium' });
 const DATE_TIME_FORMAT = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' });
+const TIME_FORMAT = new Intl.DateTimeFormat(locale, { timeStyle: 'short' });
+const MONTH_DAY_FORMAT = new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' });
 // Truncated rather than rounded, as YouTube writes view counts: 1,290,000
 // is "1.2M", never "1.3M".
 const COMPACT_FORMAT = new Intl.NumberFormat(locale, { notation: 'compact', roundingMode: 'trunc' });
@@ -14,6 +16,19 @@ export const formatCount = (value) => NUMBER_FORMAT.format(value);
 export const formatDateTime = (timestamp) => DATE_TIME_FORMAT.format(new Date(timestamp));
 
 export const formatDate = (timestamp) => DATE_FORMAT.format(new Date(timestamp));
+
+// A moment as short as it can be told: the time for today, the month and
+// day for an earlier day this year, and the full date before that.
+export const formatRecent = (timestamp, now = Date.now()) => {
+  const date = new Date(timestamp);
+  const today = new Date(now);
+
+  if (date.toDateString() === today.toDateString()) {
+    return TIME_FORMAT.format(date);
+  }
+
+  return date.getFullYear() === today.getFullYear() ? MONTH_DAY_FORMAT.format(date) : DATE_FORMAT.format(date);
+};
 
 // A view count the way YouTube writes it: "950 views", "3.2K views",
 // "1.2M views", or "조회수 3.2만회" in Korean.

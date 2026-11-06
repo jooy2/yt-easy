@@ -6,7 +6,7 @@ import { locale, t } from '../../i18n/runtime.js';
 export function StatusBar({ summary, task, onCancel, message, onDismissMessage }) {
   return (
     <div className="status-bar">
-      {summary && <p className="summary">{summary}</p>}
+      {summary && <p className="summary" title={summary.detail}>{summary.text}</p>}
       {task && (
         <div className="task-box">
           <div className="task-line">

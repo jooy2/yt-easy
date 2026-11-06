@@ -19,7 +19,7 @@ import { VirtualList } from './components/VirtualList.jsx';
 import { useManagerData } from './hooks/useManagerData.js';
 import { useTask } from './hooks/useTask.js';
 import { buildCsv, buildFileName, buildJson, downloadText } from './lib/export.js';
-import { formatDate, formatDateTime, formatFileStamp, formatViews } from './lib/format.js';
+import { formatDate, formatDateTime, formatFileStamp, formatRecent, formatViews } from './lib/format.js';
 import { openInCurrentTab, openInNewTab } from './lib/open-video.js';
 import { addAll, readCoverage, removeAll, selectRange, toggleOne } from './lib/selection.js';
 import { createSnapshot, removeFromSnapshot } from './lib/snapshot.js';
@@ -605,48 +605,46 @@ export function App() {
   // -------------------------------------------------------------------------
   // Layout
 
+  // One line of what matters: how many videos are shown, when the list was
+  // scanned, and how far the video info goes. The full sentences are its
+  // tooltip.
   const summary = useMemo(() => {
     if (!snapshot) {
-      return '';
+      return null;
     }
 
-    const parts = [t('status.total', { count: items.length })];
+    const filtered = view.items.length !== items.length;
+    const parts = [filtered ? t('status.shown-of', { shown: view.items.length, total: items.length }) : t('status.total', { count: items.length })];
+    const details = [t('status.scanned', { time: formatDateTime(snapshot.collectedAt) })];
 
-    if (view.items.length !== items.length) {
-      parts.push(t('status.shown', { count: view.items.length }));
+    parts.push(t('status.scanned', { time: formatRecent(snapshot.collectedAt) }));
+
+    if (hasApiKey && items.length > 0) {
+      const times = items.map((item) => videoInfo.get(item.videoId)?.t ?? 0).filter((time) => time > 0);
+      const viewsSince = times.length > 0 ? Math.min(...times) : null;
+
+      details.push(t('note.info-coverage', { found: items.length - missingInfoCount, total: items.length }));
+
+      if (viewsSince) {
+        details.push(t('note.info-views-since', { time: formatDateTime(viewsSince) }));
+      }
+
+      if (missingInfoCount > 0) {
+        parts.push(t('status.info-missing', { count: missingInfoCount }));
+        details.push(t('note.info-missing'));
+      } else if (viewsSince) {
+        parts.push(t('status.views-as-of', { time: formatRecent(viewsSince) }));
+      }
+    } else if (!hasApiKey) {
+      details.push(t('note.info-no-key'));
     }
-
-    parts.push(t('status.scanned', { time: formatDateTime(snapshot.collectedAt) }));
 
     if (snapshot.method === 'dom') {
       parts.push(t('status.by-scrolling'));
     }
 
-    return parts.join(' · ');
-  }, [snapshot, items.length, view.items.length]);
-
-  const infoNote = useMemo(() => {
-    if (!hasApiKey) {
-      return t('note.info-no-key');
-    }
-
-    if (items.length === 0) {
-      return '';
-    }
-
-    const times = items.map((item) => videoInfo.get(item.videoId)?.t ?? 0).filter((time) => time > 0);
-    const parts = [t('note.info-coverage', { found: items.length - missingInfoCount, total: items.length })];
-
-    if (times.length > 0) {
-      parts.push(t('note.info-views-since', { time: formatDateTime(Math.min(...times)) }));
-    }
-
-    if (missingInfoCount > 0) {
-      parts.push(t('note.info-missing'));
-    }
-
-    return parts.join(' ');
-  }, [hasApiKey, items, videoInfo, missingInfoCount]);
+    return { text: parts.join(' · '), detail: details.join('\n') };
+  }, [snapshot, items, view.items.length, hasApiKey, videoInfo, missingInfoCount]);
 
   let emptyReason = null;
 
@@ -725,7 +723,6 @@ export function App() {
           categoryNames={categoryNames}
           canFetchInfo={hasApiKey && !busy && items.length > 0}
           infoRefresh={missingInfoCount === 0}
-          infoNote={infoNote}
           onFetchInfo={handleFetchInfo}
         />
       )}
