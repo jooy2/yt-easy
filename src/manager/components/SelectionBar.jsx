@@ -23,7 +23,12 @@ export function SelectionBar({ selectedCount, totalCount, busy, canRemove, onSel
 
   return (
     <section className="selection-bar" aria-label={t('selection.label')}>
-      <p className="selection-count">{t('selection.count', { count: selectedCount })}</p>
+      {/* The hidden copy holds the width of the largest count, so the text
+          beside it stays put as the selection grows. */}
+      <p className="selection-count">
+        <span className="selection-count-sizer" aria-hidden="true">{t('selection.count', { count: totalCount })}</span>
+        <span>{t('selection.count', { count: selectedCount })}</span>
+      </p>
       <p className="selection-hint">
         {tParts('selection.hint', {
           shift: <Shortcut key="shift" size="xs" keys="Shift" />,

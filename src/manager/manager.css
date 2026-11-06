@@ -157,9 +157,19 @@ body {
 }
 
 .selection-count {
+  display: inline-grid;
   flex: none;
   margin: 0;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.selection-count > span {
+  grid-area: 1 / 1;
+}
+
+.selection-count-sizer {
+  visibility: hidden;
 }
 
 /* Shown only where it fits on the line; the README lists the shortcuts. */
