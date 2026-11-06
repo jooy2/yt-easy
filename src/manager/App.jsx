@@ -117,10 +117,17 @@ export function App() {
   const shownIds = useMemo(() => shownItems.map((item) => item.videoId), [shownItems]);
   const shownRows = useMemo(() => shownItems.map((item) => ({ key: item.videoId, item })), [shownItems]);
   const shownSeconds = useMemo(() => shownItems.reduce((sum, item) => sum + (item.durationSeconds ?? 0), 0), [shownItems]);
+  const { updatePrefs } = data;
   const filtersActive = query.trim() !== ''
     || durationFilter !== 'all'
     || prefs.watchFilter !== 'all'
     || (hasApiKey && prefs.categoryFilter !== 'all');
+
+  // Clears the search and every filter, but keeps the sort.
+  const clearFilters = useCallback(() => {
+    setQuery('');
+    updatePrefs({ durationFilter: 'all', watchFilter: 'all', categoryFilter: 'all' });
+  }, [updatePrefs]);
 
   // A new grouping starts from all videos.
   useEffect(() => {
@@ -726,7 +733,15 @@ export function App() {
           onFetchInfo={handleFetchInfo}
         />
       )}
-      <StatusBar summary={summary} task={task} onCancel={cancel} message={message} onDismissMessage={() => setMessage('')} />
+      <StatusBar
+        summary={summary}
+        filtersActive={filtersActive}
+        onClearFilters={clearFilters}
+        task={task}
+        onCancel={cancel}
+        message={message}
+        onDismissMessage={() => setMessage('')}
+      />
       {snapshot && (
         <SelectionBar
           selectedCount={selected.size}

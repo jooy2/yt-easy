@@ -271,6 +271,7 @@
   "status": {
     "by-scrolling": "Read by scrolling",
     "cancelling": "Cancelling…",
+    "clear-filters": "Clear filters",
     "info-missing": "{count} without video info",
     "scanned": "Scanned {time}",
     "shown-of": "{shown} of {total} shown",

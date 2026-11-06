@@ -33,6 +33,10 @@ const WATCH_ITEMS = [
 // Every category found in the list, between "all" and the two special
 // filters. A category chosen earlier stays in the menu even when the current
 // list has none of it.
+// A filter that narrows the list is drawn in the primary color, so a value
+// remembered from an earlier visit is hard to miss.
+const markActive = (active) => (active ? { control: 'filter-on' } : undefined);
+
 const buildCategoryItems = ({ categoryOptions, categoryFilter, categoryNames }) => {
   const items = categoryOptions.map(({ categoryId, name }) => ({ value: categoryId, label: name }));
   const special = [CATEGORY_FILTER_ALL, CATEGORY_FILTER_NOT_MUSIC, CATEGORY_FILTER_UNKNOWN];
@@ -102,8 +106,20 @@ export function FilterBar({
             />
           </Tooltip>
         </div>
-        <Select aria-label={t('filter.duration-label')} items={durationItems} value={durationFilter} onValueChange={(value) => onPrefsChange({ durationFilter: value })} />
-        <Select aria-label={t('filter.watch-label')} items={WATCH_ITEMS} value={prefs.watchFilter} onValueChange={(value) => onPrefsChange({ watchFilter: value })} />
+        <Select
+          aria-label={t('filter.duration-label')}
+          items={durationItems}
+          value={durationFilter}
+          onValueChange={(value) => onPrefsChange({ durationFilter: value })}
+          classNames={markActive(durationFilter !== 'all')}
+        />
+        <Select
+          aria-label={t('filter.watch-label')}
+          items={WATCH_ITEMS}
+          value={prefs.watchFilter}
+          onValueChange={(value) => onPrefsChange({ watchFilter: value })}
+          classNames={markActive(prefs.watchFilter !== 'all')}
+        />
         <div className="filter-pair">
           <Select
             aria-label={t('filter.category-label')}
@@ -111,6 +127,7 @@ export function FilterBar({
             value={hasApiKey ? prefs.categoryFilter : CATEGORY_FILTER_ALL}
             onValueChange={(value) => onPrefsChange({ categoryFilter: String(value) })}
             disabled={!hasApiKey}
+            classNames={markActive(hasApiKey && prefs.categoryFilter !== CATEGORY_FILTER_ALL)}
           />
           <Tooltip content={infoTip}>
             <Button variant="outline" onClick={onFetchInfo} disabled={!canFetchInfo} focusableWhenDisabled>

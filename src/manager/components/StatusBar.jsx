@@ -3,10 +3,19 @@ import { Alert, Button, ProgressLinear } from 'neba';
 import { locale, t } from '../../i18n/runtime.js';
 
 // The summary line, the running task with its progress, and the last error.
-export function StatusBar({ summary, task, onCancel, message, onDismissMessage }) {
+// While a filter narrows the list, the line offers to clear it, since the
+// filters are remembered and may have been set long ago.
+export function StatusBar({ summary, filtersActive, onClearFilters, task, onCancel, message, onDismissMessage }) {
   return (
     <div className="status-bar">
-      {summary && <p className="summary" title={summary.detail}>{summary.text}</p>}
+      {summary && (
+        <div className="summary-line">
+          <p className="summary" title={summary.detail}>{summary.text}</p>
+          {filtersActive && (
+            <Button size="xs" variant="outline" color="primary" onClick={onClearFilters}>{t('status.clear-filters')}</Button>
+          )}
+        </div>
+      )}
       {task && (
         <div className="task-box">
           <div className="task-line">

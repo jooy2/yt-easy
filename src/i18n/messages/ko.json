@@ -271,6 +271,7 @@
   "status": {
     "by-scrolling": "스크롤 방식",
     "cancelling": "취소하는 중…",
+    "clear-filters": "필터 해제",
     "info-missing": "영상 정보 없음 {count}개",
     "scanned": "{time} 스캔",
     "shown-of": "{total}개 중 {shown}개 표시",

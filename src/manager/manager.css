@@ -90,6 +90,13 @@ body {
   border-top: 1px solid var(--neba-border);
 }
 
+.summary-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
 .status-bar:empty {
   display: none;
 }
@@ -136,6 +143,12 @@ body {
   flex: 1 1 150px;
   min-width: 120px;
   max-width: 260px;
+}
+
+.filter-on.filter-on {
+  border-color: var(--neba-primary-line);
+  background: var(--neba-primary-soft);
+  color: var(--neba-primary-on-tint);
 }
 
 .filter-pair {
