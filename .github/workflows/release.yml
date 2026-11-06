@@ -51,3 +51,12 @@ jobs:
           else
             gh release create "$TAG" "$zip" --draft --verify-tag --title "yt-easy $VERSION" --notes ""
           fi
+      - name: Submit the zip to the Chrome Web Store
+        env:
+          CWS_SERVICE_ACCOUNT_KEY: ${{ secrets.CWS_SERVICE_ACCOUNT_KEY }}
+          CWS_PUBLISHER_ID: ${{ vars.CWS_PUBLISHER_ID }}
+          VERSION: ${{ steps.version.outputs.version }}
+        # Uploads the same zip and submits it for review. Skipped with a
+        # notice until the repository has the key and the publisher ID; see
+        # "Releasing" in AGENTS.md.
+        run: node scripts/publish-store.mjs "yt-easy-$VERSION.zip"

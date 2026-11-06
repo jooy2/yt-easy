@@ -88,8 +88,20 @@ After a change to what the manager shows, run `npm run screenshots` so the READM
 1. Raise `version` in `manifest.json`, `package.json`, and `package-lock.json` together. `npm version <version> --no-git-tag-version` changes the last two.
 1. Commit the change and push it to `main`.
 1. Push an annotated tag named after the version, such as `v0.2.0`. `.github/workflows/release.yml` checks the tag against the three files with `scripts/check-version.mjs`, builds and tests the extension, and attaches `yt-easy-<version>.zip` to the release of that tag. It creates a draft release when there is none, and leaves the title and notes of an existing release alone.
+1. The same workflow then uploads that zip to the Chrome Web Store and submits it for review with `scripts/publish-store.mjs`, and the store publishes it once the review passes. A version the store already holds is skipped. Without the store credentials below, the step is skipped with a notice, and the zip is uploaded in the Developer Dashboard instead, so the store and the release ship the same build.
 1. Write the release notes, and publish the release after the zip is attached.
-1. Upload the same zip in the Chrome Web Store Developer Dashboard, so the store and the release ship the same build.
+1. When the screenshots, the store text in `.github/resources/store/listing.md`, or the privacy answers changed, update them in the Developer Dashboard. The API does not reach them.
+
+### Chrome Web Store credentials
+
+The workflow signs in as a Google Cloud service account, so no token expires between releases.
+
+1. In a Google Cloud project, enable the Chrome Web Store API and create a service account. It needs no roles.
+1. Add a JSON key to the service account.
+1. In the Chrome Web Store Developer Dashboard, add the service account's email under **Account**. The publisher's Google account needs 2-step verification.
+1. In the repository settings, under **Secrets and variables > Actions**, save the whole JSON key as the secret `CWS_SERVICE_ACCOUNT_KEY`, and the publisher ID from **Publisher > Settings** in the dashboard as the variable `CWS_PUBLISHER_ID`. Delete the downloaded key file afterwards.
+
+The key does not expire. If it leaks, delete it in Google Cloud and add a new one.
 
 ## Commit conventions
 
