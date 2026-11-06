@@ -17,7 +17,7 @@ manifest.json          Permissions, content scripts, side panel
 scripts/build.mjs      Builds dist/: bundles the manager and src/content/i18n.js, writes _locales, copies everything else
 scripts/screenshots/   Captures the README screenshots and the Web Store images (sample.json, promo.html)
 icons/                 logo.png is the source; the icon PNGs are resized from it
-.github/resources/     Logo, README screenshots, and Web Store images; store/listing.md holds the store text
+.github/resources/     Logo, Web Store button, README screenshots, and Web Store images; store/listing.md holds the store text
 src/background.js      Opens the side panel from the toolbar icon
 src/i18n/              Messages and the function that formats them
   messages/              en.json is the base; every other locale has the same keys

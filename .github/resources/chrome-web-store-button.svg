@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="72" viewBox="0 0 360 72" role="img" aria-labelledby="title" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <title id="title">Install yt-easy from the Chrome Web Store</title>
+  <defs>
+    <!-- The colors and the background follow scripts/screenshots/promo.html. -->
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3d0514" />
+      <stop offset="1" stop-color="#7d0f2c" />
+    </linearGradient>
+    <radialGradient id="glow" cx="0.96" cy="0.08" r="0.62">
+      <stop offset="0" stop-color="#ff4d4f" stop-opacity="0.5" />
+      <stop offset="1" stop-color="#ff4d4f" stop-opacity="0" />
+    </radialGradient>
+    <clipPath id="front-card">
+      <rect x="88" y="165" width="410" height="300" rx="60" />
+    </clipPath>
+    <!-- The logo, redrawn in the 512 x 512 space of icons/logo.png. -->
+    <symbol id="logo" viewBox="0 0 512 512">
+      <rect x="15" y="48" width="360" height="277" rx="56" fill="#ffa27f" />
+      <rect x="50" y="110" width="382" height="280" rx="56" fill="#a3122f" />
+      <rect x="88" y="165" width="410" height="300" rx="60" fill="#ff4d4f" />
+      <path d="M358 150h100v120l-50-30-50 30z" fill="#ffc532" clip-path="url(#front-card)" />
+      <circle cx="182" cy="292" r="65" fill="#6a0a1e" />
+      <path d="M162 262 214 292l-52 30z" fill="#fff" stroke="#fff" stroke-width="12" stroke-linejoin="round" />
+      <rect x="263" y="290" width="192" height="20" rx="10" fill="#ffd6d6" />
+      <rect x="263" y="326" width="137" height="20" rx="10" fill="#ffd6d6" fill-opacity="0.85" />
+      <circle cx="190" cy="400" r="26" fill="#a3122f" />
+      <rect x="230" y="381" width="157" height="17" rx="8.5" fill="#ffd6d6" fill-opacity="0.75" />
+      <rect x="230" y="408" width="105" height="16" rx="8" fill="#ffd6d6" fill-opacity="0.75" />
+    </symbol>
+  </defs>
+
+  <rect width="360" height="72" rx="18" fill="url(#background)" />
+  <rect width="360" height="72" rx="18" fill="url(#glow)" />
+  <rect x="0.75" y="0.75" width="358.5" height="70.5" rx="17.25" fill="none" stroke="#ffa27f" stroke-opacity="0.35" stroke-width="1.5" />
+
+  <use href="#logo" x="13" y="11" width="50" height="50" />
+
+  <text x="76" y="31" fill="#ffd6d6" font-size="12.5" font-weight="600" letter-spacing="0.2">Install yt-easy from the</text>
+  <text x="75" y="54" fill="#fff" font-size="21" font-weight="800" letter-spacing="-0.2">Chrome Web Store</text>
+
+  <!-- A download arrow on a gold disc marks the whole image as a button. -->
+  <circle cx="328" cy="36" r="18" fill="#ffc532" />
+  <path d="M328 26.5v13.5m-6.5-6.5 6.5 6.5 6.5-6.5M320 45.5h16" fill="none" stroke="#6a0a1e" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

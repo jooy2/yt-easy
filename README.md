@@ -2,11 +2,13 @@
 
 # yt-easy
 
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jooy2/yt-easy/blob/main/LICENSE) [![Test](https://github.com/jooy2/yt-easy/actions/workflows/test.yml/badge.svg)](https://github.com/jooy2/yt-easy/actions/workflows/test.yml) ![Repository size](https://img.shields.io/github/repo-size/jooy2/yt-easy) ![Commit Count](https://img.shields.io/github/commit-activity/y/jooy2/yt-easy) [![Followers](https://img.shields.io/github/followers/jooy2?style=social)](https://github.com/jooy2) ![Stars](https://img.shields.io/github/stars/jooy2/yt-easy?style=social)
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/edoljgbfefckidklbddneoekcakdighb)](https://chromewebstore.google.com/detail/yt-easy/edoljgbfefckidklbddneoekcakdighb) [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jooy2/yt-easy/blob/main/LICENSE) [![Test](https://github.com/jooy2/yt-easy/actions/workflows/test.yml/badge.svg)](https://github.com/jooy2/yt-easy/actions/workflows/test.yml) ![Repository size](https://img.shields.io/github/repo-size/jooy2/yt-easy) ![Commit Count](https://img.shields.io/github/commit-activity/y/jooy2/yt-easy) [![Followers](https://img.shields.io/github/followers/jooy2?style=social)](https://github.com/jooy2) ![Stars](https://img.shields.io/github/stars/jooy2/yt-easy?style=social)
 
 **yt-easy** is a Chrome extension for sorting out your YouTube "Watch later" list and your playlists. It shows a list grouped by channel or by length, lets you search and sort it, exports it, and removes many videos at once.
 
 The YouTube Data API has returned an empty list for Watch later since 2016, so a tool built on the API cannot read it. yt-easy works inside the browser you are signed in to instead: it reads the Watch later page the way the page reads itself, and removes videos by clicking through the same menu you would.
+
+<a href="https://chromewebstore.google.com/detail/yt-easy/edoljgbfefckidklbddneoekcakdighb"><img src=".github/resources/chrome-web-store-button.svg" alt="Install yt-easy from the Chrome Web Store" width="300" height="60"></a>
 
 > yt-easy is an unofficial project, not affiliated with or endorsed by YouTube or Google; see [Disclaimer](#disclaimer).
 
