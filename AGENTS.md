@@ -80,6 +80,14 @@ Behavior on the real page cannot be covered by these tests. After changing `sele
 
 After a change to what the manager shows, run `npm run screenshots` so the README and Web Store images match the build.
 
+## Releasing
+
+1. Raise `version` in `manifest.json`, `package.json`, and `package-lock.json` together. `npm version <version> --no-git-tag-version` changes the last two.
+1. Commit the change and push it to `main`.
+1. Push an annotated tag named after the version, such as `v0.2.0`. `.github/workflows/release.yml` checks the tag against the three files with `scripts/check-version.mjs`, builds and tests the extension, and attaches `yt-easy-<version>.zip` to the release of that tag. It creates a draft release when there is none, and leaves the title and notes of an existing release alone.
+1. Write the release notes, and publish the release after the zip is attached.
+1. Upload the same zip in the Chrome Web Store Developer Dashboard, so the store and the release ship the same build.
+
 ## Commit conventions
 
 Follow the existing history: `tag: message`, in English, in the imperative. Tags follow the Udacity Git style (`feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`) plus the informal `package` and `typo`. Wrap paths and identifiers in backticks, and add `(fixes #1)` when an issue tracks the change.

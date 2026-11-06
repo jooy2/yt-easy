@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build the extension and attach it to the release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Check that the tag matches the version
+        id: version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="$(node scripts/check-version.mjs "$TAG")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Run unit tests
+        run: npm test
+      - name: Package the extension
+        working-directory: dist
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: zip -q -r -X -9 "../yt-easy-$VERSION.zip" .
+      - name: Attach the zip to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ steps.version.outputs.version }}
+        # A release that already exists keeps its title and notes; only the
+        # zip is added to it, replacing one of the same name.
+        run: |
+          zip="yt-easy-$VERSION.zip"
+
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" "$zip" --clobber
+          else
+            gh release create "$TAG" "$zip" --draft --verify-tag --title "yt-easy $VERSION" --notes ""
+          fi
