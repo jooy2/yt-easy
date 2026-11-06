@@ -428,6 +428,47 @@ body {
   min-width: 4em;
 }
 
+/* Row sizes. Medium is the layout above; each row's height is set in
+   `App.jsx` and must fit what is drawn here. Small packs the rows closer
+   with a smaller thumbnail, and large gives the thumbnail most of the row
+   and the title two lines. */
+.video-list.is-small .video-row {
+  gap: 8px;
+  padding: 0 8px;
+}
+
+.video-list.is-small .video-thumb {
+  width: 64px;
+  height: 36px;
+}
+
+.video-list.is-small .video-text {
+  gap: 1px;
+}
+
+.video-list.is-large .video-row {
+  gap: 12px;
+}
+
+.video-list.is-large .video-thumb {
+  width: 176px;
+  height: 99px;
+  border-radius: var(--neba-radius-md);
+}
+
+.video-list.is-large .video-text {
+  gap: 6px;
+}
+
+.video-list.is-large .video-title {
+  display: -webkit-box;
+  font-size: 14px;
+  line-height: 1.35;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .empty-state {
   height: 100%;
   box-sizing: border-box;
@@ -512,6 +553,15 @@ code {
   .video-thumb {
     width: 64px;
     height: 36px;
+  }
+
+  .video-list.is-large .video-row {
+    gap: 8px;
+  }
+
+  .video-list.is-large .video-thumb {
+    width: 96px;
+    height: 54px;
   }
 
   .video-category {

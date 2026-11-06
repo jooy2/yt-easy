@@ -5,10 +5,12 @@ const OVERSCAN = 6;
 // Renders only the rows near the visible part of a long list, so thousands
 // of videos scroll as smoothly as fifty. `renderRow` receives each row with
 // its position and must return an absolutely positioned element keyed by the
-// row. Changing `resetKey` scrolls back to the top.
+// row. Changing `resetKey` scrolls back to the top, and changing `getHeight`
+// keeps the row at the top of the view where it is.
 export function VirtualList({ rows, getHeight, renderRow, resetKey, label, className }) {
   const containerRef = useRef(null);
   const frameRef = useRef(0);
+  const topKeyRef = useRef(null);
   const [viewport, setViewport] = useState({ top: 0, height: 0 });
 
   const offsets = useMemo(() => {
@@ -34,8 +36,22 @@ export function VirtualList({ rows, getHeight, renderRow, resetKey, label, class
 
   useLayoutEffect(() => {
     containerRef.current.scrollTop = 0;
+    topKeyRef.current = null;
     setViewport((current) => ({ ...current, top: 0 }));
   }, [resetKey]);
+
+  // New row heights move every row, so the one that was at the top is
+  // scrolled back to the top. Runs before the new rows are painted.
+  useLayoutEffect(() => {
+    const index = topKeyRef.current == null ? -1 : rows.findIndex((row) => row.key === topKeyRef.current);
+
+    if (index > 0) {
+      containerRef.current.scrollTop = offsets[index];
+      setViewport((current) => ({ ...current, top: containerRef.current.scrollTop }));
+    }
+    // Only a change of heights moves the rows this way, so `rows` and
+    // `offsets` are read but not listened to.
+  }, [getHeight]);
 
   useEffect(() => () => cancelAnimationFrame(frameRef.current), []);
 
@@ -50,6 +66,7 @@ export function VirtualList({ rows, getHeight, renderRow, resetKey, label, class
       frameRef.current = 0;
 
       if (element) {
+        topKeyRef.current = rows[indexAt(element.scrollTop)]?.key ?? null;
         setViewport({ top: element.scrollTop, height: element.clientHeight });
       }
     });

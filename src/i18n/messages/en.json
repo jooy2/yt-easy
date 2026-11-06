@@ -138,6 +138,10 @@
     "group-all": "All",
     "meta": "{count, plural, one {# video} other {# videos}} · {duration}",
     "resize-handle": "Resize the group list",
+    "row-large": "Large",
+    "row-medium": "Medium",
+    "row-size": "Row size",
+    "row-small": "Small",
     "select-all": "Select every video in {title}",
     "whole": "All videos"
   },

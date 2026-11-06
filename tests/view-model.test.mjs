@@ -201,6 +201,7 @@ describe('isMusicVideo, matchesCategory, and normalizeViewPrefs', () => {
       categoryFilter: 'all',
       watchFilter: 'all',
       filtersOpen: true,
+      rowSize: 'medium',
     });
   });
 

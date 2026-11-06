@@ -26,6 +26,7 @@ export const VIEW_OPTIONS = Object.freeze({
   groupOrder: ['name', 'count'],
   sortDir: ['asc', 'desc'],
   watchFilter: ['all', 'unwatched', 'partial', 'watched'],
+  rowSize: ['small', 'medium', 'large'],
 });
 
 export const DEFAULT_VIEW_PREFS = Object.freeze({
@@ -36,6 +37,7 @@ export const DEFAULT_VIEW_PREFS = Object.freeze({
   categoryFilter: CATEGORY_FILTER_ALL,
   watchFilter: 'all',
   filtersOpen: true,
+  rowSize: 'medium',
 });
 
 const CATEGORY_ID_PATTERN = /^\d{1,4}$/;

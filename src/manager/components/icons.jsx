@@ -103,6 +103,14 @@ export const TrashIcon = () => (
   </Svg>
 );
 
+// Two stacked rows, for the size of the rows in the list.
+export const RowSizeIcon = () => (
+  <Svg>
+    <rect x="4" y="5" width="16" height="6" rx="1.5" />
+    <rect x="4" y="13" width="16" height="6" rx="1.5" />
+  </Svg>
+);
+
 export const ListIcon = () => (
   <Svg>
     <path d="M9 7h11M9 12h11M9 17h11" />

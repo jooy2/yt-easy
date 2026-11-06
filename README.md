@@ -101,6 +101,7 @@ To add a playlist, choose **Add a playlist…** and paste the address of the pla
 - The watch status menu narrows the list by how much of each video you have watched: **Not watched**, **Partly watched** (under 90%), or **Watched** (90% or more). The amount comes from the red bar YouTube draws under a thumbnail, and the rows show the same bar. It follows your YouTube watch history, so with the history paused or turned off, every video counts as not watched.
 - The search box matches every word you type against titles and channel names.
 - The filter button at the top folds the search box and the options away, so the list gets more room. A dot on the button shows that a search or a filter still narrows the list.
+- The button at the right end of the list heading sets the size of the rows. **Small** fits more videos on the screen, **Medium** is the default, and **Large** shows bigger thumbnails and two lines of each title.
 
 ![Videos not watched yet, grouped by length range, with the 5 to 20 minute range chosen](.github/resources/screenshots/filters.webp)
 

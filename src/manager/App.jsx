@@ -47,7 +47,8 @@ import {
 } from './lib/view-model.js';
 
 const IS_TAB_VIEW = new URLSearchParams(location.search).get('view') === 'tab';
-const ITEM_ROW_HEIGHT = 72;
+// The height of a row at each size; `manager.css` lays the rows out to fit.
+const ROW_HEIGHTS = Object.freeze({ small: 48, medium: 72, large: 112 });
 const PENDING_SAVE_INTERVAL = 10;
 const NO_ITEMS = [];
 
@@ -59,8 +60,6 @@ const isLookedUp = (info, videoId) => (info.get(videoId)?.t ?? 0) > 0;
 const isOwnedByControl = (target) => Boolean(target?.closest?.(
   'input, textarea, select, [contenteditable="true"], [contenteditable=""], [role="listbox"], [role="menu"], [role="dialog"]',
 ));
-
-const getRowHeight = () => ITEM_ROW_HEIGHT;
 
 const describeScanProgress = ({ count, paused }) => t(paused ? 'scan.paused' : 'scan.progress', { count });
 
@@ -117,6 +116,8 @@ export function App() {
   const shownItems = activeGroupEntry ? activeGroupEntry.items : view.items;
   const shownIds = useMemo(() => shownItems.map((item) => item.videoId), [shownItems]);
   const shownRows = useMemo(() => shownItems.map((item) => ({ key: item.videoId, item })), [shownItems]);
+  const rowHeight = ROW_HEIGHTS[prefs.rowSize] ?? ROW_HEIGHTS.medium;
+  const getRowHeight = useCallback(() => rowHeight, [rowHeight]);
   const shownSeconds = useMemo(() => shownItems.reduce((sum, item) => sum + (item.durationSeconds ?? 0), 0), [shownItems]);
   const { updatePrefs } = data;
   const filtersActive = query.trim() !== ''
@@ -697,12 +698,14 @@ export function App() {
         totalSeconds={shownSeconds}
         coverage={readCoverage(selected, shownIds)}
         onToggleAll={handleToggleShown}
+        rowSize={prefs.rowSize}
+        onRowSizeChange={(rowSize) => data.updatePrefs({ rowSize })}
       />
       {emptyReason === 'filtered' ? (
         <EmptyState reason="filtered" />
       ) : (
         <VirtualList
-          className="video-list"
+          className={`video-list is-${prefs.rowSize}`}
           label={t('list.aria-label', { title: listTitle })}
           rows={shownRows}
           getHeight={getRowHeight}
