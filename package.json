@@ -1,6 +1,6 @@
 {
   "name": "yt-easy",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "A Chrome extension that sorts, exports, and bulk-removes videos in your YouTube Watch later list and playlists.",
   "type": "module",

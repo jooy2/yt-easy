@@ -50,4 +50,4 @@ body:
     attributes:
       label: yt-easy version
       description: The version on the extension's card in `chrome://extensions`, or the commit you built from.
-      placeholder: '0.1.0'
+      placeholder: '1.0.0'
