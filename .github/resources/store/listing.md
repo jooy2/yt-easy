@@ -25,7 +25,9 @@ What you can do
 - Scan Watch later or any playlist by its address, including lists of several thousand videos, and switch between the lists you scanned.
 - Group videos by channel or by length range, with ranges you set yourself.
 - Search titles and channel names, and sort by date added, channel, or length.
-- See how much of each video you have watched, and filter by it.
+- See how much of each video you have watched, and filter by it. A filter that narrows the list is highlighted, and one click clears them all.
+- Choose small, medium, or large rows, from a compact list to big thumbnails.
+- Open a video in the YouTube tab next to the side panel, where only the video loads and the page stays, or in a new tab.
 - Select videos one by one, a whole group, or everything the current search shows, and remove them in one job with a progress bar and a cancel button.
 - Try it safely first: a dry run finds the remove entry without clicking it, and test mode handles only the first few videos. You can also save the videos about to be removed as JSON and CSV files before anything is removed.
 - Export the whole list as JSON or CSV.
@@ -34,10 +36,11 @@ What you can do
 The manager opens in Chrome's side panel next to YouTube, or in a full tab. It is available in English and Korean.
 
 How removal works
-Videos are removed one at a time, in list order, with a pause of at least one second between them. The extension checks that each video is gone before it moves on, and stops on its own when YouTube does not behave as expected. Videos can be removed from Watch later and from your own playlists.
+Videos are removed one at a time, in list order, with a pause of at least one second between them. The extension checks that each video is gone before it moves on, tries a video that fails up to three times, and stops on its own when YouTube does not behave as expected. Videos can be removed from Watch later and from your own playlists.
 
 Privacy
 - Everything yt-easy keeps, such as the scanned lists and your settings, stays in your Chrome profile. There is no yt-easy server and no analytics.
+- The reset button next to Start scan deletes the scanned lists and the looked-up video details at once, and your settings too if you choose. Nothing changes on YouTube.
 - yt-easy talks to YouTube only about the list you choose to scan or clean up, with the same requests the playlist page makes.
 - If you add a YouTube Data API key, the IDs of the videos in your list are sent to the YouTube Data API to look up their details. Nothing is sent to the API until you add a key and allow access.
 Privacy policy: https://github.com/jooy2/yt-easy/blob/main/PRIVACY.md
@@ -59,7 +62,9 @@ YouTube Data API는 '나중에 볼 동영상' 목록을 돌려주지 않습니�
 - '나중에 볼 동영상'이나 주소로 지정한 재생목록을 스캔합니다. 영상이 수천 개인 목록도 읽을 수 있고, 스캔한 목록끼리 바꿔 가며 볼 수 있습니다.
 - 채널별로, 또는 직접 정한 길이 구간별로 영상을 묶어 봅니다.
 - 제목과 채널 이름을 검색하고, 추가된 날짜순·채널명순·길이순으로 정렬합니다.
-- 영상마다 얼마나 봤는지 보여 주고, 시청 여부로 걸러 봅니다.
+- 영상마다 얼마나 봤는지 보여 주고, 시청 여부로 걸러 봅니다. 목록을 좁히고 있는 필터는 눈에 띄게 표시되고, 한 번에 모두 해제할 수 있습니다.
+- 목록 항목을 작게, 중간, 크게 중에서 골라 촘촘한 목록부터 큰 썸네일까지 원하는 대로 봅니다.
+- 영상을 사이드 패널 옆 YouTube 탭에서 엽니다. 페이지를 다시 불러오지 않고 영상만 바뀝니다. 새 탭으로 열 수도 있습니다.
 - 영상을 하나씩, 그룹 전체를, 또는 지금 검색 결과 전체를 골라 한 번에 삭제합니다. 진행 막대로 진행 상황을 보고 언제든 취소할 수 있습니다.
 - 먼저 안전하게 시험해 볼 수 있습니다. 드라이런은 삭제 메뉴를 찾기만 하고 누르지 않으며, 테스트 모드는 앞의 몇 개만 처리합니다. 삭제하기 전에 대상 목록을 JSON과 CSV 파일로 저장해 둘 수도 있습니다.
 - 목록 전체를 JSON이나 CSV 파일로 내보냅니다.
@@ -68,10 +73,11 @@ YouTube Data API는 '나중에 볼 동영상' 목록을 돌려주지 않습니�
 관리 화면은 YouTube 옆의 Chrome 사이드 패널이나 새 탭에서 열립니다. 영어와 한국어를 지원합니다.
 
 삭제 방식
-영상은 목록 순서대로 하나씩, 최소 1초 간격을 두고 삭제합니다. 영상이 목록에서 사라졌는지 확인한 뒤에 다음으로 넘어가고, YouTube 화면이 예상과 다르게 동작하면 스스로 멈춥니다. '나중에 볼 동영상'과 본인의 재생목록에서만 삭제할 수 있습니다.
+영상은 목록 순서대로 하나씩, 최소 1초 간격을 두고 삭제합니다. 영상이 목록에서 사라졌는지 확인한 뒤에 다음으로 넘어가고, 실패한 영상은 세 번까지 다시 시도하며, YouTube 화면이 예상과 다르게 동작하면 스스로 멈춥니다. '나중에 볼 동영상'과 본인의 재생목록에서만 삭제할 수 있습니다.
 
 개인정보
 - 스캔한 목록과 설정처럼 yt-easy가 보관하는 데이터는 모두 사용자의 Chrome 프로필 안에만 저장됩니다. yt-easy 서버는 없고, 사용 통계도 수집하지 않습니다.
+- 스캔 시작 옆의 초기화 버튼으로 스캔한 목록과 가져온 영상 정보를 한 번에 지울 수 있고, 원하면 설정까지 지웁니다. YouTube에는 아무것도 바뀌지 않습니다.
 - YouTube와는 사용자가 스캔하거나 정리하려고 고른 목록에 대해서만, 재생목록 페이지가 보내는 것과 같은 요청으로 통신합니다.
 - YouTube Data API 키를 넣으면 영상 정보를 조회하려고 목록에 있는 영상의 ID를 YouTube Data API로 보냅니다. 키를 넣고 접근을 허용하기 전에는 API로 아무것도 보내지 않습니다.
 개인정보 처리방침: https://github.com/jooy2/yt-easy/blob/main/PRIVACY.md
