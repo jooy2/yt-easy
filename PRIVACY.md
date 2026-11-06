@@ -26,7 +26,7 @@ Everything yt-easy keeps is stored with `chrome.storage.local`, in your Chrome p
 - The scanned lists, as described above. Up to six lists with 20,000 videos in all are kept, and older lists make room for newer ones.
 - Your settings, including your YouTube Data API key if you enter one. The key is stored in plain text, like any other extension setting.
 - The category, publish date, and view count of each video, if you look them up with the YouTube Data API, and the names of the categories with the language they came in.
-- How you last sorted and filtered the list.
+- How you last sorted and filtered the list, and the size of its rows.
 
 Export and backup files are saved only when you ask for them, to the `yt-easy` folder in your Downloads folder.
 
@@ -48,6 +48,7 @@ The optional lookup of categories, publish dates, and view counts uses YouTube A
 
 - Leave the API key empty and nothing is sent to the YouTube Data API. Saving the settings with an empty key deletes the stored key and removes the extension's access to `www.googleapis.com`.
 - **Remove this list from history** in the list menu deletes a scanned playlist from the extension's storage. It changes nothing on YouTube.
+- The reset button next to **Start scan** deletes every scanned list, the video info, and the view options from the extension's storage, and the settings with the API key too when you choose so. It changes nothing on YouTube.
 - Removing the extension from Chrome deletes everything it stored.
 
 ## Changes to this policy
