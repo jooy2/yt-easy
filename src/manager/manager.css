@@ -7,6 +7,13 @@ body,
   height: 100%;
 }
 
+/* The toolbars and the group list sit on a faint tint of the text color,
+   and the video list on the plain surface, so the list reads as the content
+   and the rest as its frame in light and dark mode alike. */
+:root {
+  --app-frame: color-mix(in oklch, var(--neba-surface), var(--neba-fg) 3.5%);
+}
+
 /* Layout rules below set `display`, which would otherwise override `hidden`. */
 [hidden] {
   display: none !important;
@@ -15,7 +22,7 @@ body,
 body {
   min-width: 300px;
   margin: 0;
-  background: var(--neba-surface);
+  background: var(--app-frame);
   color: var(--neba-fg);
   font-size: 13px;
 }
@@ -216,6 +223,7 @@ body {
   flex: 1;
   flex-direction: column;
   min-height: 160px;
+  background: var(--neba-surface);
 }
 
 .group-panes {
@@ -239,6 +247,7 @@ body {
   gap: 10px;
   padding: 6px 12px;
   border-bottom: 1px solid var(--neba-border);
+  background: var(--app-frame);
 }
 
 .list-title {
@@ -276,6 +285,7 @@ body {
   flex-direction: column;
   height: 100%;
   min-width: 0;
+  background: var(--app-frame);
 }
 
 /* neba's full width is 100%, which the margins would push past the pane.
