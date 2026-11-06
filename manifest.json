@@ -38,9 +38,16 @@
         "src/content/collector.js",
         "src/content/remover.js",
         "src/content/overlay.js",
+        "src/content/navigation.js",
         "src/content/main.js"
       ],
       "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["src/content/page-navigate.js"],
+      "run_at": "document_idle",
+      "world": "MAIN"
     }
   ]
 }

@@ -56,6 +56,21 @@
     menuEntryTarget: 'button, a, [role="menuitem"], tp-yt-paper-item',
   };
 
+  // Moving to another video inside YouTube's own app, the way a click on a
+  // video link does, so the tab keeps the page and loads only the video.
+  // `page-navigate.js`, which runs in the page's world, sends the event to
+  // the app element.
+  ns.NAVIGATION = {
+    appSelector: 'ytd-app',
+    eventName: 'yt-navigate',
+    buildWatchEndpoint: (videoId) => ({
+      commandMetadata: {
+        webCommandMetadata: { url: `/watch?v=${videoId}`, webPageType: 'WEB_PAGE_TYPE_WATCH', rootVe: 3832 },
+      },
+      watchEndpoint: { videoId },
+    }),
+  };
+
   // Labels of the "Remove from Watch later" menu entry. The collector reads
   // the exact label from the page data, in the account's own UI language, and
   // passes it to the remover first; this list is the fallback. In another

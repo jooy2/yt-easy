@@ -106,7 +106,7 @@ To add a playlist, choose **Add a playlist…** and paste the address of the pla
 
 ### Open a video
 
-Each row ends with two buttons. The first, **Open in this tab**, loads the video in the tab the side panel sits beside when that tab is on YouTube. When it shows another site, or when the manager is open in its own tab, the video opens in a new tab instead, so no other page is replaced. The button is disabled while a scan or a removal runs, because that tab may be the list's tab the job works in. The second button, **Open in a new tab**, always opens a new tab.
+Each row ends with two buttons. The first, **Open in this tab**, shows the video in the tab the side panel sits beside when that tab is on YouTube. The tab moves to the video the way it does when you click a video inside YouTube, so only the video loads rather than the whole page. When it shows another site, or when the manager is open in its own tab, the video opens in a new tab instead, so no other page is replaced. The button is disabled while a scan or a removal runs, because that tab may be the list's tab the job works in. The second button, **Open in a new tab**, always opens a new tab.
 
 Clicking anywhere else on a row selects it, so opening a video never changes the selection.
 

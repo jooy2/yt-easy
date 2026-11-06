@@ -135,7 +135,7 @@ Saves the files the user asks for: an export of the list, and an optional backup
 Host permissions, `https://www.youtube.com/*` and the optional `https://www.googleapis.com/*`:
 
 ```text
-www.youtube.com: the content script runs only on YouTube. It reads the playlist page of the list the user chose to scan (Watch later, or a playlist whose address the user entered), loads the rest of that list with the same request the page sends while scrolling, and, when the user starts a removal, opens each selected video's menu on that page and chooses its remove entry. The manager opens that list's tab and the videos the user opens.
+www.youtube.com: the content script runs only on YouTube. It reads the playlist page of the list the user chose to scan (Watch later, or a playlist whose address the user entered), loads the rest of that list with the same request the page sends while scrolling, and, when the user starts a removal, opens each selected video's menu on that page and chooses its remove entry. The manager opens that list's tab and the videos the user opens. When the user opens a video in a YouTube tab, a small script in the page asks YouTube's own app to move to that video, as a click on a video link does, so the page does not load again.
 
 www.googleapis.com (optional): requested only when the user saves their own YouTube Data API key in the settings, and removed when the key is removed. Used for videos.list, with the IDs of the videos in the user's list, and videoCategories.list, to show each video's category, publish date, and view count.
 ```

@@ -3,7 +3,7 @@
 // cancels the job, so nothing keeps running without someone watching.
 (() => {
   const ns = (globalThis.ytEasy ??= {});
-  const { collector, remover, overlay, page, util } = ns;
+  const { collector, remover, overlay, page, navigation, util } = ns;
   const { t } = ns.i18n;
 
   const JOB_PORT_NAME = 'yt-easy-job';
@@ -172,17 +172,43 @@
     }
   };
 
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (!isFromThisExtension(sender) || message?.type !== 'ping') {
-      return;
+  // A video opened from the manager. A tab that runs a job keeps its page,
+  // and the manager opens the video in a new tab instead.
+  const openVideo = async (videoId) => {
+    if (activeJob) {
+      return { ok: false, busy: true };
     }
 
-    sendResponse({
-      ready: true,
-      listId: readCurrentListId(),
-      visible: page.isVisible(),
-      busy: activeJob !== null,
-    });
+    try {
+      return { ok: await navigation.openVideo(videoId) };
+    } catch (error) {
+      console.error('yt-easy: could not open the video in the page.', error);
+      return { ok: false };
+    }
+  };
+
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (!isFromThisExtension(sender)) {
+      return undefined;
+    }
+
+    if (message?.type === 'ping') {
+      sendResponse({
+        ready: true,
+        listId: readCurrentListId(),
+        visible: page.isVisible(),
+        busy: activeJob !== null,
+      });
+      return undefined;
+    }
+
+    if (message?.type === 'open-video') {
+      openVideo(message.videoId).then(sendResponse);
+      // The answer comes later.
+      return true;
+    }
+
+    return undefined;
   });
 
   chrome.runtime.onConnect.addListener((port) => {

@@ -31,7 +31,9 @@ src/content/           Content scripts on www.youtube.com (classic scripts)
   collector.js           Collects the list from page data, or by scrolling
   remover.js             Removes videos through each row's menu
   overlay.js             Progress card shown on the Watch later page
-  main.js                Ping and job messages from the manager
+  navigation.js          Opens a video inside YouTube's app, through page-navigate.js
+  main.js                Ping, job, and open-video messages from the manager
+  page-navigate.js       The one script in the page's own world; passes navigation requests to YouTube's app
 src/manager/           Side panel page, bundled by esbuild; also openable in a tab
   main.jsx               Entry: neba providers and styles
   App.jsx                State, and the scan, export, category, and removal flows
@@ -47,6 +49,7 @@ dist/                  Build output, loaded into Chrome (not committed)
 - The manager finds or opens the tab of the list (`tab-bridge.js`), pings its content script, and runs one job over a port named `yt-easy-job`. Commands are `collect` and `remove`, each with the list ID; the content script answers with `progress`, then `done`, `error`, or `cancelled`.
 - Each scanned list is stored on its own, keyed by list ID (`src/manager/lib/snapshot.js`, `pruneSnapshots` keeps the total within limits), and the manager shows one at a time.
 - Closing the manager closes the port, and the content script cancels the job. Nothing runs unattended.
+- Opening a video in a YouTube tab sends `open-video` to its content script, which asks YouTube's app to move to the video without loading the page again. Only `page-navigate.js` runs in the page's world, because only there is the app reachable; it takes JSON text from `navigation.js` and touches nothing else. When the move does not happen, the manager loads the address instead.
 - The content scripts share one namespace, `globalThis.ytEasy`, and load in the order listed in `manifest.json`. A file may only use what an earlier file defined, unless it reads it lazily inside a function. `i18n.js` comes first and provides `ytEasy.i18n.t`; it exists only in the build, and the test helper builds it the same way.
 - The manager and the content scripts read their copy through `t('group.key', values)` from the same message files, in the language of Chrome, with English for any language that has no file.
 - Only the manager writes to `chrome.storage.local`. Everything the content script returns is checked in `src/manager/lib/snapshot.js` before it is stored or shown.
