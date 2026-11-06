@@ -505,13 +505,15 @@ export function App() {
             currentTitle = progress.current.title;
           }
 
-          update({
-            label: progress.paused
-              ? t('remove.paused')
-              : t(dryRun ? 'remove.progress-dry' : 'remove.progress', { done: progress.done, total: progress.total, title: currentTitle }),
-            value: progress.done,
-            max: progress.total,
-          });
+          let label = t(dryRun ? 'remove.progress-dry' : 'remove.progress', { done: progress.done, total: progress.total, title: currentTitle });
+
+          if (progress.paused) {
+            label = t('remove.paused');
+          } else if (progress.retry) {
+            label = t('remove.retrying', { ...progress.retry, done: progress.done, total: progress.total, title: currentTitle });
+          }
+
+          update({ label, value: progress.done, max: progress.total });
         },
       });
     } catch (error) {
@@ -519,11 +521,16 @@ export function App() {
         setMessage(error.message);
       }
     } finally {
-      if (removed.size > 0) {
-        await applyRemovals(removed);
+      // The task ends even when saving fails, so the next job can start.
+      try {
+        if (removed.size > 0) {
+          await applyRemovals(removed);
+        }
+      } catch (error) {
+        setMessage(error.message);
+      } finally {
+        end();
       }
-
-      end();
     }
 
     if (outcome) {

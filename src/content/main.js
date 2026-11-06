@@ -157,6 +157,7 @@
             succeeded,
             failed,
             paused: progress.paused,
+            retry: progress.retry,
             currentTitle: progress.current?.title,
           });
           post({ type: 'progress', ...progress });

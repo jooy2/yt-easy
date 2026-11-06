@@ -129,7 +129,7 @@ To keep a copy of what you remove, turn on **Save the list as backup files befor
 
 The list's tab then comes to the front and shows a progress card. Keep that tab on screen until the job finishes: Chrome pauses pages in background tabs, and the removal pauses with them. Do not scroll or click on the page while it runs. You can cancel from the manager or from the card, and closing the manager cancels the job too.
 
-Videos are removed in list order, one at a time. The job stops on its own when three videos in a row fail, when the tab leaves the list's page, or when a row other than the target disappears. At the end, a dialog lists the failures with their reasons, and **Select failed only** selects them for another try.
+Videos are removed in list order, one at a time. A video that fails is tried up to three times, with a short pause before each retry, and the job then moves on to the next one. The job stops on its own when three videos in a row still fail, when the tab leaves the list's page, or when a row other than the target disappears; an unexpected error stops it too, and the videos removed until then stay removed in the manager. At the end, a dialog lists the failures with their reasons, and **Select failed only** selects them for another try.
 
 ### Export
 

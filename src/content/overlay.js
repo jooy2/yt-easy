@@ -104,7 +104,7 @@
     }
   };
 
-  const update = ({ done, total, succeeded, failed, currentTitle, paused }) => {
+  const update = ({ done, total, succeeded, failed, currentTitle, paused, retry }) => {
     if (!parts) {
       return;
     }
@@ -115,7 +115,9 @@
       ? t('content.overlay-paused', { done, total })
       : t('content.overlay-progress', { done, total, succeeded, failed });
 
-    if (currentTitle !== undefined) {
+    if (retry && currentTitle !== undefined) {
+      parts.current.textContent = t('content.overlay-retry', { ...retry, title: currentTitle });
+    } else if (currentTitle !== undefined) {
       parts.current.textContent = currentTitle;
     }
   };

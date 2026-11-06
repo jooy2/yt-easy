@@ -10,6 +10,11 @@
   const MENU_CLOSE_TIMEOUT = 1500;
   const REMOVAL_TIMEOUT = 8000;
   const MAX_CONSECUTIVE_FAILURES = 3;
+  // Pauses before the second and the third try of one video. A failure that
+  // a retry cannot fix, such as a video that is not in the list, is not
+  // tried again.
+  const RETRY_DELAYS = [1500, 3000];
+  const RETRYABLE_CODES = new Set(['list-stalled', 'no-menu-button', 'no-remove-entry', 'unconfirmed', 'error']);
 
   // The message key of the reason shown for each failure code.
   const FAILURE_REASONS = {
@@ -150,9 +155,47 @@
     return fail('unconfirmed');
   };
 
+  // Runs `run`, one try at removing a video, until it succeeds, fails in a
+  // way a retry cannot fix, or runs out of retries. Before each retry, `reset`
+  // closes whatever the failed try left open, so it cannot get in the way of
+  // the next one. An unexpected error counts as a failed try. A removal that
+  // YouTube confirmed only after the wait ended shows up as a row that is
+  // gone by the time of the retry, which `isGone` checks.
+  const retryRemoval = async ({ run, isGone, reset, onRetry, signal, delays = RETRY_DELAYS }) => {
+    for (let attempt = 0; ; attempt += 1) {
+      let result = null;
+
+      try {
+        result = await run();
+      } catch (error) {
+        if (util.isAbortError(error) || error instanceof WrongRowError) {
+          throw error;
+        }
+
+        console.warn('yt-easy: a try at removing a video failed unexpectedly.', error);
+        result = fail('error');
+      }
+
+      if (result.ok || !RETRYABLE_CODES.has(result.code) || attempt >= delays.length) {
+        return result;
+      }
+
+      onRetry?.({ attempt: attempt + 2, max: delays.length + 1 });
+      await reset();
+      await util.sleep(delays[attempt], signal);
+
+      if (result.code === 'unconfirmed' && isGone()) {
+        return { ok: true };
+      }
+    }
+  };
+
   // Removes `targets` one by one, in the given order, with a random pause
-  // between them. Stops on cancel, when the tab leaves the playlist, and after
-  // several failures in a row, since that usually means the page changed.
+  // between them. A video that fails is tried again a few times, and then
+  // left for the next one. Stops on cancel, when the tab leaves the playlist,
+  // after several videos in a row fail, since that usually means the page
+  // changed, and on an error it cannot recover from. Whatever stops it, the
+  // results so far are returned.
   const removeAll = async ({ targets, options, signal, onProgress }) => {
     const { listId } = options;
     const fallbackLabels = listId === WATCH_LATER_LIST_ID ? REMOVE_MENU_LABELS : [];
@@ -177,7 +220,13 @@
         let result = null;
 
         try {
-          result = await removeOne({ videoId: target.videoId, listId, labels, dryRun: options.dryRun, signal, onPause });
+          result = await retryRemoval({
+            run: () => removeOne({ videoId: target.videoId, listId, labels, dryRun: options.dryRun, signal, onPause }),
+            isGone: () => !page.findItemElement(target.videoId, listId),
+            reset: closeMenu,
+            onRetry: (retry) => onProgress?.({ done: index, total, current: target, retry }),
+            signal,
+          });
         } catch (error) {
           if (!(error instanceof WrongRowError)) {
             throw error;
@@ -207,17 +256,18 @@
         }
       }
     } catch (error) {
-      if (!util.isAbortError(error)) {
-        throw error;
+      if (util.isAbortError(error)) {
+        cancelled = true;
+      } else {
+        console.error('yt-easy: the removal stopped on an error.', error);
+        stopReason = t('content.error-remove');
       }
-
-      cancelled = true;
     } finally {
-      await closeMenu();
+      await closeMenu().catch(() => {});
     }
 
     return { results, cancelled, stopReason, dryRun: options.dryRun };
   };
 
-  ns.remover = { removeAll };
+  ns.remover = { removeAll, retryRemoval };
 })();

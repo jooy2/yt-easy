@@ -6,7 +6,7 @@ import vm from 'node:vm';
 
 import { buildSync } from 'esbuild';
 
-const FILES = ['selectors.js', 'util.js', 'page.js', 'collector.js'];
+const FILES = ['selectors.js', 'util.js', 'page.js', 'collector.js', 'remover.js'];
 
 // `src/content/i18n.js` only exists in the build, so it is built here the
 // same way. Without `chrome.i18n` it speaks the base locale, English.
